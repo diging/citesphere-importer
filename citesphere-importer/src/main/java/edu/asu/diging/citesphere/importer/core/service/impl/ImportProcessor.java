@@ -23,22 +23,22 @@ public class ImportProcessor implements IImportProcessor {
      */
     @Override
     public void process(KafkaJobMessage message) {
-        ZoteroUserInfo info = getUserInfo(message);
+        JobInfo info = getJobInfo(message);
         if (info == null) {
             return;
         }
         
-        String fileBytes = downloadFile(message);
-        if (fileBytes == null) {
+        String filePath = downloadFile(message);
+        if (filePath == null) {
             return;
         }
         
     }
     
-    private ZoteroUserInfo getUserInfo(KafkaJobMessage message) {
-        ZoteroUserInfo info = null;
+    private JobInfo getJobInfo(KafkaJobMessage message) {
+        JobInfo info = null;
         try {
-            info = connector.getZoteroInfo(message.getId());
+            info = connector.getJobInfo(message.getId());
         } catch (CitesphereCommunicationException e) {
             // FIXME this needs to be handled better
             logger.error("Could not get Zotero info.", e);

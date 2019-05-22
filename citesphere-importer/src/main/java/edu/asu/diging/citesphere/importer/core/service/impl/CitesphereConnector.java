@@ -89,17 +89,17 @@ public class CitesphereConnector implements ICitesphereConnector {
      * @see edu.asu.diging.citesphere.importer.core.service.impl.ICitesphereConnector#getZoteroInfo(java.lang.String)
      */
     @Override
-    public ZoteroUserInfo getZoteroInfo(String apiToken) throws CitesphereCommunicationException {
+    public JobInfo getJobInfo(String apiToken) throws CitesphereCommunicationException {
         @SuppressWarnings("unchecked")
-        ResponseEntity<String> response = (ResponseEntity<String>) makeApiCall("api/v1/user/zotero", apiToken, String.class);
+        ResponseEntity<String> response = (ResponseEntity<String>) makeApiCall("api/v1/job/info", apiToken, String.class);
         HttpStatus status = response.getStatusCode();
         
-        ZoteroUserInfo info = null;
+        JobInfo info = null;
         if (status == HttpStatus.OK) {
             String responseBody = response.getBody();
             ObjectMapper mapper = new ObjectMapper();
             try {
-                info = mapper.readValue(responseBody, ZoteroUserInfo.class);
+                info = mapper.readValue(responseBody, JobInfo.class);
             } catch (IOException e) {
                 throw new CitesphereCommunicationException("Could not understand returned message: " + responseBody, e);
             }
