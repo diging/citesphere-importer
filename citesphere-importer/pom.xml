@@ -23,13 +23,14 @@
         <db.user>db-user</db.user>
         <db.password>db-password</db.password>
 
+        <citesphere.download.path></citesphere.download.path>
         <citesphere.base.uri>http://localhost:8080/citesphere</citesphere.base.uri>
         <kafka.hosts></kafka.hosts>
-        
+
         <zotero.client.key></zotero.client.key>
         <zotero.client.secret></zotero.client.secret>
         <citesphere.client.key></citesphere.client.key>
-        <citesphere.client.secret></citesphere.client.secret>        
+        <citesphere.client.secret></citesphere.client.secret>
 
         <log.level>info</log.level>
     </properties>
@@ -243,6 +244,12 @@
             <version>${spring.kafka.version}</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
+        </dependency>
 
     </dependencies>
 
