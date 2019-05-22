@@ -1,24 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>edu.asu.diging</groupId>
-  <artifactId>citesphere-importer</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-  <packaging>war</packaging>
-  
-  <properties>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>edu.asu.diging</groupId>
+    <artifactId>citesphere-importer</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>war</packaging>
+
+    <properties>
         <org.slf4j-version>1.7.26</org.slf4j-version>
         <org.springframework-version>5.1.7.RELEASE</org.springframework-version>
         <spring-security-version>5.1.5.RELEASE</spring-security-version>
         <spring-data.version>Lovelace-RELEASE</spring-data.version>
         <thymeleaf.version>3.0.11.RELEASE</thymeleaf.version>
+        <spring.kafka.version>2.2.6.RELEASE</spring.kafka.version>
 
         <admin.password>$2a$04$oQo44vqcDIFRoYKiAXoNheurzkwX9dcNmowvTX/hsWuBMwijqn44i</admin.password>
-        
+
         <db.driver>com.mysql.jdbc.Driver</db.driver>
         <db.database.url>jdbc-url-to-db</db.database.url>
         <db.user>db-user</db.user>
         <db.password>db-password</db.password>
+
+        <citesphere.base.uri>http://localhost:8080/citesphere</citesphere.base.uri>
+        <kafka.hosts></kafka.hosts>
+        
+        <zotero.client.key></zotero.client.key>
+        <zotero.client.secret></zotero.client.secret>
+        <citesphere.client.key></citesphere.client.key>
+        <citesphere.client.secret></citesphere.client.secret>        
 
         <log.level>info</log.level>
     </properties>
@@ -84,7 +95,7 @@
             <artifactId>spring-security-taglibs</artifactId>
             <version>${spring-security-version}</version>
         </dependency>
-        
+
         <!-- Spring Data -->
         <dependency>
             <groupId>org.springframework.data</groupId>
@@ -211,6 +222,27 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.9.9</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.9.9</version>
+        </dependency>
+
+
+        <!-- Apache Kafka -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+            <version>${spring.kafka.version}</version>
+        </dependency>
+
 
     </dependencies>
 
@@ -259,5 +291,5 @@
             </plugin>
         </plugins>
     </build>
-  
+
 </project>
