@@ -9,6 +9,7 @@ import edu.asu.diging.citesphere.importer.core.exception.CitesphereCommunication
 import edu.asu.diging.citesphere.importer.core.kafka.impl.KafkaJobMessage;
 import edu.asu.diging.citesphere.importer.core.service.ICitesphereConnector;
 import edu.asu.diging.citesphere.importer.core.service.IImportProcessor;
+import edu.asu.diging.citesphere.importer.core.service.parse.IHandlerRegistry;
 
 @Service
 public class ImportProcessor implements IImportProcessor {
@@ -17,6 +18,9 @@ public class ImportProcessor implements IImportProcessor {
     
     @Autowired
     private ICitesphereConnector connector;
+    
+    @Autowired
+    private IHandlerRegistry handlerRegistry;
 
     /* (non-Javadoc)
      * @see edu.asu.diging.citesphere.importer.core.service.impl.IImportProcessor#process(edu.asu.diging.citesphere.importer.core.kafka.impl.KafkaJobMessage)
@@ -33,6 +37,7 @@ public class ImportProcessor implements IImportProcessor {
             return;
         }
         
+        handlerRegistry.handleFile(info, filePath);
     }
     
     private JobInfo getJobInfo(KafkaJobMessage message) {

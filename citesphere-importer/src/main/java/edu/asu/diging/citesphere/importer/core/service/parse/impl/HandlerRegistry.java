@@ -13,9 +13,10 @@ import org.springframework.stereotype.Service;
 import edu.asu.diging.citesphere.importer.core.service.impl.JobInfo;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
 import edu.asu.diging.citesphere.importer.core.service.parse.FileHandler;
+import edu.asu.diging.citesphere.importer.core.service.parse.IHandlerRegistry;
 
 @Service
-public class HandlerRegistry {
+public class HandlerRegistry implements IHandlerRegistry {
     
     @Autowired
     private ApplicationContext ctx;
@@ -30,6 +31,10 @@ public class HandlerRegistry {
         allHandlers.values().forEach(h -> handlers.add(h));        
     }
     
+    /* (non-Javadoc)
+     * @see edu.asu.diging.citesphere.importer.core.service.parse.impl.IHandlerRegistry#handleFile(edu.asu.diging.citesphere.importer.core.service.impl.JobInfo, java.lang.String)
+     */
+    @Override
     public void handleFile(JobInfo info, String filePath) {
         for (FileHandler handler: handlers) {
             if (handler.canHandle(filePath)) {
