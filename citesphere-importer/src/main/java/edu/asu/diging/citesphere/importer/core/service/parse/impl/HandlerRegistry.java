@@ -35,13 +35,12 @@ public class HandlerRegistry implements IHandlerRegistry {
      * @see edu.asu.diging.citesphere.importer.core.service.parse.impl.IHandlerRegistry#handleFile(edu.asu.diging.citesphere.importer.core.service.impl.JobInfo, java.lang.String)
      */
     @Override
-    public void handleFile(JobInfo info, String filePath) {
+    public BibEntryIterator handleFile(JobInfo info, String filePath) {
         for (FileHandler handler: handlers) {
             if (handler.canHandle(filePath)) {
-                BibEntryIterator iterator = handler.getIterator(filePath);
-                // do stuff
-                break;
+                return handler.getIterator(filePath);
             }
         }
+        return null;
     }
 }

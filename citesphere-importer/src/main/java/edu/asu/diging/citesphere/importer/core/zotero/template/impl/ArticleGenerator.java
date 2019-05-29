@@ -1,0 +1,159 @@
+package edu.asu.diging.citesphere.importer.core.zotero.template.impl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+
+import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import edu.asu.diging.citesphere.importer.core.model.impl.Article;
+import edu.asu.diging.citesphere.importer.core.model.impl.ArticleId;
+import edu.asu.diging.citesphere.importer.core.model.impl.ArticlePublicationDate;
+import edu.asu.diging.citesphere.importer.core.model.impl.Contributor;
+import edu.asu.diging.citesphere.importer.core.model.impl.Issn;
+import edu.asu.diging.citesphere.importer.core.zotero.template.ItemJsonGenerator;
+
+@Service
+public class ArticleGenerator extends ItemJsonGenerator {
+
+    /**
+     * Maps jstor contributor types to zotero creator types
+     */
+    private Map<String, String> jstorZoteroCreatorMap;
+
+    @PostConstruct
+    public void init() {
+        super.init();
+        jstorZoteroCreatorMap = new HashMap<>();
+        jstorZoteroCreatorMap.put("author", "author");
+        jstorZoteroCreatorMap.put("editor", "editor");
+    }
+
+    public Class<Article> responsibleFor() {
+        return Article.class;
+    }
+
+    public String processTitle(JsonNode node, Article article) {
+        String title = article.getArticleMeta().getArticleTitle();
+        if (title != null && !title.trim().isEmpty()) {
+            return title;
+        }
+
+        if (article.getArticleMeta().getReviewInfo() != null
+                && article.getArticleMeta().getReviewInfo().getTitle() != null
+                && !article.getArticleMeta().getReviewInfo().getTitle().trim().isEmpty()) {
+            return "Review of: " + article.getArticleMeta().getReviewInfo().getTitle();
+        }
+
+        return null;
+    }
+
+    public ArrayNode processCreators(JsonNode node, Article article) {
+        ArrayNode creators = getObjectMapper().createArrayNode();
+        for (Contributor contributor : article.getArticleMeta().getContributors()) {
+            ObjectNode contributorNode = getObjectMapper().createObjectNode();
+            contributorNode.put("creatorType", jstorZoteroCreatorMap.get(contributor.getContributionType()));
+            contributorNode.put("firstName", contributor.getGivenName());
+            contributorNode.put("lastName", contributor.getSurname());
+            creators.add(contributorNode);
+        }
+
+        if (article.getArticleMeta().getReviewInfo() != null) {
+            for (Contributor reviewedAuthor : article.getArticleMeta().getReviewInfo().getContributors()) {
+                ObjectNode contributorNode = getObjectMapper().createObjectNode();
+                contributorNode.put("creatorType", "reviewedAuthor");
+                contributorNode.put("firstName", reviewedAuthor.getGivenName());
+                contributorNode.put("lastName", reviewedAuthor.getSurname());
+                creators.add(contributorNode);
+            }
+        }
+
+        return creators;
+    }
+
+    public String processAbstractNote(JsonNode node, Article article) {
+        return article.getArticleMeta().getArticleAbstract();
+    }
+
+    public String processPublicationTitle(JsonNode node, Article article) {
+        return article.getJournalMeta().getJournalTitle();
+    }
+
+    public String processVolume(JsonNode node, Article article) {
+        return article.getArticleMeta().getVolume();
+    }
+
+    public String processIssue(JsonNode node, Article article) {
+        return article.getArticleMeta().getIssue();
+    }
+
+    public String processPages(JsonNode node, Article article) {
+        List<String> pages = new ArrayList<>();
+        if (article.getArticleMeta().getFirstPage() != null && !article.getArticleMeta().getFirstPage().isEmpty()) {
+            pages.add(article.getArticleMeta().getFirstPage());
+        }
+        if (article.getArticleMeta().getLastPage() != null && !article.getArticleMeta().getLastPage().isEmpty()) {
+            pages.add(article.getArticleMeta().getLastPage());
+        }
+
+        return String.join(" - ", pages);
+    }
+
+    public String processDate(JsonNode node, Article article) {
+        List<String> date = new ArrayList<>();
+        if (article.getArticleMeta().getPublicationDate() != null) {
+            if (article.getArticleMeta().getPublicationDate().getPublicationDate() != null
+                    && !article.getArticleMeta().getPublicationDate().getPublicationDate().isEmpty()) {
+                return article.getArticleMeta().getPublicationDate().getPublicationDate();
+            }
+            ArticlePublicationDate pubDate = article.getArticleMeta().getPublicationDate();
+            if (pubDate.getPublicationYear() != null && !pubDate.getPublicationYear().isEmpty()) {
+                date.add(pubDate.getPublicationYear());
+            }
+            if (pubDate.getPublicationMonth() != null && !pubDate.getPublicationMonth().isEmpty()) {
+                date.add(pubDate.getPublicationMonth());
+            }
+            if (pubDate.getPublicationDay() != null && !pubDate.getPublicationDay().isEmpty()) {
+                date.add(pubDate.getPublicationDay());
+            }
+        }
+        return String.join("-", date);
+    }
+
+    public String processLanguage(JsonNode node, Article article) {
+        return article.getArticleMeta().getLanguage();
+    }
+
+    public String processDOI(JsonNode node, Article article) {
+        for (ArticleId id : article.getArticleMeta().getArticleIds()) {
+            if (id.getPubIdType().equals("doi")) {
+                return id.getId();
+            }
+        }
+        return null;
+    }
+
+    public String processISSN(JsonNode node, Article article) {
+        String epubIssn = null;
+        for (Issn issn : article.getJournalMeta().getIssns()) {
+            if (issn.getPubType() != null && issn.getPubType().equals("ppub")) {
+                return issn.getIssn();
+            }
+            if (issn.getPubType() != null && issn.getPubType().equals("epub")) {
+                epubIssn = issn.getIssn();
+            }
+        }
+        return epubIssn;
+    }
+
+    public String processUrl(JsonNode node, Article article) {
+        return article.getArticleMeta().getSelfUri();
+    }
+}

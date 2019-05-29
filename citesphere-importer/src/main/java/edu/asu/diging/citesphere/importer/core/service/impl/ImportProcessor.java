@@ -1,15 +1,28 @@
 package edu.asu.diging.citesphere.importer.core.service.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import edu.asu.diging.citesphere.importer.core.exception.CitesphereCommunicationException;
 import edu.asu.diging.citesphere.importer.core.kafka.impl.KafkaJobMessage;
+import edu.asu.diging.citesphere.importer.core.model.BibEntry;
+import edu.asu.diging.citesphere.importer.core.model.ItemType;
+import edu.asu.diging.citesphere.importer.core.model.impl.Article;
 import edu.asu.diging.citesphere.importer.core.service.ICitesphereConnector;
 import edu.asu.diging.citesphere.importer.core.service.IImportProcessor;
+import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
 import edu.asu.diging.citesphere.importer.core.service.parse.IHandlerRegistry;
+import edu.asu.diging.citesphere.importer.core.zotero.IZoteroConnector;
+import edu.asu.diging.citesphere.importer.core.zotero.template.IJsonGenerationService;
 
 @Service
 public class ImportProcessor implements IImportProcessor {
@@ -21,6 +34,21 @@ public class ImportProcessor implements IImportProcessor {
     
     @Autowired
     private IHandlerRegistry handlerRegistry;
+    
+    @Autowired
+    private IZoteroConnector zoteroConnector;
+    
+    @Autowired
+    private IJsonGenerationService generationService;
+    
+    private Map<Class<? extends BibEntry>, ItemType> itemTypeMapping = new HashMap<>();
+    
+    @PostConstruct
+    public void init() {
+        // this needs to be changed and improved, but for now it works
+        itemTypeMapping.put(Article.class, ItemType.JOURNAL_ARTICLE);
+    }
+    
 
     /* (non-Javadoc)
      * @see edu.asu.diging.citesphere.importer.core.service.impl.IImportProcessor#process(edu.asu.diging.citesphere.importer.core.kafka.impl.KafkaJobMessage)
@@ -37,7 +65,14 @@ public class ImportProcessor implements IImportProcessor {
             return;
         }
         
-        handlerRegistry.handleFile(info, filePath);
+        BibEntryIterator bibIterator = handlerRegistry.handleFile(info, filePath);
+        while(bibIterator.hasNext()) {
+            BibEntry entry = bibIterator.next();
+            ItemType type = itemTypeMapping.get(entry.getClass());
+            JsonNode template = zoteroConnector.getTemplate(type);
+            String msg = generationService.generateJson(template, entry);
+            logger.error(msg);
+        }
     }
     
     private JobInfo getJobInfo(KafkaJobMessage message) {

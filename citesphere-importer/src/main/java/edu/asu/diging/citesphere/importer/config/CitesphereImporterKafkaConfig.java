@@ -63,7 +63,7 @@ public class CitesphereImporterKafkaConfig {
     public ConcurrentKafkaListenerContainerFactory kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
-
+        
         return factory;
     }
     

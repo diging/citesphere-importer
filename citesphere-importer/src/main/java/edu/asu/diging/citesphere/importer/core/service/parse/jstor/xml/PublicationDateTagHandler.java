@@ -32,7 +32,7 @@ public class PublicationDateTagHandler extends TagHandler implements ArticleMeta
         
         List<Node> year = getChildNodes(node, "year");
         if (!year.isEmpty()) {
-            pubDate.setPublicationYear(month.get(0).getTextContent());
+            pubDate.setPublicationYear(year.get(0).getTextContent());
         }
         
         List<Node> date = getChildNodes(node, "string-date");
