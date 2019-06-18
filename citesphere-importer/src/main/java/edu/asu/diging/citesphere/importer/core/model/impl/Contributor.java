@@ -1,5 +1,6 @@
 package edu.asu.diging.citesphere.importer.core.model.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Contributor {
@@ -7,7 +8,7 @@ public class Contributor {
     private String contributionType;
     private String givenName;
     private String surname;
-    private List<Affiliation> affiliations;
+    private List<Affiliation> affiliations = new ArrayList<Affiliation>();
     
     public String getContributionType() {
         return contributionType;

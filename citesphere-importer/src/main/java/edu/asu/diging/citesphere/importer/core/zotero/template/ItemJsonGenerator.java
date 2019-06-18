@@ -22,7 +22,7 @@ import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 
 public abstract class ItemJsonGenerator {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
     
     protected Map<String, Method> methods;
     protected ObjectMapper mapper;

@@ -1,12 +1,13 @@
 package edu.asu.diging.citesphere.importer.core.model.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ArticleMeta {
 
     private List<ArticleId> articleIds;
     private String articleTitle;
-    private List<ArticleCategory> categories;
+    private List<ArticleCategoryGroup> categoryGroups = new ArrayList<ArticleCategoryGroup>();
     private List<Contributor> contributors;
     private String authorNotesCorrespondence;
     private ArticlePublicationDate publicationDate;
@@ -35,11 +36,11 @@ public class ArticleMeta {
     public void setArticleTitle(String articleTitle) {
         this.articleTitle = articleTitle;
     }
-    public List<ArticleCategory> getCategories() {
-        return categories;
+    public List<ArticleCategoryGroup> getCategories() {
+        return categoryGroups;
     }
-    public void setCategories(List<ArticleCategory> categories) {
-        this.categories = categories;
+    public void setCategories(List<ArticleCategoryGroup> categoryGroups) {
+        this.categoryGroups = categoryGroups;
     }
     public List<Contributor> getContributors() {
         return contributors;

@@ -9,15 +9,20 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import edu.asu.diging.citesphere.importer.core.model.impl.Affiliation;
 import edu.asu.diging.citesphere.importer.core.model.impl.Article;
+import edu.asu.diging.citesphere.importer.core.model.impl.ArticleCategory;
+import edu.asu.diging.citesphere.importer.core.model.impl.ArticleCategoryGroup;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleId;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticlePublicationDate;
 import edu.asu.diging.citesphere.importer.core.model.impl.Contributor;
 import edu.asu.diging.citesphere.importer.core.model.impl.Issn;
+import edu.asu.diging.citesphere.importer.core.model.impl.JournalId;
 import edu.asu.diging.citesphere.importer.core.zotero.template.ItemJsonGenerator;
 
 @Service
@@ -155,5 +160,114 @@ public class ArticleGenerator extends ItemJsonGenerator {
 
     public String processUrl(JsonNode node, Article article) {
         return article.getArticleMeta().getSelfUri();
+    }
+    
+    public String processExtra(JsonNode node, Article article) {
+        String prefix = "Citesphere: ";
+        ObjectNode root = getObjectMapper().createObjectNode();
+        createCreatorsExtra(article, root);
+        createIds(article, root);
+        createCategories(article, root);
+        
+        try {
+            return prefix + getObjectMapper().writeValueAsString(root);
+        } catch (JsonProcessingException e) {
+            logger.error("Could not create Citesphere json.", e);
+            return prefix;
+        }
+    }
+
+    private void createCreatorsExtra(Article article, ObjectNode root) {
+        ArrayNode authors = root.putArray("authors");
+        ArrayNode editors = root.putArray("editors");
+        ArrayNode others = root.putArray("otherCreators");
+        int idx = 0;
+        for (Contributor contrib : article.getArticleMeta().getContributors()) {
+            ObjectNode contribNode = null;
+            if (contrib.getContributionType().equals("author")) {
+                contribNode = authors.addObject();
+                fillPerson(contrib, contribNode, idx);
+            } else if (contrib.getContributionType().equals("editor")) {
+                contribNode = editors.addObject();
+                fillPerson(contrib, contribNode, idx);
+            } else {
+                contribNode = others.addObject();
+                String role = jstorZoteroCreatorMap.get(contrib.getContributionType()) != null ? jstorZoteroCreatorMap.get(contrib.getContributionType()) : "contributor";
+                contribNode.put("role", role);
+                ObjectNode personNode = contribNode.putObject("person");
+                fillPerson(contrib, personNode, idx);
+            }            
+            idx++;
+        }
+    }
+    
+    private void createIds(Article article, ObjectNode root) {
+        if (article.getArticleMeta().getArticleIds().isEmpty()) {
+            return;
+        }
+        ArrayNode idArray = root.putArray("ids");
+        for (ArticleId id : article.getArticleMeta().getArticleIds()) {
+            ObjectNode idNode = idArray.addObject();
+            idNode.put("type", id.getPubIdType());
+            idNode.put("id", id.getId());
+        }
+        
+        ArrayNode journalIdArray = root.putArray("journalIds");
+        for (JournalId id : article.getJournalMeta().getJournalIds()) {
+            ObjectNode idNode = journalIdArray.addObject();
+            idNode.put("type", id.getIdType());
+            idNode.put("id", id.getId());
+        }
+    }
+    
+    private void createCategories(Article article, ObjectNode root) {
+        if (article.getArticleMeta().getCategories().isEmpty()) {
+            return;
+        }
+        
+        ArrayNode categoryArray = root.putArray("categories");
+        for (ArticleCategoryGroup group : article.getArticleMeta().getCategories()) {
+            ObjectNode groupNode = categoryArray.addObject();
+            groupNode.put("type", group.getType());
+            addCategoryGroups(groupNode, group);
+        }
+    }
+    
+    private void addCategoryGroups(ObjectNode categoriesNode, ArticleCategoryGroup group) {
+        ArrayNode categoryArray = categoriesNode.putArray("categories");
+        for (ArticleCategory category : group.getCategories()) {
+            ObjectNode catNode = categoryArray.addObject();
+            catNode.put("name", category.getSubject());
+        }
+        
+        ArrayNode subGroupArray = categoriesNode.putArray("categoryGroups");
+        for (ArticleCategoryGroup subGroup : group.getSubGroups()) {
+            ObjectNode groupNode = subGroupArray.addObject();
+            groupNode.put("type", subGroup.getType());
+            addCategoryGroups(groupNode, subGroup);
+        }
+    }
+
+    private void fillPerson(Contributor contrib, ObjectNode creatorNode, int idx) {
+        List<String> nameParts = new ArrayList<>();
+        if (contrib.getGivenName() != null && !contrib.getGivenName().isEmpty()) {
+            nameParts.add(contrib.getGivenName());
+        }
+        if (contrib.getSurname() != null && !contrib.getSurname().isEmpty()) {
+            nameParts.add(contrib.getSurname());
+        }
+        creatorNode.put("name", String.join(" ", nameParts));
+        creatorNode.put("firstName", contrib.getGivenName());
+        creatorNode.put("lastName", contrib.getSurname());
+        creatorNode.put("positionInList", idx);
+        
+        ArrayNode affiliationArray = creatorNode.arrayNode();
+        for (Affiliation aff : contrib.getAffiliations()) {
+            if (aff.getName() != null && !aff.getName().trim().isEmpty()) {
+                ObjectNode affNode = affiliationArray.addObject();
+                affNode.put("name", aff.getName());
+            }
+        }
+        creatorNode.set("affiliations", affiliationArray);
     }
 }
