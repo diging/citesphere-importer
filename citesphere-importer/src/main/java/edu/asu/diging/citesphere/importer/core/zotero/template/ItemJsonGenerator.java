@@ -17,6 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 
@@ -41,7 +42,9 @@ public abstract class ItemJsonGenerator {
     public abstract Class<?> responsibleFor();
 
     public String generate(JsonNode node, BibEntry bibEntry) {
-        Map<String, Object> objectMap = new HashMap<>();
+        ObjectMapper mapper = new ObjectMapper();
+        
+        ObjectNode bibNode = mapper.createObjectNode();
         Iterator<Entry<String, JsonNode>> fields = node.fields();
         while (fields.hasNext()) {
             Object result = null;
@@ -64,13 +67,13 @@ public abstract class ItemJsonGenerator {
             }
             
             if (result != null) {
-                objectMap.put(entry.getKey(), result);
+                bibNode.putPOJO(entry.getKey(), result);
             }
         }
-        
-        ObjectMapper mapper = new ObjectMapper();
+        ArrayNode root = mapper.createArrayNode();
+        root.add(bibNode);
         try {
-            return mapper.writeValueAsString(objectMap);
+            return mapper.writeValueAsString(root);
         } catch (JsonProcessingException e) {
             logger.error("Could not write JSON.");
             return null;

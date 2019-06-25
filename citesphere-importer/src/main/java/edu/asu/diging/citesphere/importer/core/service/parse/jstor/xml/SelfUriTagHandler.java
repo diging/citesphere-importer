@@ -16,7 +16,7 @@ public class SelfUriTagHandler extends TagHandler implements ArticleMetaTagHandl
 
     @Override
     public void handle(Node node, ArticleMeta articleMeta) {
-        String uri = ((Element)node).getAttributeNS("http://www.w3.org/1999/xlink", "href");
+        String uri = ((Element)node).getAttributeNS("*", "href");
         articleMeta.setSelfUri(uri);
     }
 

@@ -2,6 +2,7 @@ package edu.asu.diging.citesphere.importer.core.zotero.impl;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.annotation.PostConstruct;
 
@@ -9,6 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -18,6 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.asu.diging.citesphere.importer.core.model.ItemType;
+import edu.asu.diging.citesphere.importer.core.service.impl.JobInfo;
 import edu.asu.diging.citesphere.importer.core.zotero.IZoteroConnector;
 
 @Service
@@ -31,6 +37,9 @@ public class ZoteroConnector implements IZoteroConnector {
     
     @Value("${_zotero_template_api_endpoint}")
     private String templateApiEndpoint;
+    
+    @Value("${_zotero_create_item_api_endpoint}")
+    private String createItemApiEndpoint;
     
     private RestTemplate restTemplate;
     
@@ -56,5 +65,16 @@ public class ZoteroConnector implements IZoteroConnector {
             logger.error("Could not unmarshal response.", e);
         }
         return null;
+    }
+    
+    @Override
+    public ItemCreationResponse addEntry(JobInfo info, String json) throws URISyntaxException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(info.getZotero());
+        HttpEntity<String> entity = new HttpEntity<String>(json, headers);
+        String url = String.format(createItemApiEndpoint, info.getGroupId());
+        ResponseEntity<ItemCreationResponse> response = restTemplate.exchange(url, HttpMethod.POST, entity, ItemCreationResponse.class);
+        logger.info("Creating item returned: " + response.getStatusCodeValue());
+        return response.getBody();
     }
 }

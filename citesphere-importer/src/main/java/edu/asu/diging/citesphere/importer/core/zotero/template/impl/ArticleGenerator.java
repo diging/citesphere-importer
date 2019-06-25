@@ -19,10 +19,12 @@ import edu.asu.diging.citesphere.importer.core.model.impl.Article;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleCategory;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleCategoryGroup;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleId;
+import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticlePublicationDate;
 import edu.asu.diging.citesphere.importer.core.model.impl.Contributor;
 import edu.asu.diging.citesphere.importer.core.model.impl.Issn;
 import edu.asu.diging.citesphere.importer.core.model.impl.JournalId;
+import edu.asu.diging.citesphere.importer.core.model.impl.ReviewInfo;
 import edu.asu.diging.citesphere.importer.core.zotero.template.ItemJsonGenerator;
 
 @Service
@@ -168,6 +170,9 @@ public class ArticleGenerator extends ItemJsonGenerator {
         createCreatorsExtra(article, root);
         createIds(article, root);
         createCategories(article, root);
+        createReviewInfo(article, root);
+        createCopyright(article, root);
+        createCorrespondenceNotes(article, root);
         
         try {
             return prefix + getObjectMapper().writeValueAsString(root);
@@ -245,6 +250,54 @@ public class ArticleGenerator extends ItemJsonGenerator {
             ObjectNode groupNode = subGroupArray.addObject();
             groupNode.put("type", subGroup.getType());
             addCategoryGroups(groupNode, subGroup);
+        }
+    }
+    
+    private void createReviewInfo(Article article, ObjectNode root) {
+        ReviewInfo info = article.getArticleMeta().getReviewInfo();
+        if (info != null) {
+            ObjectNode reviewNode = root.putObject("reviewInfo");
+            if (info.getContributors() != null) {
+                ArrayNode contributorsNode = reviewNode.putArray("contributors");
+                int idx = 0;
+                for (Contributor contrib : info.getContributors()) {
+                    ObjectNode contribNode = contributorsNode.addObject();
+                    fillPerson(contrib, contribNode, idx);
+                    idx++;
+                }
+            }
+            
+            if (info.getTitle() != null) {
+                reviewNode.put("title", info.getTitle());
+            }
+            
+            if (info.getYear() != null) {
+                reviewNode.put("year", info.getYear());
+            }
+            
+            if (info.getFullDescription() != null) {
+                reviewNode.put("fullDescription", info.getFullDescription());
+            }
+        }
+    }
+    
+    private void createCopyright(Article article, ObjectNode root) {
+        ObjectNode copyrightNode = root.putObject("copyright");
+        ArticleMeta meta = article.getArticleMeta();
+        if (meta.getCopyrightHolder() != null) {
+            copyrightNode.put("holder", meta.getCopyrightHolder());
+        }
+        if (meta.getCopyrightStatement() != null) {
+            copyrightNode.put("statement", meta.getCopyrightStatement());
+        }
+        if (meta.getCopyrightYear() != null) {
+            copyrightNode.put("year", meta.getCopyrightYear());
+        }
+    }
+    
+    private void createCorrespondenceNotes(Article article, ObjectNode root) {
+        if (article.getArticleMeta().getAuthorNotesCorrespondence() != null) {
+            root.put("authorCorrespondenceNote", article.getArticleMeta().getAuthorNotesCorrespondence());
         }
     }
 

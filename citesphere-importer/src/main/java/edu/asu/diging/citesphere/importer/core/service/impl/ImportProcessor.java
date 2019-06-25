@@ -1,5 +1,6 @@
 package edu.asu.diging.citesphere.importer.core.service.impl;
 
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,6 +23,7 @@ import edu.asu.diging.citesphere.importer.core.service.IImportProcessor;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
 import edu.asu.diging.citesphere.importer.core.service.parse.IHandlerRegistry;
 import edu.asu.diging.citesphere.importer.core.zotero.IZoteroConnector;
+import edu.asu.diging.citesphere.importer.core.zotero.impl.ItemCreationResponse;
 import edu.asu.diging.citesphere.importer.core.zotero.template.IJsonGenerationService;
 
 @Service
@@ -72,6 +74,15 @@ public class ImportProcessor implements IImportProcessor {
             JsonNode template = zoteroConnector.getTemplate(type);
             String msg = generationService.generateJson(template, entry);
             logger.error(msg);
+            try {
+                ItemCreationResponse response = zoteroConnector.addEntry(info, msg);
+                logger.info(response.getSuccess().toString());
+                logger.error(response.getFailed().toString());
+            } catch (URISyntaxException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            
         }
     }
     
