@@ -10,6 +10,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.zotero.template.IJsonGenerationService;
@@ -36,7 +37,7 @@ public class JsonGenerationService implements IJsonGenerationService {
      * @see edu.asu.diging.citesphere.importer.core.zotero.template.impl.IGenerationService#generateJson(com.fasterxml.jackson.databind.JsonNode, edu.asu.diging.citesphere.importer.core.model.BibEntry)
      */
     @Override
-    public String generateJson(JsonNode template, BibEntry entry) {
+    public ObjectNode generateJson(JsonNode template, BibEntry entry) {
         ItemJsonGenerator generator = generators.get(entry.getClass());
         if (generator != null) {
             return generator.generate(template, entry);

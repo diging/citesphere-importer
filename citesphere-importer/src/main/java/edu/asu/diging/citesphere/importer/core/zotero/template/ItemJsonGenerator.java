@@ -13,7 +13,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -41,7 +40,7 @@ public abstract class ItemJsonGenerator {
 
     public abstract Class<?> responsibleFor();
 
-    public String generate(JsonNode node, BibEntry bibEntry) {
+    public ObjectNode generate(JsonNode node, BibEntry bibEntry) {
         ObjectMapper mapper = new ObjectMapper();
         
         ObjectNode bibNode = mapper.createObjectNode();
@@ -70,14 +69,7 @@ public abstract class ItemJsonGenerator {
                 bibNode.putPOJO(entry.getKey(), result);
             }
         }
-        ArrayNode root = mapper.createArrayNode();
-        root.add(bibNode);
-        try {
-            return mapper.writeValueAsString(root);
-        } catch (JsonProcessingException e) {
-            logger.error("Could not write JSON.");
-            return null;
-        }
+        return bibNode;
     }
     
     public String processItemType(JsonNode node, BibEntry bibEntry) {

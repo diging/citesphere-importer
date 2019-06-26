@@ -1,7 +1,6 @@
 package edu.asu.diging.citesphere.importer.core.zotero.impl;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 
 import javax.annotation.PostConstruct;
@@ -13,9 +12,12 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.RequestEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.DefaultResponseErrorHandler;
+import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
@@ -49,6 +51,19 @@ public class ZoteroConnector implements IZoteroConnector {
         if (!zoteroBaseUrl.endsWith("/")) {
             zoteroBaseUrl += "/";
         }
+        ResponseErrorHandler errorHandler = new DefaultResponseErrorHandler() {
+
+            @Override
+            public boolean hasError(ClientHttpResponse response) throws IOException {
+                HttpStatus status = response.getStatusCode();
+                if (HttpStatus.Series.valueOf(status) == HttpStatus.Series.SUCCESSFUL || status == HttpStatus.BAD_REQUEST) {
+                    return false;
+                }
+                return true;
+            }
+            
+        };
+        restTemplate.setErrorHandler(errorHandler);
         restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(zoteroBaseUrl));
     }
     
@@ -68,13 +83,13 @@ public class ZoteroConnector implements IZoteroConnector {
     }
     
     @Override
-    public ItemCreationResponse addEntry(JobInfo info, String json) throws URISyntaxException {
+    public ItemCreationResponse addEntries(JobInfo info, String json) throws URISyntaxException {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(info.getZotero());
         HttpEntity<String> entity = new HttpEntity<String>(json, headers);
         String url = String.format(createItemApiEndpoint, info.getGroupId());
-        ResponseEntity<ItemCreationResponse> response = restTemplate.exchange(url, HttpMethod.POST, entity, ItemCreationResponse.class);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
         logger.info("Creating item returned: " + response.getStatusCodeValue());
-        return response.getBody();
+        return null;// response.getBody();
     }
 }

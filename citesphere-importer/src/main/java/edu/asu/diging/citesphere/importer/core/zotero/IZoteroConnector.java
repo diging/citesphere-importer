@@ -12,6 +12,6 @@ public interface IZoteroConnector {
 
     JsonNode getTemplate(ItemType itemType);
 
-    ItemCreationResponse addEntry(JobInfo info, String json) throws URISyntaxException;
+    ItemCreationResponse addEntries(JobInfo info, String json) throws URISyntaxException;
 
 }

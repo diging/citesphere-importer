@@ -11,9 +11,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.asu.diging.citesphere.importer.core.exception.CitesphereCommunicationException;
+import edu.asu.diging.citesphere.importer.core.exception.IteratorCreationException;
 import edu.asu.diging.citesphere.importer.core.kafka.impl.KafkaJobMessage;
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.ItemType;
@@ -67,22 +72,52 @@ public class ImportProcessor implements IImportProcessor {
             return;
         }
         
-        BibEntryIterator bibIterator = handlerRegistry.handleFile(info, filePath);
+        BibEntryIterator bibIterator;
+        try {
+            bibIterator = handlerRegistry.handleFile(info, filePath);
+        } catch (IteratorCreationException e1) {
+            logger.error("Could not create iterator.", e1);
+            return;
+        }
+        
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayNode root = mapper.createArrayNode();
+        int entryCounter = 0;
         while(bibIterator.hasNext()) {
             BibEntry entry = bibIterator.next();
             ItemType type = itemTypeMapping.get(entry.getClass());
             JsonNode template = zoteroConnector.getTemplate(type);
-            String msg = generationService.generateJson(template, entry);
-            logger.error(msg);
-            try {
-                ItemCreationResponse response = zoteroConnector.addEntry(info, msg);
-                logger.info(response.getSuccess().toString());
-                logger.error(response.getFailed().toString());
-            } catch (URISyntaxException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            ObjectNode bibNode = generationService.generateJson(template, entry);
+            
+            root.add(bibNode);
+            entryCounter++;
+            
+            // we can submit max 50 entries to Zotoro
+            if (entryCounter >= 50) {
+                submitEntries(root, info);
+                entryCounter = 0;
+                root = mapper.createArrayNode();
             }
             
+        }
+        
+        if (entryCounter > 0) {
+            submitEntries(root, info);
+        }
+    }
+    
+    private void submitEntries(ArrayNode entries, JobInfo info) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            String msg = mapper.writeValueAsString(entries);
+            logger.info("Submitting " + msg);
+            ItemCreationResponse response = zoteroConnector.addEntries(info, msg);
+            logger.info(response.getSuccess().toString());
+            logger.error(response.getFailed().toString());
+        } catch (URISyntaxException e) {
+            logger.error("Could not store new entry.", e);
+        } catch (JsonProcessingException e) {
+            logger.error("Could not write JSON.");
         }
     }
     

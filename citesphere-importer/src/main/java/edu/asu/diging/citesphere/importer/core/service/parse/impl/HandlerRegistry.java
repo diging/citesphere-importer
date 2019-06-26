@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import edu.asu.diging.citesphere.importer.core.exception.IteratorCreationException;
 import edu.asu.diging.citesphere.importer.core.service.impl.JobInfo;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
 import edu.asu.diging.citesphere.importer.core.service.parse.FileHandler;
@@ -35,10 +36,10 @@ public class HandlerRegistry implements IHandlerRegistry {
      * @see edu.asu.diging.citesphere.importer.core.service.parse.impl.IHandlerRegistry#handleFile(edu.asu.diging.citesphere.importer.core.service.impl.JobInfo, java.lang.String)
      */
     @Override
-    public BibEntryIterator handleFile(JobInfo info, String filePath) {
+    public BibEntryIterator handleFile(JobInfo info, String filePath) throws IteratorCreationException {
         for (FileHandler handler: handlers) {
             if (handler.canHandle(filePath)) {
-                return handler.getIterator(filePath);
+                return handler.getIterator(filePath, this, info);
             }
         }
         return null;
