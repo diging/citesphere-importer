@@ -44,6 +44,11 @@ public class ItemCreationResponse {
             this.message = message;
         }
         
+        @Override
+        public String toString() {
+            return "FailedMessage [code=" + code + ", message=" + message + "]";
+        }
+        
     }
 
 }

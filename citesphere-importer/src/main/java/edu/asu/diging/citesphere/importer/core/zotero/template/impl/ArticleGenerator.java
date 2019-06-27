@@ -64,11 +64,20 @@ public class ArticleGenerator extends ItemJsonGenerator {
 
     public ArrayNode processCreators(JsonNode node, Article article) {
         ArrayNode creators = getObjectMapper().createArrayNode();
-        for (Contributor contributor : article.getArticleMeta().getContributors()) {
+        if (article.getArticleMeta().getContributors() != null) {
+            for (Contributor contributor : article.getArticleMeta().getContributors()) {
+                ObjectNode contributorNode = getObjectMapper().createObjectNode();
+                if (jstorZoteroCreatorMap.get(contributor.getContributionType()) == null) {
+                    logger.warn("Could not find creator type for " + contributor.getContributionType());
+                }
+                contributorNode.put("creatorType", jstorZoteroCreatorMap.get(contributor.getContributionType()) != null ? jstorZoteroCreatorMap.get(contributor.getContributionType()) : "author");
+                fillContributorName(contributor, contributorNode);
+                creators.add(contributorNode);
+            }
+        } else {
             ObjectNode contributorNode = getObjectMapper().createObjectNode();
-            contributorNode.put("creatorType", jstorZoteroCreatorMap.get(contributor.getContributionType()));
-            contributorNode.put("firstName", contributor.getGivenName());
-            contributorNode.put("lastName", contributor.getSurname());
+            contributorNode.put("creatorType", jstorZoteroCreatorMap.get("author"));
+            contributorNode.put("name", "Unknown");
             creators.add(contributorNode);
         }
 
@@ -76,13 +85,26 @@ public class ArticleGenerator extends ItemJsonGenerator {
             for (Contributor reviewedAuthor : article.getArticleMeta().getReviewInfo().getContributors()) {
                 ObjectNode contributorNode = getObjectMapper().createObjectNode();
                 contributorNode.put("creatorType", "reviewedAuthor");
-                contributorNode.put("firstName", reviewedAuthor.getGivenName());
-                contributorNode.put("lastName", reviewedAuthor.getSurname());
+                fillContributorName(reviewedAuthor, contributorNode);
                 creators.add(contributorNode);
             }
         }
 
         return creators;
+    }
+
+    private void fillContributorName(Contributor contributor, ObjectNode contributorNode) {
+        if (contributor.getGivenName() != null && !contributor.getGivenName().trim().isEmpty() && contributor.getSurname() != null && !contributor.getSurname().trim().isEmpty()) {
+            contributorNode.put("firstName", contributor.getGivenName());
+            contributorNode.put("lastName", contributor.getSurname());
+            
+        } else if (contributor.getGivenName() != null && !contributor.getGivenName().trim().isEmpty()) {
+            contributorNode.put("name", contributor.getGivenName());
+        } else if (contributor.getSurname() != null && !contributor.getSurname().trim().isEmpty()) {
+            contributorNode.put("name", contributor.getSurname()); 
+        } else {
+            contributorNode.put("name", "Unknown");
+        }
     }
 
     public String processAbstractNote(JsonNode node, Article article) {
@@ -186,23 +208,25 @@ public class ArticleGenerator extends ItemJsonGenerator {
         ArrayNode authors = root.putArray("authors");
         ArrayNode editors = root.putArray("editors");
         ArrayNode others = root.putArray("otherCreators");
-        int idx = 0;
-        for (Contributor contrib : article.getArticleMeta().getContributors()) {
-            ObjectNode contribNode = null;
-            if (contrib.getContributionType().equals("author")) {
-                contribNode = authors.addObject();
-                fillPerson(contrib, contribNode, idx);
-            } else if (contrib.getContributionType().equals("editor")) {
-                contribNode = editors.addObject();
-                fillPerson(contrib, contribNode, idx);
-            } else {
-                contribNode = others.addObject();
-                String role = jstorZoteroCreatorMap.get(contrib.getContributionType()) != null ? jstorZoteroCreatorMap.get(contrib.getContributionType()) : "contributor";
-                contribNode.put("role", role);
-                ObjectNode personNode = contribNode.putObject("person");
-                fillPerson(contrib, personNode, idx);
-            }            
-            idx++;
+        if (article.getArticleMeta().getContributors() != null) {
+            int idx = 0;
+            for (Contributor contrib : article.getArticleMeta().getContributors()) {
+                ObjectNode contribNode = null;
+                if (contrib.getContributionType().equals("author")) {
+                    contribNode = authors.addObject();
+                    fillPerson(contrib, contribNode, idx);
+                } else if (contrib.getContributionType().equals("editor")) {
+                    contribNode = editors.addObject();
+                    fillPerson(contrib, contribNode, idx);
+                } else {
+                    contribNode = others.addObject();
+                    String role = jstorZoteroCreatorMap.get(contrib.getContributionType()) != null ? jstorZoteroCreatorMap.get(contrib.getContributionType()) : "contributor";
+                    contribNode.put("role", role);
+                    ObjectNode personNode = contribNode.putObject("person");
+                    fillPerson(contrib, personNode, idx);
+                }            
+                idx++;
+            }
         }
     }
     

@@ -50,7 +50,7 @@ public abstract class ItemJsonGenerator {
             Entry<String, JsonNode> entry = fields.next();
             Method processMethod = methods.get("process" + StringUtils.capitalize(entry.getKey()));
             if (processMethod == null) {
-                logger.warn("No such method: " + "process" + StringUtils.capitalize(entry.getKey()));
+                logger.debug("No such method: " + "process" + StringUtils.capitalize(entry.getKey()));
                 continue;
             }
             try {

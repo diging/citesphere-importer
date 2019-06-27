@@ -6,12 +6,16 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
+import javax.print.attribute.standard.DateTimeAtCompleted;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -121,7 +125,7 @@ public class CitesphereConnector implements ICitesphereConnector {
                 String disposition = response.getHeaders().getFirst("Content-Disposition");
                 String fileName = disposition.replaceFirst("(?i)^.*filename=\"?([^\"]+)\"?.*$", "$1");
                 
-                File downloadFolder = new File(downloadPath + File.separator + UUID.randomUUID().toString());
+                File downloadFolder = new File(downloadPath + File.separator + "UP" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYYMMdd-HHmmss")) + "-" + UUID.randomUUID().toString().hashCode());
                 downloadFolder.mkdirs();
                 String filePath = downloadFolder.getAbsolutePath() + File.separator + fileName;
                 Path path = Paths.get(filePath);
