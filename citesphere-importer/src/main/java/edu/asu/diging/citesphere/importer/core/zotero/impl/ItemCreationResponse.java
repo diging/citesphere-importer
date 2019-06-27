@@ -4,15 +4,15 @@ import java.util.Map;
 
 public class ItemCreationResponse {
 
-    private Map<String, String> success;
+    private Map<String, Object> successful;
     private Map<String, String> unchanged;
     private Map<String, FailedMessage> failed;
     
-    public Map<String, String> getSuccess() {
-        return success;
+    public Map<String, Object> getSuccessful() {
+        return successful;
     }
-    public void setSuccess(Map<String, String> success) {
-        this.success = success;
+    public void setSuccess(Map<String, Object> success) {
+        this.successful = success;
     }
     public Map<String, String> getUnchanged() {
         return unchanged;

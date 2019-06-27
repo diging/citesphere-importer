@@ -111,9 +111,13 @@ public class ImportProcessor implements IImportProcessor {
         try {
             String msg = mapper.writeValueAsString(entries);
             logger.info("Submitting " + msg);
-            ItemCreationResponse response = zoteroConnector.addEntries(info, msg);
-            logger.info(response.getSuccess().toString());
-            logger.error(response.getFailed().toString());
+            ItemCreationResponse response = zoteroConnector.addEntries(info, entries);
+            if (response != null) {
+                logger.info(response.getSuccessful() + "");
+                logger.error(response.getFailed() + "");
+            } else {
+                logger.error("Item creation failed.");
+            }
         } catch (URISyntaxException e) {
             logger.error("Could not store new entry.", e);
         } catch (JsonProcessingException e) {

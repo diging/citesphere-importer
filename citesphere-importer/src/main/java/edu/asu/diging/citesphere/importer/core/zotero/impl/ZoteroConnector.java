@@ -23,6 +23,7 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import edu.asu.diging.citesphere.importer.core.model.ItemType;
 import edu.asu.diging.citesphere.importer.core.service.impl.JobInfo;
@@ -83,12 +84,21 @@ public class ZoteroConnector implements IZoteroConnector {
     }
     
     @Override
-    public ItemCreationResponse addEntries(JobInfo info, String json) throws URISyntaxException {
+    public ItemCreationResponse addEntries(JobInfo info, ArrayNode entries) throws URISyntaxException {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(info.getZotero());
-        HttpEntity<String> entity = new HttpEntity<String>(json, headers);
+        HttpEntity<ArrayNode> entity = new HttpEntity<ArrayNode>(entries, headers);
         String url = String.format(createItemApiEndpoint, info.getGroupId());
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                return mapper.readValue(response.getBody(), ItemCreationResponse.class);
+            } catch (IOException e) {
+               logger.error("Could not unmarshall response.", e);
+               return null;
+            }
+        }
         logger.info("Creating item returned: " + response.getStatusCodeValue());
         return null;// response.getBody();
     }

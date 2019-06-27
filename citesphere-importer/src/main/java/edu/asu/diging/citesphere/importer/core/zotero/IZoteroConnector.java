@@ -3,6 +3,7 @@ package edu.asu.diging.citesphere.importer.core.zotero;
 import java.net.URISyntaxException;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import edu.asu.diging.citesphere.importer.core.model.ItemType;
 import edu.asu.diging.citesphere.importer.core.service.impl.JobInfo;
@@ -12,6 +13,6 @@ public interface IZoteroConnector {
 
     JsonNode getTemplate(ItemType itemType);
 
-    ItemCreationResponse addEntries(JobInfo info, String json) throws URISyntaxException;
+    ItemCreationResponse addEntries(JobInfo info, ArrayNode entries) throws URISyntaxException;
 
 }
