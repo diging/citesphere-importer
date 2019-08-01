@@ -19,7 +19,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.asu.diging.citesphere.importer.core.exception.CitesphereCommunicationException;
 import edu.asu.diging.citesphere.importer.core.exception.IteratorCreationException;
-import edu.asu.diging.citesphere.importer.core.kafka.impl.KafkaJobMessage;
+import edu.asu.diging.citesphere.importer.core.exception.MessageCreationException;
+import edu.asu.diging.citesphere.importer.core.kafka.impl.KafkaRequestProducer;
+import edu.asu.diging.citesphere.importer.core.kafka.impl.KafkaTopics;
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.ItemType;
 import edu.asu.diging.citesphere.importer.core.model.impl.Article;
@@ -28,37 +30,45 @@ import edu.asu.diging.citesphere.importer.core.service.IImportProcessor;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
 import edu.asu.diging.citesphere.importer.core.service.parse.IHandlerRegistry;
 import edu.asu.diging.citesphere.importer.core.zotero.IZoteroConnector;
-import edu.asu.diging.citesphere.importer.core.zotero.impl.ItemCreationResponse;
 import edu.asu.diging.citesphere.importer.core.zotero.template.IJsonGenerationService;
+import edu.asu.diging.citesphere.messages.model.ItemCreationResponse;
+import edu.asu.diging.citesphere.messages.model.KafkaImportReturnMessage;
+import edu.asu.diging.citesphere.messages.model.KafkaJobMessage;
 
 @Service
 public class ImportProcessor implements IImportProcessor {
-    
+
     private final Logger logger = LoggerFactory.getLogger(getClass());
-    
+
     @Autowired
     private ICitesphereConnector connector;
-    
+
     @Autowired
     private IHandlerRegistry handlerRegistry;
-    
+
     @Autowired
     private IZoteroConnector zoteroConnector;
-    
+
     @Autowired
     private IJsonGenerationService generationService;
     
+    @Autowired
+    private KafkaRequestProducer requestProducer;
+
     private Map<Class<? extends BibEntry>, ItemType> itemTypeMapping = new HashMap<>();
-    
+
     @PostConstruct
     public void init() {
         // this needs to be changed and improved, but for now it works
         itemTypeMapping.put(Article.class, ItemType.JOURNAL_ARTICLE);
     }
-    
 
-    /* (non-Javadoc)
-     * @see edu.asu.diging.citesphere.importer.core.service.impl.IImportProcessor#process(edu.asu.diging.citesphere.importer.core.kafka.impl.KafkaJobMessage)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * edu.asu.diging.citesphere.importer.core.service.impl.IImportProcessor#process
+     * (edu.asu.diging.citesphere.importer.core.kafka.impl.KafkaJobMessage)
      */
     @Override
     public void process(KafkaJobMessage message) {
@@ -66,12 +76,12 @@ public class ImportProcessor implements IImportProcessor {
         if (info == null) {
             return;
         }
-        
+
         String filePath = downloadFile(message);
         if (filePath == null) {
             return;
         }
-        
+
         BibEntryIterator bibIterator;
         try {
             bibIterator = handlerRegistry.handleFile(info, filePath);
@@ -79,34 +89,44 @@ public class ImportProcessor implements IImportProcessor {
             logger.error("Could not create iterator.", e1);
             return;
         }
-        
+
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode root = mapper.createArrayNode();
         int entryCounter = 0;
-        while(bibIterator.hasNext()) {
+        while (bibIterator.hasNext()) {
             BibEntry entry = bibIterator.next();
             ItemType type = itemTypeMapping.get(entry.getClass());
             JsonNode template = zoteroConnector.getTemplate(type);
             ObjectNode bibNode = generationService.generateJson(template, entry);
-            
+
             root.add(bibNode);
             entryCounter++;
-            
+
             // we can submit max 50 entries to Zotoro
             if (entryCounter >= 50) {
                 submitEntries(root, info);
                 entryCounter = 0;
                 root = mapper.createArrayNode();
             }
-            
+
         }
-        
+
+        ItemCreationResponse response = null;
         if (entryCounter > 0) {
-            submitEntries(root, info);
+            response = submitEntries(root, info);
+        }
+
+        response = response != null ? response : new ItemCreationResponse();
+        KafkaImportReturnMessage returnMessage = new KafkaImportReturnMessage(response, message.getId());
+        try {
+            requestProducer.sendRequest(returnMessage, KafkaTopics.REFERENCES_IMPORT_DONE_TOPIC);
+        } catch (MessageCreationException e) {
+            // FIXME handle this case
+            logger.error("Exception sending message.", e);
         }
     }
-    
-    private void submitEntries(ArrayNode entries, JobInfo info) {
+
+    private ItemCreationResponse submitEntries(ArrayNode entries, JobInfo info) {
         ObjectMapper mapper = new ObjectMapper();
         try {
             String msg = mapper.writeValueAsString(entries);
@@ -118,13 +138,15 @@ public class ImportProcessor implements IImportProcessor {
             } else {
                 logger.error("Item creation failed.");
             }
+            return response;
         } catch (URISyntaxException e) {
             logger.error("Could not store new entry.", e);
         } catch (JsonProcessingException e) {
             logger.error("Could not write JSON.");
         }
+        return null;
     }
-    
+
     private JobInfo getJobInfo(KafkaJobMessage message) {
         JobInfo info = null;
         try {
@@ -136,7 +158,7 @@ public class ImportProcessor implements IImportProcessor {
         }
         return info;
     }
-    
+
     private String downloadFile(KafkaJobMessage message) {
         String file = null;
         try {

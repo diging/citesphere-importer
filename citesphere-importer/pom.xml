@@ -15,6 +15,7 @@
         <spring-data.version>Lovelace-RELEASE</spring-data.version>
         <thymeleaf.version>3.0.11.RELEASE</thymeleaf.version>
         <spring.kafka.version>2.2.6.RELEASE</spring.kafka.version>
+        <citesphere.messages.version>0.0.1-SNAPSHOT</citesphere.messages.version>
 
         <admin.password>$2a$04$oQo44vqcDIFRoYKiAXoNheurzkwX9dcNmowvTX/hsWuBMwijqn44i</admin.password>
 
@@ -57,6 +58,13 @@
     </dependencyManagement>
 
     <dependencies>
+
+        <dependency>
+            <groupId>edu.asu.diging</groupId>
+            <artifactId>citesphere-messages</artifactId>
+            <version>${citesphere.messages.version}</version>
+        </dependency>
+
         <!-- Spring -->
         <dependency>
             <groupId>org.springframework</groupId>

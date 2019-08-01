@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import edu.asu.diging.citesphere.importer.core.model.ItemType;
 import edu.asu.diging.citesphere.importer.core.service.impl.JobInfo;
 import edu.asu.diging.citesphere.importer.core.zotero.IZoteroConnector;
+import edu.asu.diging.citesphere.messages.model.ItemCreationResponse;
 
 @Service
 @PropertySource("classpath:/config.properties")
