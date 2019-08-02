@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<article xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:mml="http://www.w3.org/1998/Math/MathML"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         article-type="book-review"
+         dtd-version="1.0"
+         xml:lang="en">
+   <front>
+      <journal-meta>
+         <journal-id journal-id-type="publisher-id">publisher</journal-id>
+         <journal-title-group>
+            <journal-title>Journal Title</journal-title>
+         </journal-title-group>
+
+
+         <publisher>
+            <publisher-name>Publisher Name</publisher-name>
+         </publisher>
+         <issn pub-type="ppub">87654321</issn>
+         <issn pub-type="epub">12345678</issn>
+         <custom-meta-group/>
+      </journal-meta>
+      <article-meta>
+         <article-id pub-id-type="jstor-stable">jstorstable</article-id>
+         <article-categories>
+            <subj-group subj-group-type="heading">
+               <subject>Heading</subject>
+               <subj-group subj-group-type="subheading">
+                  <subject>Subheading</subject>
+               </subj-group>
+            </subj-group>
+         </article-categories>
+         <title-group>
+         	<something-else></something-else>
+            <article-title>Test <italic>title</italic></article-title>
+
+
+
+
+         </title-group>
+         <contrib-group>
+            <contrib contrib-type="author" xlink:type="simple">
+               <string-name>
+                  <given-names>Max</given-names>
+                  <x xml:space="preserve"> </x>
+                  <surname>Musterman</surname>
+               </string-name>
+               <x xml:space="preserve"> </x>
+               <xref ref-type="aff" rid="a1">*</xref>
+            </contrib>
+            <aff id="a1">*affiliation</aff>
+         </contrib-group>
+
+		 <author-notes>
+            <corresp>author notes</corresp>
+         </author-notes>
+
+         <pub-date pub-type="ppub">
+            <month>01</month>
+            <year>1999</year>
+            <string-date>January 1999</string-date>
+         </pub-date>
+         <volume>1</volume>
+         <issue>1</issue>
+         <issue-id>issueid</issue-id>
+         <fpage>1</fpage>
+         <lpage>100</lpage>
+         <product xlink:type="simple">
+            <string-name name-style="western">
+               <given-names>Petra </given-names>
+               <surname>Musterman</surname>
+            </string-name>. <source>source</source>. publisher info, <year>1999</year>. $100.</product>
+         <self-uri xlink:href="self-uri"/>
+
+         <custom-meta-group>
+            <custom-meta>
+               <meta-name>lang</meta-name>
+               <meta-value>en</meta-value>
+            </custom-meta>
+         </custom-meta-group>
+      </article-meta>
+   </front>
+
+</article>
+
