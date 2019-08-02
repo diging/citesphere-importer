@@ -21,7 +21,6 @@ import edu.asu.diging.citesphere.importer.core.exception.CitesphereCommunication
 import edu.asu.diging.citesphere.importer.core.exception.IteratorCreationException;
 import edu.asu.diging.citesphere.importer.core.exception.MessageCreationException;
 import edu.asu.diging.citesphere.importer.core.kafka.impl.KafkaRequestProducer;
-import edu.asu.diging.citesphere.importer.core.kafka.impl.KafkaTopics;
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.ItemType;
 import edu.asu.diging.citesphere.importer.core.model.impl.Article;
@@ -31,9 +30,12 @@ import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
 import edu.asu.diging.citesphere.importer.core.service.parse.IHandlerRegistry;
 import edu.asu.diging.citesphere.importer.core.zotero.IZoteroConnector;
 import edu.asu.diging.citesphere.importer.core.zotero.template.IJsonGenerationService;
+import edu.asu.diging.citesphere.messages.KafkaTopics;
 import edu.asu.diging.citesphere.messages.model.ItemCreationResponse;
 import edu.asu.diging.citesphere.messages.model.KafkaImportReturnMessage;
 import edu.asu.diging.citesphere.messages.model.KafkaJobMessage;
+import edu.asu.diging.citesphere.messages.model.ResponseCode;
+import edu.asu.diging.citesphere.messages.model.Status;
 
 @Service
 public class ImportProcessor implements IImportProcessor {
@@ -74,14 +76,17 @@ public class ImportProcessor implements IImportProcessor {
     public void process(KafkaJobMessage message) {
         JobInfo info = getJobInfo(message);
         if (info == null) {
+            sendMessage(null, message.getId(), Status.FAILED, ResponseCode.X10);
             return;
         }
 
         String filePath = downloadFile(message);
         if (filePath == null) {
+            sendMessage(null, message.getId(), Status.FAILED, ResponseCode.X20);
             return;
         }
 
+        sendMessage(null, message.getId(), Status.PROCESSING, ResponseCode.P00);
         BibEntryIterator bibIterator;
         try {
             bibIterator = handlerRegistry.handleFile(info, filePath);
@@ -117,7 +122,13 @@ public class ImportProcessor implements IImportProcessor {
         }
 
         response = response != null ? response : new ItemCreationResponse();
-        KafkaImportReturnMessage returnMessage = new KafkaImportReturnMessage(response, message.getId());
+        sendMessage(response, message.getId(), Status.DONE, ResponseCode.S00);
+    }
+    
+    private void sendMessage(ItemCreationResponse message, String jobId, Status status, ResponseCode code) {
+        KafkaImportReturnMessage returnMessage = new KafkaImportReturnMessage(message, jobId);
+        returnMessage.setStatus(status);
+        returnMessage.setCode(code);
         try {
             requestProducer.sendRequest(returnMessage, KafkaTopics.REFERENCES_IMPORT_DONE_TOPIC);
         } catch (MessageCreationException e) {
