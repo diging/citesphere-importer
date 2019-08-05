@@ -49,7 +49,17 @@
                <x xml:space="preserve"> </x>
                <xref ref-type="aff" rid="a1">*</xref>
             </contrib>
+            <contrib contrib-type="author" xlink:type="simple">
+               <string-name>
+                  <given-names>Petra</given-names>
+                  <x xml:space="preserve"> </x>
+                  <surname>Musterman</surname>
+               </string-name>
+               <x xml:space="preserve"> </x>
+               <xref ref-type="aff" rid="a2">*</xref>
+            </contrib>
             <aff id="a1">*affiliation</aff>
+            <aff id="a2">*affiliation</aff>
          </contrib-group>
 
 		 <author-notes>
