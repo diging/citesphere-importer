@@ -1,26 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>edu.asu.diging</groupId>
-  <artifactId>citesphere-importer</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-  <packaging>war</packaging>
-  
-  <properties>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>edu.asu.diging</groupId>
+    <artifactId>citesphere-importer</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>war</packaging>
+
+    <properties>
         <org.slf4j-version>1.7.26</org.slf4j-version>
         <org.springframework-version>5.1.7.RELEASE</org.springframework-version>
         <spring-security-version>5.1.5.RELEASE</spring-security-version>
         <spring-data.version>Lovelace-RELEASE</spring-data.version>
         <thymeleaf.version>3.0.11.RELEASE</thymeleaf.version>
+        <spring.kafka.version>2.2.6.RELEASE</spring.kafka.version>
+        <citesphere.messages.version>0.1</citesphere.messages.version>
 
         <admin.password>$2a$04$oQo44vqcDIFRoYKiAXoNheurzkwX9dcNmowvTX/hsWuBMwijqn44i</admin.password>
-        
+
         <db.driver>com.mysql.jdbc.Driver</db.driver>
         <db.database.url>jdbc-url-to-db</db.database.url>
         <db.user>db-user</db.user>
         <db.password>db-password</db.password>
 
+        <citesphere.download.path></citesphere.download.path>
+        <citesphere.base.uri>http://localhost:8080/citesphere</citesphere.base.uri>
+        <kafka.hosts></kafka.hosts>
+
+        <zotero.client.key></zotero.client.key>
+        <zotero.client.secret></zotero.client.secret>
+        <citesphere.client.key></citesphere.client.key>
+        <citesphere.client.secret></citesphere.client.secret>
+
         <log.level>info</log.level>
+
+        <tomcat.deploy.path></tomcat.deploy.path>
+        <tomcat.app.name>citesphere-importer</tomcat.app.name>
+        <tomcat.server.id>TomcatServer</tomcat.server.id>
+
     </properties>
 
     <dependencyManagement>
@@ -45,6 +63,13 @@
     </dependencyManagement>
 
     <dependencies>
+
+        <dependency>
+            <groupId>edu.asu.diging</groupId>
+            <artifactId>citesphere-messages</artifactId>
+            <version>${citesphere.messages.version}</version>
+        </dependency>
+
         <!-- Spring -->
         <dependency>
             <groupId>org.springframework</groupId>
@@ -84,7 +109,7 @@
             <artifactId>spring-security-taglibs</artifactId>
             <version>${spring-security-version}</version>
         </dependency>
-        
+
         <!-- Spring Data -->
         <dependency>
             <groupId>org.springframework.data</groupId>
@@ -211,6 +236,50 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Apache Kafka -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+            <version>${spring.kafka.version}</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>27.1-jre</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.9</version>
+        </dependency>
+
+        <!-- Testing -->
+        <!-- https://mvnrepository.com/artifact/junit/junit -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.mockito/mockito-all -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.10.19</version>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 
@@ -257,7 +326,17 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <url>${tomcat.deploy.path}</url>
+                    <server>${tomcat.server.id}</server>
+                    <path>/${tomcat.app.name}</path>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
-  
+
 </project>
