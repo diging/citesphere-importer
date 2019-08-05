@@ -21,7 +21,7 @@ public class TagHandlerTest {
     
     @Before
     public void init() throws SAXException, IOException, ParserConfigurationException {
-        InputStream stream = getClass().getResourceAsStream("jstor-xml-test.xml");
+        InputStream stream = getClass().getResourceAsStream("/jstor-xml-test.xml");
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         doc = dBuilder.parse(stream);
