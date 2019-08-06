@@ -2,12 +2,19 @@ package edu.asu.diging.citesphere.importer.core.model.impl;
 
 import java.util.List;
 
-public class JournalMeta {
+/**
+ * This class hold information about the "container" of a publication (e.g. the journal
+ * an article was published in, or the book a chapter was part of.
+ * @author jdamerow
+ *
+ */
+public class ContainerMeta {
 
     private List<JournalId> journalIds;
     private String journalTitle;
     private String publisherName;
     private List<Issn> issns;
+    private List<Contributor> contributors;
     
     public List<JournalId> getJournalIds() {
         return journalIds;
@@ -32,6 +39,12 @@ public class JournalMeta {
     }
     public void setIssns(List<Issn> issns) {
         this.issns = issns;
+    }
+    public List<Contributor> getContributors() {
+        return contributors;
+    }
+    public void setContributors(List<Contributor> contributors) {
+        this.contributors = contributors;
     }   
     
 }

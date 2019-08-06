@@ -6,10 +6,13 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import edu.asu.diging.citesphere.importer.core.exception.HandlerTestException;
 import edu.asu.diging.citesphere.importer.core.exception.IteratorCreationException;
 import edu.asu.diging.citesphere.importer.core.service.impl.JobInfo;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
@@ -18,6 +21,8 @@ import edu.asu.diging.citesphere.importer.core.service.parse.IHandlerRegistry;
 
 @Service
 public class HandlerRegistry implements IHandlerRegistry {
+    
+    private final Logger logger = LoggerFactory.getLogger(getClass());
     
     @Autowired
     private ApplicationContext ctx;
@@ -38,8 +43,12 @@ public class HandlerRegistry implements IHandlerRegistry {
     @Override
     public BibEntryIterator handleFile(JobInfo info, String filePath) throws IteratorCreationException {
         for (FileHandler handler: handlers) {
-            if (handler.canHandle(filePath)) {
-                return handler.getIterator(filePath, this, info);
+            try {
+                if (handler.canHandle(filePath)) {
+                    return handler.getIterator(filePath, this, info);
+                }
+            } catch (HandlerTestException e) {
+                logger.error("Could not test if handable.", e);
             }
         }
         return null;

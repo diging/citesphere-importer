@@ -1,4 +1,4 @@
-package edu.asu.diging.citesphere.importer.core.service.parse.jstor.xml;
+package edu.asu.diging.citesphere.importer.core.service.parse.iterators;
 
 import java.io.IOException;
 
@@ -17,8 +17,9 @@ import org.xml.sax.SAXException;
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.impl.Article;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
-import edu.asu.diging.citesphere.importer.core.model.impl.JournalMeta;
+import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
+import edu.asu.diging.citesphere.importer.core.service.parse.jstor.xml.IArticleTagParser;
 
 public class JStorArticleXmlIterator implements BibEntryIterator {
     
@@ -59,13 +60,13 @@ public class JStorArticleXmlIterator implements BibEntryIterator {
         
     }
     
-    private JournalMeta parseJournalMeta(Element element) {
+    private ContainerMeta parseJournalMeta(Element element) {
         NodeList journalMetaList = element.getElementsByTagName("journal-meta");
         if (journalMetaList.getLength() == 0) {
             return null;
         }
         
-        JournalMeta meta = new JournalMeta();
+        ContainerMeta meta = new ContainerMeta();
         // there should only be one
         Node journalMetaNode = journalMetaList.item(0);
         
@@ -106,5 +107,10 @@ public class JStorArticleXmlIterator implements BibEntryIterator {
     @Override
     public boolean hasNext() {
         return !iteratorDone;
+    }
+
+    @Override
+    public void close() {
+        // nothing to do
     }
 }

@@ -7,7 +7,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import edu.asu.diging.citesphere.importer.core.model.impl.JournalId;
-import edu.asu.diging.citesphere.importer.core.model.impl.JournalMeta;
+import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
 
 @Component
 public class JournalIdHandler implements JournalMetaTagHandler {
@@ -24,7 +24,7 @@ public class JournalIdHandler implements JournalMetaTagHandler {
      * @see edu.asu.diging.citesphere.importer.core.service.parse.jstor.xml.JournalMetaTagHandler#handle(org.w3c.dom.Node, edu.asu.diging.citesphere.importer.core.model.impl.JournalMeta)
      */
     @Override
-    public void handle(Node node, JournalMeta journalMeta) {
+    public void handle(Node node, ContainerMeta journalMeta) {
         if (journalMeta.getJournalIds() == null) {
             journalMeta.setJournalIds(new ArrayList<>());
         }

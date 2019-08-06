@@ -7,7 +7,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import edu.asu.diging.citesphere.importer.core.model.impl.Issn;
-import edu.asu.diging.citesphere.importer.core.model.impl.JournalMeta;
+import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
 
 @Component
 public class JournalIssnHandler implements JournalMetaTagHandler {
@@ -18,7 +18,7 @@ public class JournalIssnHandler implements JournalMetaTagHandler {
     }
 
     @Override
-    public void handle(Node node, JournalMeta journalMeta) {
+    public void handle(Node node, ContainerMeta journalMeta) {
         if (journalMeta.getIssns() == null) {
             journalMeta.setIssns(new ArrayList<>());
         }
