@@ -9,8 +9,14 @@ import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
 import edu.asu.diging.citesphere.importer.core.model.impl.ContributionType;
 import edu.asu.diging.citesphere.importer.core.model.impl.Contributor;
 
+/**
+ * Handler to parse the BA (book authors) tag. Currently, this is turned into creator type
+ * "author".
+ * @author jdamerow
+ *
+ */
 @Component
-public class BATagHandler implements WoSMetaTagHandler {
+public class BATagHandler extends CreatorTagHandler {
 
     @Override
     public String handledTag() {
@@ -18,21 +24,8 @@ public class BATagHandler implements WoSMetaTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, String previousValue, ContainerMeta containerMeta, ArticleMeta articleMeta) {
-        Contributor contributor = new Contributor();
-        contributor.setContributionType(ContributionType.AUTHOR);
-        contributor.setFullStandardizeName(value);
-        if (value.contains(",")) {
-            String[] nameParts = value.split(",");
-            if (nameParts.length == 1) {
-                contributor.setSurname(nameParts[0]);
-            } else if (nameParts.length == 2) {
-                contributor.setSurname(nameParts[0]);
-                contributor.setGivenName(nameParts[1]);
-            } else {
-                contributor.setSurname(value);
-            }
-        }
+    public void handle(String field, String value, String previousField, int fieldIdx, ContainerMeta containerMeta, ArticleMeta articleMeta) {
+        Contributor contributor = createContributor(value, ContributionType.AUTHOR);
         if (containerMeta.getContributors() == null) {
             containerMeta.setContributors(new ArrayList<Contributor>());
         }

@@ -35,6 +35,10 @@ public class WoSTaggedFieldsIterator implements BibEntryIterator {
     private void init() {
         try {
             lineIterator = FileUtils.lineIterator(new File(filePath));
+            if (lineIterator.hasNext()) {
+                // we're at the beginning, so we'll signal that with and empty string
+                currentLine = "";
+            }
         } catch (IOException e) {
             logger.error("Could not create line iterator.", e);
         }
@@ -48,7 +52,7 @@ public class WoSTaggedFieldsIterator implements BibEntryIterator {
 
         BibEntry entry = null;
         String previousField = null;
-        String previousValue = null;
+        int fieldIdx = 0;
         
         while (lineIterator.hasNext()) {
             String line = lineIterator.nextLine();
@@ -58,13 +62,17 @@ public class WoSTaggedFieldsIterator implements BibEntryIterator {
             }
 
             // not a valid line or not filled field
-            if (line.length() < 4) {
+            if (line.length() < 2) {
                 continue;
             }
             String field = line.substring(0, 2);
-            String value = line.substring(3);
+            String value = "";
+            
+            if (line.length() > 2) {
+                value = line.substring(3);
+            }
 
-            if (field == WoSFieldTags.PT) {
+            if (field.equals(WoSFieldTags.PT)) {
                 switch (value) {
                 case WoSPublicationTypes.JOURNAL:
                     entry = new Article();
@@ -76,12 +84,14 @@ public class WoSTaggedFieldsIterator implements BibEntryIterator {
             } else {
                 if (field.trim().isEmpty()) {
                     field = previousField;
+                    fieldIdx++;
+                } else {
+                    fieldIdx = 0;
                 }
-                tagParserRegistry.parseMetaTag(field, value, previousField, previousValue, containerMeta, articleMeta);
+                tagParserRegistry.parseMetaTag(field, value, previousField, fieldIdx, containerMeta, articleMeta);
             }
             
             previousField = field;
-            previousValue = value;
         }
 
         // in case there are several empty lines between entries

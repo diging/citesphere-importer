@@ -7,6 +7,6 @@ public interface WoSMetaTagHandler {
 
     String handledTag();
 
-    void handle(String field, String value, String previousField, String previousValue, ContainerMeta containerMeta, ArticleMeta articleMeta);
+    void handle(String field, String value, String previousField, int fieldIdx, ContainerMeta containerMeta, ArticleMeta articleMeta);
 
 }

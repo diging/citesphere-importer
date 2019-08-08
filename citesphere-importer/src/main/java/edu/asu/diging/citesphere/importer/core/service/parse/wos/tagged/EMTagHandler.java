@@ -4,26 +4,28 @@ import java.util.ArrayList;
 
 import org.springframework.stereotype.Component;
 
+import edu.asu.diging.citesphere.importer.core.model.impl.AdditionalData;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
 import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
-import edu.asu.diging.citesphere.importer.core.model.impl.ContributionType;
 
 @Component
-public class AFTagHandler extends CreatorTagHandler {
+public class EMTagHandler implements WoSMetaTagHandler {
 
     @Override
     public String handledTag() {
-        return "AF";
+        return "EM";
     }
 
     @Override
     public void handle(String field, String value, String previousField, int fieldIdx, ContainerMeta containerMeta,
             ArticleMeta articleMeta) {
-        if (articleMeta.getContributors() == null) {
-            articleMeta.setContributors(new ArrayList<>());
+        // apparently it's just a random list of email addresses that we can't easily assign
+        // to contributors; so we'll just save them.
+        if (articleMeta.getAdditionalData() == null) {
+            articleMeta.setAdditionalData(new ArrayList<>());
         }
-
-        addFullnameToContributor(value, fieldIdx, articleMeta.getContributors(), ContributionType.AUTHOR);
+        
+        articleMeta.getAdditionalData().add(new AdditionalData(AdditionalData.EMAIL_ADDRESSES, value)); 
     }
 
 }

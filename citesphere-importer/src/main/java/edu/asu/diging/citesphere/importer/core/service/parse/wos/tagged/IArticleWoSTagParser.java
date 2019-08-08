@@ -5,5 +5,5 @@ import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
 
 public interface IArticleWoSTagParser {
 
-    void parseMetaTag(String field, String value, String previousField, String previousValue, ContainerMeta containerMeta, ArticleMeta articleMeta);
+    void parseMetaTag(String field, String value, String previousField, int fieldIdx, ContainerMeta containerMeta, ArticleMeta articleMeta);
 }

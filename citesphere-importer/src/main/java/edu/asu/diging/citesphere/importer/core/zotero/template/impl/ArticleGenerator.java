@@ -70,7 +70,10 @@ public class ArticleGenerator extends ItemJsonGenerator {
                 if (jstorZoteroCreatorMap.get(contributor.getContributionType()) == null) {
                     logger.warn("Could not find creator type for " + contributor.getContributionType());
                 }
-                contributorNode.put("creatorType", jstorZoteroCreatorMap.get(contributor.getContributionType()) != null ? jstorZoteroCreatorMap.get(contributor.getContributionType()) : "author");
+                contributorNode.put("creatorType",
+                        jstorZoteroCreatorMap.get(contributor.getContributionType()) != null
+                                ? jstorZoteroCreatorMap.get(contributor.getContributionType())
+                                : "author");
                 fillContributorName(contributor, contributorNode);
                 creators.add(contributorNode);
             }
@@ -94,14 +97,15 @@ public class ArticleGenerator extends ItemJsonGenerator {
     }
 
     private void fillContributorName(Contributor contributor, ObjectNode contributorNode) {
-        if (contributor.getGivenName() != null && !contributor.getGivenName().trim().isEmpty() && contributor.getSurname() != null && !contributor.getSurname().trim().isEmpty()) {
+        if (contributor.getGivenName() != null && !contributor.getGivenName().trim().isEmpty()
+                && contributor.getSurname() != null && !contributor.getSurname().trim().isEmpty()) {
             contributorNode.put("firstName", contributor.getGivenName());
             contributorNode.put("lastName", contributor.getSurname());
-            
+
         } else if (contributor.getGivenName() != null && !contributor.getGivenName().trim().isEmpty()) {
             contributorNode.put("name", contributor.getGivenName());
         } else if (contributor.getSurname() != null && !contributor.getSurname().trim().isEmpty()) {
-            contributorNode.put("name", contributor.getSurname()); 
+            contributorNode.put("name", contributor.getSurname());
         } else {
             contributorNode.put("name", "Unknown");
         }
@@ -161,9 +165,11 @@ public class ArticleGenerator extends ItemJsonGenerator {
     }
 
     public String processDOI(JsonNode node, Article article) {
-        for (ArticleId id : article.getArticleMeta().getArticleIds()) {
-            if (id.getPubIdType().equals("doi")) {
-                return id.getId();
+        if (article.getArticleMeta().getArticleIds() != null) {
+            for (ArticleId id : article.getArticleMeta().getArticleIds()) {
+                if (id.getPubIdType().equals("doi")) {
+                    return id.getId();
+                }
             }
         }
         return null;
@@ -171,12 +177,14 @@ public class ArticleGenerator extends ItemJsonGenerator {
 
     public String processISSN(JsonNode node, Article article) {
         String epubIssn = null;
-        for (Issn issn : article.getJournalMeta().getIssns()) {
-            if (issn.getPubType() != null && issn.getPubType().equals("ppub")) {
-                return issn.getIssn();
-            }
-            if (issn.getPubType() != null && issn.getPubType().equals("epub")) {
-                epubIssn = issn.getIssn();
+        if (article.getJournalMeta().getIssns() != null) {
+            for (Issn issn : article.getJournalMeta().getIssns()) {
+                if (issn.getPubType() != null && issn.getPubType().equals("ppub")) {
+                    return issn.getIssn();
+                }
+                if (issn.getPubType() != null && issn.getPubType().equals("epub")) {
+                    epubIssn = issn.getIssn();
+                }
             }
         }
         return epubIssn;
@@ -185,7 +193,7 @@ public class ArticleGenerator extends ItemJsonGenerator {
     public String processUrl(JsonNode node, Article article) {
         return article.getArticleMeta().getSelfUri();
     }
-    
+
     public String processExtra(JsonNode node, Article article) {
         String prefix = "Citesphere: ";
         ObjectNode root = getObjectMapper().createObjectNode();
@@ -195,7 +203,7 @@ public class ArticleGenerator extends ItemJsonGenerator {
         createReviewInfo(article, root);
         createCopyright(article, root);
         createCorrespondenceNotes(article, root);
-        
+
         try {
             return prefix + getObjectMapper().writeValueAsString(root);
         } catch (JsonProcessingException e) {
@@ -220,18 +228,20 @@ public class ArticleGenerator extends ItemJsonGenerator {
                     fillPerson(contrib, contribNode, idx);
                 } else {
                     contribNode = others.addObject();
-                    String role = jstorZoteroCreatorMap.get(contrib.getContributionType()) != null ? jstorZoteroCreatorMap.get(contrib.getContributionType()) : "contributor";
+                    String role = jstorZoteroCreatorMap.get(contrib.getContributionType()) != null
+                            ? jstorZoteroCreatorMap.get(contrib.getContributionType())
+                            : "contributor";
                     contribNode.put("role", role);
                     ObjectNode personNode = contribNode.putObject("person");
                     fillPerson(contrib, personNode, idx);
-                }            
+                }
                 idx++;
             }
         }
     }
-    
+
     private void createIds(Article article, ObjectNode root) {
-        if (article.getArticleMeta().getArticleIds().isEmpty()) {
+        if (article.getArticleMeta().getArticleIds() == null || article.getArticleMeta().getArticleIds().isEmpty()) {
             return;
         }
         ArrayNode idArray = root.putArray("ids");
@@ -240,7 +250,7 @@ public class ArticleGenerator extends ItemJsonGenerator {
             idNode.put("type", id.getPubIdType());
             idNode.put("id", id.getId());
         }
-        
+
         ArrayNode journalIdArray = root.putArray("journalIds");
         for (JournalId id : article.getJournalMeta().getJournalIds()) {
             ObjectNode idNode = journalIdArray.addObject();
@@ -248,12 +258,12 @@ public class ArticleGenerator extends ItemJsonGenerator {
             idNode.put("id", id.getId());
         }
     }
-    
+
     private void createCategories(Article article, ObjectNode root) {
         if (article.getArticleMeta().getCategories().isEmpty()) {
             return;
         }
-        
+
         ArrayNode categoryArray = root.putArray("categories");
         for (ArticleCategoryGroup group : article.getArticleMeta().getCategories()) {
             ObjectNode groupNode = categoryArray.addObject();
@@ -261,14 +271,14 @@ public class ArticleGenerator extends ItemJsonGenerator {
             addCategoryGroups(groupNode, group);
         }
     }
-    
+
     private void addCategoryGroups(ObjectNode categoriesNode, ArticleCategoryGroup group) {
         ArrayNode categoryArray = categoriesNode.putArray("categories");
         for (ArticleCategory category : group.getCategories()) {
             ObjectNode catNode = categoryArray.addObject();
             catNode.put("name", category.getSubject());
         }
-        
+
         ArrayNode subGroupArray = categoriesNode.putArray("categoryGroups");
         for (ArticleCategoryGroup subGroup : group.getSubGroups()) {
             ObjectNode groupNode = subGroupArray.addObject();
@@ -276,7 +286,7 @@ public class ArticleGenerator extends ItemJsonGenerator {
             addCategoryGroups(groupNode, subGroup);
         }
     }
-    
+
     private void createReviewInfo(Article article, ObjectNode root) {
         ReviewInfo info = article.getArticleMeta().getReviewInfo();
         if (info != null) {
@@ -290,21 +300,21 @@ public class ArticleGenerator extends ItemJsonGenerator {
                     idx++;
                 }
             }
-            
+
             if (info.getTitle() != null) {
                 reviewNode.put("title", info.getTitle());
             }
-            
+
             if (info.getYear() != null) {
                 reviewNode.put("year", info.getYear());
             }
-            
+
             if (info.getFullDescription() != null) {
                 reviewNode.put("fullDescription", info.getFullDescription());
             }
         }
     }
-    
+
     private void createCopyright(Article article, ObjectNode root) {
         ObjectNode copyrightNode = root.putObject("copyright");
         ArticleMeta meta = article.getArticleMeta();
@@ -318,7 +328,7 @@ public class ArticleGenerator extends ItemJsonGenerator {
             copyrightNode.put("year", meta.getCopyrightYear());
         }
     }
-    
+
     private void createCorrespondenceNotes(Article article, ObjectNode root) {
         if (article.getArticleMeta().getAuthorNotesCorrespondence() != null) {
             root.put("authorCorrespondenceNote", article.getArticleMeta().getAuthorNotesCorrespondence());
@@ -337,7 +347,7 @@ public class ArticleGenerator extends ItemJsonGenerator {
         creatorNode.put("firstName", contrib.getGivenName());
         creatorNode.put("lastName", contrib.getSurname());
         creatorNode.put("positionInList", idx);
-        
+
         ArrayNode affiliationArray = creatorNode.arrayNode();
         for (Affiliation aff : contrib.getAffiliations()) {
             if (aff.getName() != null && !aff.getName().trim().isEmpty()) {

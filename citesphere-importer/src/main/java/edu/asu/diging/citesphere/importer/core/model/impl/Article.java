@@ -5,7 +5,7 @@ import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 public class Article implements BibEntry {
 
     private String articleType;
-    private ContainerMeta journalMeta;
+    private ContainerMeta containerMeta;
     private ArticleMeta articleMeta;
     
     public String getArticleType() {
@@ -15,10 +15,10 @@ public class Article implements BibEntry {
         this.articleType = articleType;
     }
     public ContainerMeta getJournalMeta() {
-        return journalMeta;
+        return containerMeta;
     }
     public void setJournalMeta(ContainerMeta journalMeta) {
-        this.journalMeta = journalMeta;
+        this.containerMeta = journalMeta;
     }
     public ArticleMeta getArticleMeta() {
         return articleMeta;

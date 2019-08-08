@@ -36,14 +36,14 @@ public class WoSHandler implements FileHandler {
                 // followed by a space; if they all match, we assume it's WoS' data format.
                 while (it.hasNext() && linesRead < linesToRead) {
                     String line = it.nextLine();
-                    if (!line.matches("[A-Z]{2} .*$")) {
+                    if (!line.matches("([A-Z0-9]{2}| {2})( .*$|$)") && !line.trim().isEmpty()) {
                         return false;
                     }
                 }
                 
                 return true;
             } catch(IOException e) {
-                throw new HandlerTestException("Dould not read lines.", e);
+                throw new HandlerTestException("Could not read lines.", e);
             }
         }
         return false;

@@ -31,10 +31,10 @@ public class ArticleWoSTagParser implements IArticleWoSTagParser {
      * @see edu.asu.diging.citesphere.importer.core.service.parse.jstor.xml.IArticleTagParser#parseArticleMetaTag(org.w3c.dom.Node, edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta)
      */
     @Override
-    public void parseMetaTag(String field, String value, String previousField, String previousValue, ContainerMeta containerMeta, ArticleMeta articleMeta) {
+    public void parseMetaTag(String field, String value, String previousField, int fieldIdx, ContainerMeta containerMeta, ArticleMeta articleMeta) {
         WoSMetaTagHandler handler = metaHanders.get(field);
         if (handler != null) {
-            handler.handle(field, value, previousField, previousValue, containerMeta, articleMeta);
+            handler.handle(field, value, previousField, fieldIdx, containerMeta, articleMeta);
         }
     }
 }

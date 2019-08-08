@@ -23,6 +23,16 @@ public class ArticleMeta {
     private String articleAbstract;
     private String language;
     private ReviewInfo reviewInfo;
+    private String documentType;
+    private String conferenceTitle;
+    private String conferenceDate;
+    private String conferenceLocation;
+    private String conferenceSponsor;
+    private String conferenceHost;
+    private List<Keyword> keywords;
+    private String reprintAddress;
+    private List<AdditionalData> additionalData;
+    private List<ContributorId> unassignedIds;
     
     public List<ArticleId> getArticleIds() {
         return articleIds;
@@ -131,6 +141,66 @@ public class ArticleMeta {
     }
     public void setReviewInfo(ReviewInfo reviewInfo) {
         this.reviewInfo = reviewInfo;
+    }
+    public String getDocumentType() {
+        return documentType;
+    }
+    public void setDocumentType(String documentType) {
+        this.documentType = documentType;
+    }
+    public String getConferenceTitle() {
+        return conferenceTitle;
+    }
+    public void setConferenceTitle(String conferenceTitle) {
+        this.conferenceTitle = conferenceTitle;
+    }
+    public String getConferenceDate() {
+        return conferenceDate;
+    }
+    public void setConferenceDate(String conferenceDate) {
+        this.conferenceDate = conferenceDate;
+    }
+    public String getConferenceLocation() {
+        return conferenceLocation;
+    }
+    public void setConferenceLocation(String conferenceLocation) {
+        this.conferenceLocation = conferenceLocation;
+    }
+    public String getConferenceSponsor() {
+        return conferenceSponsor;
+    }
+    public void setConferenceSponsor(String conferenceSponsor) {
+        this.conferenceSponsor = conferenceSponsor;
+    }
+    public String getConferenceHost() {
+        return conferenceHost;
+    }
+    public void setConferenceHost(String conferenceHost) {
+        this.conferenceHost = conferenceHost;
+    }
+    public List<Keyword> getKeywords() {
+        return keywords;
+    }
+    public void setKeywords(List<Keyword> keywords) {
+        this.keywords = keywords;
+    }
+    public String getReprintAddress() {
+        return reprintAddress;
+    }
+    public void setReprintAddress(String reprintAddress) {
+        this.reprintAddress = reprintAddress;
+    }
+    public List<AdditionalData> getAdditionalData() {
+        return additionalData;
+    }
+    public void setAdditionalData(List<AdditionalData> additionalData) {
+        this.additionalData = additionalData;
+    }
+    public List<ContributorId> getUnassignedIds() {
+        return unassignedIds;
+    }
+    public void setUnassignedIds(List<ContributorId> unassignedIds) {
+        this.unassignedIds = unassignedIds;
     }
     
     

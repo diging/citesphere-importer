@@ -10,16 +10,21 @@ import edu.asu.diging.citesphere.importer.core.model.impl.ContributionType;
 import edu.asu.diging.citesphere.importer.core.model.impl.Contributor;
 
 @Component
-public class AUTagHandler extends CreatorTagHandler {
+public class CATagHandler implements WoSMetaTagHandler {
 
     @Override
     public String handledTag() {
-        return "AU";
+        return "CA";
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, ContainerMeta containerMeta, ArticleMeta articleMeta) {
-        Contributor contributor = createContributor(value, ContributionType.AUTHOR);
+    public void handle(String field, String value, String previousField, int fieldIdx,
+            ContainerMeta containerMeta, ArticleMeta articleMeta) {
+        Contributor contributor = new Contributor();
+        contributor.setContributionType(ContributionType.AUTHOR);
+        contributor.setFullStandardizedName(value);
+        contributor.setSurname(value);
+        contributor.setFullSurname(value);
         
         if (articleMeta.getContributors() == null) {
             articleMeta.setContributors(new ArrayList<Contributor>());
@@ -27,6 +32,5 @@ public class AUTagHandler extends CreatorTagHandler {
         
         articleMeta.getContributors().add(contributor);
     }
-
 
 }

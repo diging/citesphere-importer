@@ -12,7 +12,9 @@ public class Contributor {
     private String fullGivenName;
     private String fullSurname;
     private String fullName;
+    private String emailAddress;
     private List<Affiliation> affiliations = new ArrayList<Affiliation>();
+    private List<ContributorId> ids;
     
     public String getContributionType() {
         return contributionType;
@@ -35,7 +37,7 @@ public class Contributor {
     public String getFullStandardizeName() {
         return fullStandardizeName;
     }
-    public void setFullStandardizeName(String fullStandardizeName) {
+    public void setFullStandardizedName(String fullStandardizeName) {
         this.fullStandardizeName = fullStandardizeName;
     }
     public String getFullGivenName() {
@@ -56,11 +58,23 @@ public class Contributor {
     public void setFullName(String fullName) {
         this.fullName = fullName;
     }
+    public String getEmailAddress() {
+        return emailAddress;
+    }
+    public void setEmailAddress(String emailAddress) {
+        this.emailAddress = emailAddress;
+    }
     public List<Affiliation> getAffiliations() {
         return affiliations;
     }
     public void setAffiliations(List<Affiliation> affiliations) {
         this.affiliations = affiliations;
+    }
+    public List<ContributorId> getIds() {
+        return ids;
+    }
+    public void setIds(List<ContributorId> ids) {
+        this.ids = ids;
     }
     
 }

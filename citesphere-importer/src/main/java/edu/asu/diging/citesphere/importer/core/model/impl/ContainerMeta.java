@@ -13,6 +13,8 @@ public class ContainerMeta {
     private List<JournalId> journalIds;
     private String journalTitle;
     private String publisherName;
+    private String seriesTitle;
+    private String seriesSubTitle;
     private List<Issn> issns;
     private List<Contributor> contributors;
     
@@ -33,6 +35,18 @@ public class ContainerMeta {
     }
     public void setPublisherName(String publisherName) {
         this.publisherName = publisherName;
+    }
+    public String getSeriesTitle() {
+        return seriesTitle;
+    }
+    public void setSeriesTitle(String seriesTitle) {
+        this.seriesTitle = seriesTitle;
+    }
+    public String getSeriesSubTitle() {
+        return seriesSubTitle;
+    }
+    public void setSeriesSubTitle(String seriesSubTitle) {
+        this.seriesSubTitle = seriesSubTitle;
     }
     public List<Issn> getIssns() {
         return issns;
