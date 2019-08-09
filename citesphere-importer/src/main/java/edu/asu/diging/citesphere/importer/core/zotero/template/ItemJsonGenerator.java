@@ -38,7 +38,7 @@ public abstract class ItemJsonGenerator {
         }
     }
 
-    public abstract Class<?> responsibleFor();
+    public abstract String responsibleFor();
 
     public ObjectNode generate(JsonNode node, BibEntry bibEntry) {
         ObjectMapper mapper = new ObjectMapper();

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.springframework.stereotype.Component;
 
+import edu.asu.diging.citesphere.importer.core.model.FieldPrefixes;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
 import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
 
@@ -22,7 +23,7 @@ public class JITagHandler implements WoSMetaTagHandler {
             containerMeta.setJournalAbbreviations(new ArrayList<>());
         }
         
-        containerMeta.getJournalAbbreviations().add(value);
+        containerMeta.getJournalAbbreviations().add(FieldPrefixes.ISO + value);
     }
 
 }

@@ -14,13 +14,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import edu.asu.diging.citesphere.importer.core.model.BibEntry;
+import edu.asu.diging.citesphere.importer.core.model.FieldPrefixes;
 import edu.asu.diging.citesphere.importer.core.model.impl.Affiliation;
-import edu.asu.diging.citesphere.importer.core.model.impl.Article;
+import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleCategory;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleCategoryGroup;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleId;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticlePublicationDate;
+import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
 import edu.asu.diging.citesphere.importer.core.model.impl.Contributor;
 import edu.asu.diging.citesphere.importer.core.model.impl.Issn;
 import edu.asu.diging.citesphere.importer.core.model.impl.JournalId;
@@ -43,11 +46,11 @@ public class ArticleGenerator extends ItemJsonGenerator {
         jstorZoteroCreatorMap.put("editor", "editor");
     }
 
-    public Class<Article> responsibleFor() {
-        return Article.class;
+    public String responsibleFor() {
+        return Publication.ARTICLE;
     }
 
-    public String processTitle(JsonNode node, Article article) {
+    public String processTitle(JsonNode node, BibEntry article) {
         String title = article.getArticleMeta().getArticleTitle();
         if (title != null && !title.trim().isEmpty()) {
             return title;
@@ -62,7 +65,7 @@ public class ArticleGenerator extends ItemJsonGenerator {
         return null;
     }
 
-    public ArrayNode processCreators(JsonNode node, Article article) {
+    public ArrayNode processCreators(JsonNode node, BibEntry article) {
         ArrayNode creators = getObjectMapper().createArrayNode();
         if (article.getArticleMeta().getContributors() != null) {
             for (Contributor contributor : article.getArticleMeta().getContributors()) {
@@ -111,23 +114,23 @@ public class ArticleGenerator extends ItemJsonGenerator {
         }
     }
 
-    public String processAbstractNote(JsonNode node, Article article) {
+    public String processAbstractNote(JsonNode node, BibEntry article) {
         return article.getArticleMeta().getArticleAbstract();
     }
 
-    public String processPublicationTitle(JsonNode node, Article article) {
-        return article.getJournalMeta().getJournalTitle();
+    public String processPublicationTitle(JsonNode node, BibEntry article) {
+        return article.getContainerMeta().getJournalTitle();
     }
 
-    public String processVolume(JsonNode node, Article article) {
+    public String processVolume(JsonNode node, BibEntry article) {
         return article.getArticleMeta().getVolume();
     }
 
-    public String processIssue(JsonNode node, Article article) {
+    public String processIssue(JsonNode node, BibEntry article) {
         return article.getArticleMeta().getIssue();
     }
 
-    public String processPages(JsonNode node, Article article) {
+    public String processPages(JsonNode node, BibEntry article) {
         List<String> pages = new ArrayList<>();
         if (article.getArticleMeta().getFirstPage() != null && !article.getArticleMeta().getFirstPage().isEmpty()) {
             pages.add(article.getArticleMeta().getFirstPage());
@@ -139,7 +142,7 @@ public class ArticleGenerator extends ItemJsonGenerator {
         return String.join(" - ", pages);
     }
 
-    public String processDate(JsonNode node, Article article) {
+    public String processDate(JsonNode node, BibEntry article) {
         List<String> date = new ArrayList<>();
         if (article.getArticleMeta().getPublicationDate() != null) {
             if (article.getArticleMeta().getPublicationDate().getPublicationDate() != null
@@ -160,11 +163,11 @@ public class ArticleGenerator extends ItemJsonGenerator {
         return String.join("-", date);
     }
 
-    public String processLanguage(JsonNode node, Article article) {
+    public String processLanguage(JsonNode node, BibEntry article) {
         return article.getArticleMeta().getLanguage();
     }
 
-    public String processDOI(JsonNode node, Article article) {
+    public String processDOI(JsonNode node, BibEntry article) {
         if (article.getArticleMeta().getArticleIds() != null) {
             for (ArticleId id : article.getArticleMeta().getArticleIds()) {
                 if (id.getPubIdType().equals("doi")) {
@@ -175,14 +178,17 @@ public class ArticleGenerator extends ItemJsonGenerator {
         return null;
     }
 
-    public String processISSN(JsonNode node, Article article) {
+    public String processISSN(JsonNode node, BibEntry article) {
         String epubIssn = null;
-        if (article.getJournalMeta().getIssns() != null) {
-            for (Issn issn : article.getJournalMeta().getIssns()) {
-                if (issn.getPubType() != null && issn.getPubType().equals("ppub")) {
+        if (article.getContainerMeta().getIssns() != null) {
+            for (Issn issn : article.getContainerMeta().getIssns()) {
+                if (issn.getPubType() != null && issn.getPubType().equals("issn")) {
                     return issn.getIssn();
                 }
-                if (issn.getPubType() != null && issn.getPubType().equals("epub")) {
+                if (issn.getPubType() != null && issn.getPubType().equals("ppub")) {
+                    epubIssn = issn.getIssn();
+                }
+                if (issn.getPubType() != null && issn.getPubType().equals("epub") && epubIssn == null) {
                     epubIssn = issn.getIssn();
                 }
             }
@@ -190,11 +196,40 @@ public class ArticleGenerator extends ItemJsonGenerator {
         return epubIssn;
     }
 
-    public String processUrl(JsonNode node, Article article) {
+    public String processUrl(JsonNode node, BibEntry article) {
         return article.getArticleMeta().getSelfUri();
     }
 
-    public String processExtra(JsonNode node, Article article) {
+    public String processSeries(JsonNode node, BibEntry article) {
+        StringBuffer seriesTitle = new StringBuffer();
+        seriesTitle.append(article.getContainerMeta().getSeriesTitle());
+
+        if (article.getContainerMeta().getSeriesSubTitle() != null
+                && !article.getContainerMeta().getSeriesSubTitle().trim().isEmpty()) {
+            seriesTitle.append(" - " + article.getContainerMeta().getSeriesSubTitle());
+        }
+
+        return seriesTitle.toString();
+    }
+
+    public String processJournalAbbreviation(JsonNode node, BibEntry entry) {
+        String abbrev = "";
+        if (entry.getContainerMeta().getJournalAbbreviations() != null) {
+            for (String abb : entry.getContainerMeta().getJournalAbbreviations()) {
+                if (abb.startsWith(FieldPrefixes.ISO)) {
+                    return abb.substring(FieldPrefixes.ISO.length());
+                }
+                if (abb.length() > abb.indexOf(":")) {
+                    abbrev = abb.substring(abb.indexOf(":") + 1);
+                } else {
+                    abbrev = abb;
+                }
+            }
+        }
+        return abbrev;
+    }
+
+    public String processExtra(JsonNode node, BibEntry article) {
         String prefix = "Citesphere: ";
         ObjectNode root = getObjectMapper().createObjectNode();
         createCreatorsExtra(article, root);
@@ -203,6 +238,10 @@ public class ArticleGenerator extends ItemJsonGenerator {
         createReviewInfo(article, root);
         createCopyright(article, root);
         createCorrespondenceNotes(article, root);
+        createJournalAbbreviations(article, root);
+        createPublisher(article, root);
+        createSeries(article, root);
+        createIssns(article, root);
 
         try {
             return prefix + getObjectMapper().writeValueAsString(root);
@@ -212,7 +251,7 @@ public class ArticleGenerator extends ItemJsonGenerator {
         }
     }
 
-    private void createCreatorsExtra(Article article, ObjectNode root) {
+    private void createCreatorsExtra(BibEntry article, ObjectNode root) {
         ArrayNode authors = root.putArray("authors");
         ArrayNode editors = root.putArray("editors");
         ArrayNode others = root.putArray("otherCreators");
@@ -240,26 +279,30 @@ public class ArticleGenerator extends ItemJsonGenerator {
         }
     }
 
-    private void createIds(Article article, ObjectNode root) {
+    private void createIds(BibEntry article, ObjectNode root) {
         if (article.getArticleMeta().getArticleIds() == null || article.getArticleMeta().getArticleIds().isEmpty()) {
             return;
         }
         ArrayNode idArray = root.putArray("ids");
-        for (ArticleId id : article.getArticleMeta().getArticleIds()) {
-            ObjectNode idNode = idArray.addObject();
-            idNode.put("type", id.getPubIdType());
-            idNode.put("id", id.getId());
+        if (article.getArticleMeta().getArticleIds() != null) {
+            for (ArticleId id : article.getArticleMeta().getArticleIds()) {
+                ObjectNode idNode = idArray.addObject();
+                idNode.put("type", id.getPubIdType());
+                idNode.put("id", id.getId());
+            }
         }
 
         ArrayNode journalIdArray = root.putArray("journalIds");
-        for (JournalId id : article.getJournalMeta().getJournalIds()) {
-            ObjectNode idNode = journalIdArray.addObject();
-            idNode.put("type", id.getIdType());
-            idNode.put("id", id.getId());
+        if (article.getContainerMeta().getJournalIds() != null) {
+            for (JournalId id : article.getContainerMeta().getJournalIds()) {
+                ObjectNode idNode = journalIdArray.addObject();
+                idNode.put("type", id.getIdType());
+                idNode.put("id", id.getId());
+            }
         }
     }
 
-    private void createCategories(Article article, ObjectNode root) {
+    private void createCategories(BibEntry article, ObjectNode root) {
         if (article.getArticleMeta().getCategories().isEmpty()) {
             return;
         }
@@ -287,7 +330,7 @@ public class ArticleGenerator extends ItemJsonGenerator {
         }
     }
 
-    private void createReviewInfo(Article article, ObjectNode root) {
+    private void createReviewInfo(BibEntry article, ObjectNode root) {
         ReviewInfo info = article.getArticleMeta().getReviewInfo();
         if (info != null) {
             ObjectNode reviewNode = root.putObject("reviewInfo");
@@ -315,7 +358,7 @@ public class ArticleGenerator extends ItemJsonGenerator {
         }
     }
 
-    private void createCopyright(Article article, ObjectNode root) {
+    private void createCopyright(BibEntry article, ObjectNode root) {
         ObjectNode copyrightNode = root.putObject("copyright");
         ArticleMeta meta = article.getArticleMeta();
         if (meta.getCopyrightHolder() != null) {
@@ -329,9 +372,52 @@ public class ArticleGenerator extends ItemJsonGenerator {
         }
     }
 
-    private void createCorrespondenceNotes(Article article, ObjectNode root) {
+    private void createCorrespondenceNotes(BibEntry article, ObjectNode root) {
         if (article.getArticleMeta().getAuthorNotesCorrespondence() != null) {
             root.put("authorCorrespondenceNote", article.getArticleMeta().getAuthorNotesCorrespondence());
+        }
+    }
+    
+    private void createJournalAbbreviations(BibEntry article, ObjectNode root) {
+        if (article.getContainerMeta().getJournalAbbreviations() != null) {
+            ArrayNode abbrevs = root.putArray("journalAbbreviations");
+            for (String abbrev : article.getContainerMeta().getJournalAbbreviations()) {
+                ObjectNode abbrevNode = abbrevs.addObject();
+                if (abbrev.contains(":")) {
+                    String type = abbrev.substring(0, abbrev.indexOf(":"));
+                    abbrev = abbrev.substring(abbrev.indexOf(":") + 1);
+                    abbrevNode.put("type", type);
+                }
+                abbrevNode.put("abbreviation", abbrev);
+            }
+        }
+    }
+    
+    private void createPublisher(BibEntry article, ObjectNode root) {
+        ObjectNode pubNode = root.putObject("publisher");
+        ContainerMeta info = article.getContainerMeta();
+        pubNode.put("name", info.getPublisherName() != null ? info.getPublisherName() : "");
+        pubNode.put("location", info.getPublisherLocation() != null ? info.getPublisherLocation() : "");
+        pubNode.put("address", info.getPublisherAddress() != null ? info.getPublisherAddress() : "");
+    }
+    
+    private void createSeries(BibEntry article, ObjectNode root) {
+        ObjectNode pubNode = root.putObject("series");
+        ContainerMeta info = article.getContainerMeta();
+        pubNode.put("title", info.getSeriesTitle() != null ? info.getSeriesTitle() : "");
+        pubNode.put("subtitle", info.getSeriesSubTitle() != null ? info.getSeriesSubTitle() : "");
+       
+    }
+    
+    private void createIssns(BibEntry article, ObjectNode root) {
+        ArrayNode array = root.putArray("issns");
+        ContainerMeta info = article.getContainerMeta();
+        if (info.getIssns() != null) {
+            for (Issn issn : info.getIssns()) {
+                ObjectNode node = array.addObject();
+                node.put("type", issn.getPubType() != null ? issn.getPubType() : "");
+                node.put("issn", issn.getIssn());
+            }
         }
     }
 

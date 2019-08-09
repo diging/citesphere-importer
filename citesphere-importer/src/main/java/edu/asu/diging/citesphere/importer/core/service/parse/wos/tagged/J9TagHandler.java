@@ -10,6 +10,8 @@ import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
 @Component
 public class J9TagHandler implements WoSMetaTagHandler {
     
+    private final String PREFIX = "29c:";
+    
     @Override
     public String handledTag() {
         return "J9";
@@ -22,7 +24,7 @@ public class J9TagHandler implements WoSMetaTagHandler {
             containerMeta.setJournalAbbreviations(new ArrayList<>());
         }
         
-        containerMeta.getJournalAbbreviations().add(value);
+        containerMeta.getJournalAbbreviations().add(PREFIX + value);
     }
 
 }

@@ -23,7 +23,7 @@ import edu.asu.diging.citesphere.importer.core.exception.MessageCreationExceptio
 import edu.asu.diging.citesphere.importer.core.kafka.impl.KafkaRequestProducer;
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.ItemType;
-import edu.asu.diging.citesphere.importer.core.model.impl.Article;
+import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
 import edu.asu.diging.citesphere.importer.core.service.ICitesphereConnector;
 import edu.asu.diging.citesphere.importer.core.service.IImportProcessor;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
@@ -62,7 +62,7 @@ public class ImportProcessor implements IImportProcessor {
     @PostConstruct
     public void init() {
         // this needs to be changed and improved, but for now it works
-        itemTypeMapping.put(Article.class, ItemType.JOURNAL_ARTICLE);
+        itemTypeMapping.put(Publication.class, ItemType.JOURNAL_ARTICLE);
     }
 
     /*

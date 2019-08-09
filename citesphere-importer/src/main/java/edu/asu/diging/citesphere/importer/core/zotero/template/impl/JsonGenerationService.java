@@ -13,13 +13,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
+import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
 import edu.asu.diging.citesphere.importer.core.zotero.template.IJsonGenerationService;
 import edu.asu.diging.citesphere.importer.core.zotero.template.ItemJsonGenerator;
 
 @Service
 public class JsonGenerationService implements IJsonGenerationService {
 
-    private Map<Class<?>, ItemJsonGenerator> generators;
+    private Map<String, ItemJsonGenerator> generators;
     
     @Autowired
     private ApplicationContext ctx;
@@ -38,7 +39,7 @@ public class JsonGenerationService implements IJsonGenerationService {
      */
     @Override
     public ObjectNode generateJson(JsonNode template, BibEntry entry) {
-        ItemJsonGenerator generator = generators.get(entry.getClass());
+        ItemJsonGenerator generator = generators.get(entry.getArticleType());
         if (generator != null) {
             return generator.generate(template, entry);
         }

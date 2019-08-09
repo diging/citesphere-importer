@@ -2,6 +2,8 @@ package edu.asu.diging.citesphere.importer.core.service.parse.iterators;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
@@ -9,13 +11,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
-import edu.asu.diging.citesphere.importer.core.model.impl.Article;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
 import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
+import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
 import edu.asu.diging.citesphere.importer.core.service.parse.wos.tagged.IArticleWoSTagParser;
+import edu.asu.diging.citesphere.importer.core.service.parse.wos.tagged.WoSDocumentTypes;
 import edu.asu.diging.citesphere.importer.core.service.parse.wos.tagged.WoSFieldTags;
-import edu.asu.diging.citesphere.importer.core.service.parse.wos.tagged.WoSPublicationTypes;
 
 public class WoSTaggedFieldsIterator implements BibEntryIterator {
 
@@ -25,6 +27,8 @@ public class WoSTaggedFieldsIterator implements BibEntryIterator {
     private String filePath;
     private LineIterator lineIterator;
     private String currentLine = null;
+    
+    private Map<String, String> publicationsType;
 
     public WoSTaggedFieldsIterator(String filePath, IArticleWoSTagParser parserRegistry) {
         this.filePath = filePath;
@@ -33,6 +37,10 @@ public class WoSTaggedFieldsIterator implements BibEntryIterator {
     }
 
     private void init() {
+        
+        publicationsType = new HashMap<String, String>();
+        publicationsType.put(WoSDocumentTypes.ARTICLE, Publication.ARTICLE);
+        
         try {
             lineIterator = FileUtils.lineIterator(new File(filePath));
             if (lineIterator.hasNext()) {
@@ -72,14 +80,18 @@ public class WoSTaggedFieldsIterator implements BibEntryIterator {
                 value = line.substring(3);
             }
 
-            if (field.equals(WoSFieldTags.PT)) {
-                switch (value) {
-                case WoSPublicationTypes.JOURNAL:
-                    entry = new Article();
-                    ((Article) entry).setArticleMeta(articleMeta);
-                    ((Article) entry).setJournalMeta(containerMeta);
-                    ((Article) entry).setArticleType(value);
-                    break;
+            if (field.equals(WoSFieldTags.DT)) {
+                // we only take the first vale (might be several separated by ';')
+                String[] types = value.split(";");
+                if (types.length > 0) {
+                    switch (types[0]) {
+                    case WoSDocumentTypes.ARTICLE:
+                        entry = new Publication();
+                        entry.setArticleMeta(articleMeta);
+                        entry.setJournalMeta(containerMeta);
+                        entry.setArticleType(Publication.ARTICLE);
+                        break;
+                    }
                 }
             } else {
                 if (field.trim().isEmpty()) {
@@ -92,6 +104,10 @@ public class WoSTaggedFieldsIterator implements BibEntryIterator {
             }
             
             previousField = field;
+        }
+        
+        if (entry.getArticleType() == null) {
+            entry.setArticleType(Publication.ARTICLE);
         }
 
         // in case there are several empty lines between entries
