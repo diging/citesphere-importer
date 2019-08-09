@@ -6,13 +6,13 @@ import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
 import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
 
 @Component
-public class RITagHandler extends ContributorIdsHandler implements WoSMetaTagHandler {
+public class OITagHandler extends ContributorIdsHandler implements WoSMetaTagHandler {
 
-    private final String ID_SYSTEM = "web-of-science";
+    private final String ID_SYSTEM = "orcid";
 
     @Override
     public String handledTag() {
-        return "RI";
+        return "OI";
     }
 
     /**

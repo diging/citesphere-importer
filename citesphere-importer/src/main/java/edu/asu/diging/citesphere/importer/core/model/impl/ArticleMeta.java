@@ -14,8 +14,13 @@ public class ArticleMeta {
     private String volume;
     private String issue;
     private String issueId;
+    private String specialIssue;
+    private String partNumber;
+    private String supplement;
     private String firstPage;
     private String lastPage;
+    private String pageCount;
+    private String chapterCount;
     private String copyrightStatement;
     private String copyrightYear;
     private String copyrightHolder;
@@ -33,6 +38,11 @@ public class ArticleMeta {
     private String reprintAddress;
     private List<AdditionalData> additionalData;
     private List<ContributorId> unassignedIds;
+    private String fundingInfo;
+    private String fundingText;
+    private List<Reference> references;
+    private String referenceCount;
+    private String retrievalDate;
     
     public List<ArticleId> getArticleIds() {
         return articleIds;
@@ -88,6 +98,24 @@ public class ArticleMeta {
     public void setIssueId(String issueId) {
         this.issueId = issueId;
     }
+    public String getSpecialIssue() {
+        return specialIssue;
+    }
+    public void setSpecialIssue(String specialIssue) {
+        this.specialIssue = specialIssue;
+    }
+    public String getPartNumber() {
+        return partNumber;
+    }
+    public void setPartNumber(String partNumber) {
+        this.partNumber = partNumber;
+    }
+    public String getSupplement() {
+        return supplement;
+    }
+    public void setSupplement(String supplement) {
+        this.supplement = supplement;
+    }
     public String getFirstPage() {
         return firstPage;
     }
@@ -99,6 +127,18 @@ public class ArticleMeta {
     }
     public void setLastPage(String lastPage) {
         this.lastPage = lastPage;
+    }
+    public String getPageCount() {
+        return pageCount;
+    }
+    public void setPageCount(String pageCount) {
+        this.pageCount = pageCount;
+    }
+    public String getChapterCount() {
+        return chapterCount;
+    }
+    public void setChapterCount(String chapterCount) {
+        this.chapterCount = chapterCount;
     }
     public String getCopyrightStatement() {
         return copyrightStatement;
@@ -202,6 +242,35 @@ public class ArticleMeta {
     public void setUnassignedIds(List<ContributorId> unassignedIds) {
         this.unassignedIds = unassignedIds;
     }
-    
+    public String getFundingInfo() {
+        return fundingInfo;
+    }
+    public void setFundingInfo(String fundingInfo) {
+        this.fundingInfo = fundingInfo;
+    }
+    public String getFundingText() {
+        return fundingText;
+    }
+    public void setFundingText(String fundingText) {
+        this.fundingText = fundingText;
+    }
+    public List<Reference> getReferences() {
+        return references;
+    }
+    public void setReferences(List<Reference> references) {
+        this.references = references;
+    }
+    public String getReferenceCount() {
+        return referenceCount;
+    }
+    public void setReferenceCount(String referenceCount) {
+        this.referenceCount = referenceCount;
+    }
+    public String getRetrievalDate() {
+        return retrievalDate;
+    }
+    public void setRetrievalDate(String retrievalDate) {
+        this.retrievalDate = retrievalDate;
+    }
     
 }
