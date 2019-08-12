@@ -40,6 +40,7 @@ public class WoSTaggedFieldsIterator implements BibEntryIterator {
         
         publicationsType = new HashMap<String, String>();
         publicationsType.put(WoSDocumentTypes.ARTICLE, Publication.ARTICLE);
+        publicationsType.put(WoSDocumentTypes.BOOK, Publication.BOOK);
         
         try {
             lineIterator = FileUtils.lineIterator(new File(filePath));
@@ -58,7 +59,10 @@ public class WoSTaggedFieldsIterator implements BibEntryIterator {
         ArticleMeta articleMeta = new ArticleMeta();
         ContainerMeta containerMeta = new ContainerMeta();
 
-        BibEntry entry = null;
+        BibEntry entry = new Publication();
+        entry.setArticleMeta(articleMeta);
+        entry.setJournalMeta(containerMeta);
+        
         String previousField = null;
         int fieldIdx = 0;
         
@@ -84,14 +88,7 @@ public class WoSTaggedFieldsIterator implements BibEntryIterator {
                 // we only take the first vale (might be several separated by ';')
                 String[] types = value.split(";");
                 if (types.length > 0) {
-                    switch (types[0]) {
-                    case WoSDocumentTypes.ARTICLE:
-                        entry = new Publication();
-                        entry.setArticleMeta(articleMeta);
-                        entry.setJournalMeta(containerMeta);
-                        entry.setArticleType(Publication.ARTICLE);
-                        break;
-                    }
+                    entry.setArticleType(publicationsType.get(types[0]));
                 }
             } else {
                 if (field.trim().isEmpty()) {

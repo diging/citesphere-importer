@@ -57,12 +57,13 @@ public class ImportProcessor implements IImportProcessor {
     @Autowired
     private KafkaRequestProducer requestProducer;
 
-    private Map<Class<? extends BibEntry>, ItemType> itemTypeMapping = new HashMap<>();
+    private Map<String, ItemType> itemTypeMapping = new HashMap<>();
 
     @PostConstruct
     public void init() {
         // this needs to be changed and improved, but for now it works
-        itemTypeMapping.put(Publication.class, ItemType.JOURNAL_ARTICLE);
+        itemTypeMapping.put(Publication.ARTICLE, ItemType.JOURNAL_ARTICLE);
+        itemTypeMapping.put(Publication.BOOK, ItemType.BOOK);
     }
 
     /*
@@ -100,7 +101,7 @@ public class ImportProcessor implements IImportProcessor {
         int entryCounter = 0;
         while (bibIterator.hasNext()) {
             BibEntry entry = bibIterator.next();
-            ItemType type = itemTypeMapping.get(entry.getClass());
+            ItemType type = itemTypeMapping.get(entry.getArticleType());
             JsonNode template = zoteroConnector.getTemplate(type);
             ObjectNode bibNode = generationService.generateJson(template, entry);
 
