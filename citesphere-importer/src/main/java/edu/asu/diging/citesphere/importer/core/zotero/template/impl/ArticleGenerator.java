@@ -24,6 +24,7 @@ import edu.asu.diging.citesphere.importer.core.model.impl.ArticleId;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticlePublicationDate;
 import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
+import edu.asu.diging.citesphere.importer.core.model.impl.ContributionType;
 import edu.asu.diging.citesphere.importer.core.model.impl.Contributor;
 import edu.asu.diging.citesphere.importer.core.model.impl.Issn;
 import edu.asu.diging.citesphere.importer.core.model.impl.JournalId;
@@ -37,13 +38,18 @@ public class ArticleGenerator extends ItemJsonGenerator {
      * Maps jstor contributor types to zotero creator types
      */
     private Map<String, String> jstorZoteroCreatorMap;
+    private Map<String, String> containerContributorsZoteroMap;
 
     @PostConstruct
     public void init() {
         super.init();
         jstorZoteroCreatorMap = new HashMap<>();
-        jstorZoteroCreatorMap.put("author", "author");
-        jstorZoteroCreatorMap.put("editor", "editor");
+        jstorZoteroCreatorMap.put("author", ZoteroCreatorTypes.AUTHOR);
+        jstorZoteroCreatorMap.put("editor", ZoteroCreatorTypes.EDITOR);
+
+        containerContributorsZoteroMap = new HashMap<>();
+        containerContributorsZoteroMap.put(ContributionType.AUTHOR, ZoteroCreatorTypes.BOOK_AUTHOR);
+        containerContributorsZoteroMap.put(ContributionType.EDITOR, ZoteroCreatorTypes.EDITOR);
     }
 
     public String responsibleFor() {
@@ -90,8 +96,18 @@ public class ArticleGenerator extends ItemJsonGenerator {
         if (article.getArticleMeta().getReviewInfo() != null) {
             for (Contributor reviewedAuthor : article.getArticleMeta().getReviewInfo().getContributors()) {
                 ObjectNode contributorNode = getObjectMapper().createObjectNode();
-                contributorNode.put("creatorType", "reviewedAuthor");
+                contributorNode.put("creatorType", ZoteroCreatorTypes.REVIEWED_AUTHOR);
                 fillContributorName(reviewedAuthor, contributorNode);
+                creators.add(contributorNode);
+            }
+        }
+
+        if (article.getContainerMeta().getContributors() != null) {
+            for (Contributor contributor : article.getContainerMeta().getContributors()) {
+                ObjectNode contributorNode = getObjectMapper().createObjectNode();
+                contributorNode.put("creatorType",
+                        containerContributorsZoteroMap.get(contributor.getContributionType()));
+                fillContributorName(contributor, contributorNode);
                 creators.add(contributorNode);
             }
         }
@@ -202,7 +218,9 @@ public class ArticleGenerator extends ItemJsonGenerator {
 
     public String processSeries(JsonNode node, BibEntry article) {
         StringBuffer seriesTitle = new StringBuffer();
-        seriesTitle.append(article.getContainerMeta().getSeriesTitle());
+        if (article.getContainerMeta().getSeriesTitle() != null) {
+            seriesTitle.append(article.getContainerMeta().getSeriesTitle());
+        }
 
         if (article.getContainerMeta().getSeriesSubTitle() != null
                 && !article.getContainerMeta().getSeriesSubTitle().trim().isEmpty()) {
@@ -255,8 +273,9 @@ public class ArticleGenerator extends ItemJsonGenerator {
         ArrayNode authors = root.putArray("authors");
         ArrayNode editors = root.putArray("editors");
         ArrayNode others = root.putArray("otherCreators");
+
+        int idx = 0;
         if (article.getArticleMeta().getContributors() != null) {
-            int idx = 0;
             for (Contributor contrib : article.getArticleMeta().getContributors()) {
                 ObjectNode contribNode = null;
                 if (contrib.getContributionType().equals("author")) {
@@ -274,6 +293,23 @@ public class ArticleGenerator extends ItemJsonGenerator {
                     ObjectNode personNode = contribNode.putObject("person");
                     fillPerson(contrib, personNode, idx);
                 }
+                idx++;
+            }
+        }
+
+        if (article.getContainerMeta().getContributors() != null) {
+            for (Contributor contrib : article.getContainerMeta().getContributors()) {
+                ObjectNode contribNode = null;
+                String role = contrib.getContributionType();
+                if (role.equals("author")) {
+                    role = ZoteroCreatorTypes.BOOK_AUTHOR;
+                } else if (jstorZoteroCreatorMap.get(contrib.getContributionType()) != null) {
+                    role = jstorZoteroCreatorMap.get(contrib.getContributionType());
+                }
+                contribNode = others.addObject();
+                contribNode.put("role", role);
+                ObjectNode personNode = contribNode.putObject("person");
+                fillPerson(contrib, personNode, idx);
                 idx++;
             }
         }
@@ -377,7 +413,7 @@ public class ArticleGenerator extends ItemJsonGenerator {
             root.put("authorCorrespondenceNote", article.getArticleMeta().getAuthorNotesCorrespondence());
         }
     }
-    
+
     private void createJournalAbbreviations(BibEntry article, ObjectNode root) {
         if (article.getContainerMeta().getJournalAbbreviations() != null) {
             ArrayNode abbrevs = root.putArray("journalAbbreviations");
@@ -392,7 +428,7 @@ public class ArticleGenerator extends ItemJsonGenerator {
             }
         }
     }
-    
+
     private void createPublisher(BibEntry article, ObjectNode root) {
         ObjectNode pubNode = root.putObject("publisher");
         ContainerMeta info = article.getContainerMeta();
@@ -400,15 +436,15 @@ public class ArticleGenerator extends ItemJsonGenerator {
         pubNode.put("location", info.getPublisherLocation() != null ? info.getPublisherLocation() : "");
         pubNode.put("address", info.getPublisherAddress() != null ? info.getPublisherAddress() : "");
     }
-    
+
     private void createSeries(BibEntry article, ObjectNode root) {
         ObjectNode pubNode = root.putObject("series");
         ContainerMeta info = article.getContainerMeta();
         pubNode.put("title", info.getSeriesTitle() != null ? info.getSeriesTitle() : "");
         pubNode.put("subtitle", info.getSeriesSubTitle() != null ? info.getSeriesSubTitle() : "");
-       
+
     }
-    
+
     private void createIssns(BibEntry article, ObjectNode root) {
         ArrayNode array = root.putArray("issns");
         ContainerMeta info = article.getContainerMeta();
