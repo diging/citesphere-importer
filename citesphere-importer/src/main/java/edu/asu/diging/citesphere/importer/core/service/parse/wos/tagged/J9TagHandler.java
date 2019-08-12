@@ -10,7 +10,7 @@ import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
 @Component
 public class J9TagHandler implements WoSMetaTagHandler {
     
-    private final String PREFIX = "29c:";
+    private final String PREFIX = "29chars:";
     
     @Override
     public String handledTag() {

@@ -29,7 +29,7 @@ public class DETagHandler implements WoSMetaTagHandler {
         if (keywords.length > 0) {
             for (String keyword : keywords) {
                 Keyword authorKeyword = new Keyword();
-                authorKeyword.setKeyword(keyword);
+                authorKeyword.setKeyword(keyword.trim());
                 authorKeyword.setCreator(KeywordType.AUTHOR);
                 articleMeta.getKeywords().add(authorKeyword);
             }

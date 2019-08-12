@@ -29,7 +29,7 @@ public class IDTagHandler implements WoSMetaTagHandler {
         if (keywords.length > 0) {
             for (String keyword : keywords) {
                 Keyword authorKeyword = new Keyword();
-                authorKeyword.setKeyword(keyword);
+                authorKeyword.setKeyword(keyword.trim());
                 authorKeyword.setCreator(KeywordType.KEYWORDS_PLUS);
                 articleMeta.getKeywords().add(authorKeyword);
             }

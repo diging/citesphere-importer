@@ -27,9 +27,20 @@ public class CRTagHandler implements WoSMetaTagHandler {
         String[] parts = value.split(",");
         // let's assume there are at least name, year, and doi or title
         Reference ref = new Reference();
+        if (parts.length > 1) {
+            String potentialAuthor = parts[0].trim();
+            // apprently sometimes they only have a year
+            if (!potentialAuthor.matches("[0-9]{4}")) {
+                ref.setAuthorString(potentialAuthor);
+                String potentialYear = parts[1].trim();
+                if (potentialYear.matches("[0-9]{4}")) {
+                    ref.setYear(potentialYear);
+                }
+            } else {
+                ref.setYear(potentialAuthor);
+            }            
+        }
         if (parts.length > 3) {
-            ref.setAuthors(parts[0]);
-            ref.setYear(parts[1].trim());
             // assume last one is DOI
             setDOI(ref, parts[parts.length -1]);
         }

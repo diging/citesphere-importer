@@ -1,12 +1,12 @@
 package edu.asu.diging.citesphere.importer.core.zotero.template.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -16,24 +16,19 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.FieldPrefixes;
-import edu.asu.diging.citesphere.importer.core.model.impl.Affiliation;
-import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
-import edu.asu.diging.citesphere.importer.core.model.impl.ArticleCategory;
-import edu.asu.diging.citesphere.importer.core.model.impl.ArticleCategoryGroup;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleId;
-import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticlePublicationDate;
-import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
-import edu.asu.diging.citesphere.importer.core.model.impl.ContributionType;
 import edu.asu.diging.citesphere.importer.core.model.impl.Contributor;
 import edu.asu.diging.citesphere.importer.core.model.impl.Issn;
-import edu.asu.diging.citesphere.importer.core.model.impl.JournalId;
-import edu.asu.diging.citesphere.importer.core.model.impl.ReviewInfo;
+import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
 import edu.asu.diging.citesphere.importer.core.zotero.template.ItemJsonGenerator;
 
 @Service
 public class ArticleGenerator extends ItemJsonGenerator {
 
+    @Autowired
+    private ExtraFieldHelper fieldHelper;
+    
     /**
      * Maps jstor contributor types to zotero creator types
      */
@@ -43,13 +38,8 @@ public class ArticleGenerator extends ItemJsonGenerator {
     @PostConstruct
     public void init() {
         super.init();
-        jstorZoteroCreatorMap = new HashMap<>();
-        jstorZoteroCreatorMap.put("author", ZoteroCreatorTypes.AUTHOR);
-        jstorZoteroCreatorMap.put("editor", ZoteroCreatorTypes.EDITOR);
-
-        containerContributorsZoteroMap = new HashMap<>();
-        containerContributorsZoteroMap.put(ContributionType.AUTHOR, ZoteroCreatorTypes.BOOK_AUTHOR);
-        containerContributorsZoteroMap.put(ContributionType.EDITOR, ZoteroCreatorTypes.EDITOR);
+        jstorZoteroCreatorMap = fieldHelper.getJstorZoteroCreatorMap();
+        containerContributorsZoteroMap = fieldHelper.getContainerContributorsZoteroMap();
     }
 
     public String responsibleFor() {
@@ -250,16 +240,32 @@ public class ArticleGenerator extends ItemJsonGenerator {
     public String processExtra(JsonNode node, BibEntry article) {
         String prefix = "Citesphere: ";
         ObjectNode root = getObjectMapper().createObjectNode();
-        createCreatorsExtra(article, root);
-        createIds(article, root);
-        createCategories(article, root);
-        createReviewInfo(article, root);
-        createCopyright(article, root);
-        createCorrespondenceNotes(article, root);
-        createJournalAbbreviations(article, root);
-        createPublisher(article, root);
-        createSeries(article, root);
-        createIssns(article, root);
+        fieldHelper.createCreatorsExtra(article, root);
+        fieldHelper.createIds(article, root);
+        fieldHelper.createCategories(article, root);
+        fieldHelper.createReviewInfo(article, root);
+        fieldHelper.createCopyright(article, root);
+        fieldHelper.createCorrespondenceNotes(article, root);
+        fieldHelper.createJournalAbbreviations(article, root);
+        fieldHelper.createPublisher(article, root);
+        fieldHelper.createSeries(article, root);
+        fieldHelper.createIssns(article, root);
+        fieldHelper.createIssueId(article, root);
+        fieldHelper.createSpecialIssue(article, root);
+        fieldHelper.createPartNumber(article, root);
+        fieldHelper.createSupplement(article, root);
+        fieldHelper.createPageCount(article, root);
+        fieldHelper.createChapterCount(article, root);
+        fieldHelper.createDocumentType(article, root);
+        fieldHelper.createConferenceInfo(article, root);
+        fieldHelper.createKeywords(article, root);
+        fieldHelper.createReprintAddress(article, root);
+        fieldHelper.createAdditionalData(article, root);
+        fieldHelper.createUnassignedContributorIds(article, root);
+        fieldHelper.createFundingInfo(article, root);
+        fieldHelper.createReferences(article, root);
+        fieldHelper.createReferenceCount(article, root);
+        fieldHelper.createRetrievalDate(article, root);
 
         try {
             return prefix + getObjectMapper().writeValueAsString(root);
@@ -269,214 +275,7 @@ public class ArticleGenerator extends ItemJsonGenerator {
         }
     }
 
-    private void createCreatorsExtra(BibEntry article, ObjectNode root) {
-        ArrayNode authors = root.putArray("authors");
-        ArrayNode editors = root.putArray("editors");
-        ArrayNode others = root.putArray("otherCreators");
+    
 
-        int idx = 0;
-        if (article.getArticleMeta().getContributors() != null) {
-            for (Contributor contrib : article.getArticleMeta().getContributors()) {
-                ObjectNode contribNode = null;
-                if (contrib.getContributionType().equals("author")) {
-                    contribNode = authors.addObject();
-                    fillPerson(contrib, contribNode, idx);
-                } else if (contrib.getContributionType().equals("editor")) {
-                    contribNode = editors.addObject();
-                    fillPerson(contrib, contribNode, idx);
-                } else {
-                    contribNode = others.addObject();
-                    String role = jstorZoteroCreatorMap.get(contrib.getContributionType()) != null
-                            ? jstorZoteroCreatorMap.get(contrib.getContributionType())
-                            : "contributor";
-                    contribNode.put("role", role);
-                    ObjectNode personNode = contribNode.putObject("person");
-                    fillPerson(contrib, personNode, idx);
-                }
-                idx++;
-            }
-        }
-
-        if (article.getContainerMeta().getContributors() != null) {
-            for (Contributor contrib : article.getContainerMeta().getContributors()) {
-                ObjectNode contribNode = null;
-                String role = contrib.getContributionType();
-                if (role.equals("author")) {
-                    role = ZoteroCreatorTypes.BOOK_AUTHOR;
-                } else if (jstorZoteroCreatorMap.get(contrib.getContributionType()) != null) {
-                    role = jstorZoteroCreatorMap.get(contrib.getContributionType());
-                }
-                contribNode = others.addObject();
-                contribNode.put("role", role);
-                ObjectNode personNode = contribNode.putObject("person");
-                fillPerson(contrib, personNode, idx);
-                idx++;
-            }
-        }
-    }
-
-    private void createIds(BibEntry article, ObjectNode root) {
-        if (article.getArticleMeta().getArticleIds() == null || article.getArticleMeta().getArticleIds().isEmpty()) {
-            return;
-        }
-        ArrayNode idArray = root.putArray("ids");
-        if (article.getArticleMeta().getArticleIds() != null) {
-            for (ArticleId id : article.getArticleMeta().getArticleIds()) {
-                ObjectNode idNode = idArray.addObject();
-                idNode.put("type", id.getPubIdType());
-                idNode.put("id", id.getId());
-            }
-        }
-
-        ArrayNode journalIdArray = root.putArray("journalIds");
-        if (article.getContainerMeta().getJournalIds() != null) {
-            for (JournalId id : article.getContainerMeta().getJournalIds()) {
-                ObjectNode idNode = journalIdArray.addObject();
-                idNode.put("type", id.getIdType());
-                idNode.put("id", id.getId());
-            }
-        }
-    }
-
-    private void createCategories(BibEntry article, ObjectNode root) {
-        if (article.getArticleMeta().getCategories().isEmpty()) {
-            return;
-        }
-
-        ArrayNode categoryArray = root.putArray("categories");
-        for (ArticleCategoryGroup group : article.getArticleMeta().getCategories()) {
-            ObjectNode groupNode = categoryArray.addObject();
-            groupNode.put("type", group.getType());
-            addCategoryGroups(groupNode, group);
-        }
-    }
-
-    private void addCategoryGroups(ObjectNode categoriesNode, ArticleCategoryGroup group) {
-        ArrayNode categoryArray = categoriesNode.putArray("categories");
-        for (ArticleCategory category : group.getCategories()) {
-            ObjectNode catNode = categoryArray.addObject();
-            catNode.put("name", category.getSubject());
-        }
-
-        ArrayNode subGroupArray = categoriesNode.putArray("categoryGroups");
-        for (ArticleCategoryGroup subGroup : group.getSubGroups()) {
-            ObjectNode groupNode = subGroupArray.addObject();
-            groupNode.put("type", subGroup.getType());
-            addCategoryGroups(groupNode, subGroup);
-        }
-    }
-
-    private void createReviewInfo(BibEntry article, ObjectNode root) {
-        ReviewInfo info = article.getArticleMeta().getReviewInfo();
-        if (info != null) {
-            ObjectNode reviewNode = root.putObject("reviewInfo");
-            if (info.getContributors() != null) {
-                ArrayNode contributorsNode = reviewNode.putArray("contributors");
-                int idx = 0;
-                for (Contributor contrib : info.getContributors()) {
-                    ObjectNode contribNode = contributorsNode.addObject();
-                    fillPerson(contrib, contribNode, idx);
-                    idx++;
-                }
-            }
-
-            if (info.getTitle() != null) {
-                reviewNode.put("title", info.getTitle());
-            }
-
-            if (info.getYear() != null) {
-                reviewNode.put("year", info.getYear());
-            }
-
-            if (info.getFullDescription() != null) {
-                reviewNode.put("fullDescription", info.getFullDescription());
-            }
-        }
-    }
-
-    private void createCopyright(BibEntry article, ObjectNode root) {
-        ObjectNode copyrightNode = root.putObject("copyright");
-        ArticleMeta meta = article.getArticleMeta();
-        if (meta.getCopyrightHolder() != null) {
-            copyrightNode.put("holder", meta.getCopyrightHolder());
-        }
-        if (meta.getCopyrightStatement() != null) {
-            copyrightNode.put("statement", meta.getCopyrightStatement());
-        }
-        if (meta.getCopyrightYear() != null) {
-            copyrightNode.put("year", meta.getCopyrightYear());
-        }
-    }
-
-    private void createCorrespondenceNotes(BibEntry article, ObjectNode root) {
-        if (article.getArticleMeta().getAuthorNotesCorrespondence() != null) {
-            root.put("authorCorrespondenceNote", article.getArticleMeta().getAuthorNotesCorrespondence());
-        }
-    }
-
-    private void createJournalAbbreviations(BibEntry article, ObjectNode root) {
-        if (article.getContainerMeta().getJournalAbbreviations() != null) {
-            ArrayNode abbrevs = root.putArray("journalAbbreviations");
-            for (String abbrev : article.getContainerMeta().getJournalAbbreviations()) {
-                ObjectNode abbrevNode = abbrevs.addObject();
-                if (abbrev.contains(":")) {
-                    String type = abbrev.substring(0, abbrev.indexOf(":"));
-                    abbrev = abbrev.substring(abbrev.indexOf(":") + 1);
-                    abbrevNode.put("type", type);
-                }
-                abbrevNode.put("abbreviation", abbrev);
-            }
-        }
-    }
-
-    private void createPublisher(BibEntry article, ObjectNode root) {
-        ObjectNode pubNode = root.putObject("publisher");
-        ContainerMeta info = article.getContainerMeta();
-        pubNode.put("name", info.getPublisherName() != null ? info.getPublisherName() : "");
-        pubNode.put("location", info.getPublisherLocation() != null ? info.getPublisherLocation() : "");
-        pubNode.put("address", info.getPublisherAddress() != null ? info.getPublisherAddress() : "");
-    }
-
-    private void createSeries(BibEntry article, ObjectNode root) {
-        ObjectNode pubNode = root.putObject("series");
-        ContainerMeta info = article.getContainerMeta();
-        pubNode.put("title", info.getSeriesTitle() != null ? info.getSeriesTitle() : "");
-        pubNode.put("subtitle", info.getSeriesSubTitle() != null ? info.getSeriesSubTitle() : "");
-
-    }
-
-    private void createIssns(BibEntry article, ObjectNode root) {
-        ArrayNode array = root.putArray("issns");
-        ContainerMeta info = article.getContainerMeta();
-        if (info.getIssns() != null) {
-            for (Issn issn : info.getIssns()) {
-                ObjectNode node = array.addObject();
-                node.put("type", issn.getPubType() != null ? issn.getPubType() : "");
-                node.put("issn", issn.getIssn());
-            }
-        }
-    }
-
-    private void fillPerson(Contributor contrib, ObjectNode creatorNode, int idx) {
-        List<String> nameParts = new ArrayList<>();
-        if (contrib.getGivenName() != null && !contrib.getGivenName().isEmpty()) {
-            nameParts.add(contrib.getGivenName());
-        }
-        if (contrib.getSurname() != null && !contrib.getSurname().isEmpty()) {
-            nameParts.add(contrib.getSurname());
-        }
-        creatorNode.put("name", String.join(" ", nameParts));
-        creatorNode.put("firstName", contrib.getGivenName());
-        creatorNode.put("lastName", contrib.getSurname());
-        creatorNode.put("positionInList", idx);
-
-        ArrayNode affiliationArray = creatorNode.arrayNode();
-        for (Affiliation aff : contrib.getAffiliations()) {
-            if (aff.getName() != null && !aff.getName().trim().isEmpty()) {
-                ObjectNode affNode = affiliationArray.addObject();
-                affNode.put("name", aff.getName());
-            }
-        }
-        creatorNode.set("affiliations", affiliationArray);
-    }
+    
 }
