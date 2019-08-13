@@ -37,6 +37,14 @@ import edu.asu.diging.citesphere.messages.model.KafkaJobMessage;
 import edu.asu.diging.citesphere.messages.model.ResponseCode;
 import edu.asu.diging.citesphere.messages.model.Status;
 
+/**
+ * This class coordinates the import process. It connects with Citesphere and 
+ * downloads the files to be imported. It then starts the transformation process from
+ * import format to internal bibliographical format and then turns the internal 
+ * bibliographical format to Json that can be submitted to Zotero.
+ * @author jdamerow
+ *
+ */
 @Service
 public class ImportProcessor implements IImportProcessor {
 
@@ -57,6 +65,10 @@ public class ImportProcessor implements IImportProcessor {
     @Autowired
     private KafkaRequestProducer requestProducer;
 
+    /**
+     * Map that maps internal bibliographical formats (contants of {@link Publication} 
+     * class) to Zotero item types ({@link ItemType} enum).
+     */
     private Map<String, ItemType> itemTypeMapping = new HashMap<>();
 
     @PostConstruct
@@ -64,6 +76,7 @@ public class ImportProcessor implements IImportProcessor {
         // this needs to be changed and improved, but for now it works
         itemTypeMapping.put(Publication.ARTICLE, ItemType.JOURNAL_ARTICLE);
         itemTypeMapping.put(Publication.BOOK, ItemType.BOOK);
+        itemTypeMapping.put(Publication.BOOK_CHAPTER, ItemType.BOOK_SECTION);
     }
 
     /*

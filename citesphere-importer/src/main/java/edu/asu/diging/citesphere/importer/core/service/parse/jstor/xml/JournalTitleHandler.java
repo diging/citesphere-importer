@@ -25,7 +25,7 @@ public class JournalTitleHandler implements JournalMetaTagHandler {
                     if (!titleNode.getNodeName().equals("journal-title")) {
                         continue;
                     } 
-                    journalMeta.setJournalTitle(titleNode.getTextContent());
+                    journalMeta.setContainerTitle(titleNode.getTextContent());
                     break;
                 }
             }

@@ -11,14 +11,18 @@ import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
 import edu.asu.diging.citesphere.importer.core.zotero.template.ItemJsonGenerator;
 
 @Service
-public class BookGenerator extends ItemJsonGenerator {
+public class BookChapterGenerator extends ItemJsonGenerator {
 
+    @Override
     public String responsibleFor() {
-        return Publication.BOOK;
+        return Publication.BOOK_CHAPTER;
     }
-    
-    public String processNumPages(JsonNode node, BibEntry article) {
-        return article.getArticleMeta().getPageCount() != null ? article.getArticleMeta().getPageCount() : "";
+
+    public String processBookTitle(JsonNode node, BibEntry article) {
+        if (article.getContainerMeta().getContainerTitle() != null) {
+            return article.getContainerMeta().getContainerTitle();
+        }
+        return "";
     }
     
     public String processISBN(JsonNode node, BibEntry article) {
@@ -31,11 +35,5 @@ public class BookGenerator extends ItemJsonGenerator {
         }
         return "";
     }
-    
-    public String processUrl(JsonNode node, BibEntry article) {
-        if (article.getArticleMeta().getSelfUri() != null) {
-            return article.getArticleMeta().getSelfUri().trim();
-        }
-        return "";
-    }
+
 }

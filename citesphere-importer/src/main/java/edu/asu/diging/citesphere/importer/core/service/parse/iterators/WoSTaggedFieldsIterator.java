@@ -28,6 +28,10 @@ public class WoSTaggedFieldsIterator implements BibEntryIterator {
     private LineIterator lineIterator;
     private String currentLine = null;
     
+    /** 
+     * Map to map WoS document types ({@link WoSDocumentTypes} constants) to internal
+     *  bibliographical types ({@link Publication} constants).
+     */
     private Map<String, String> publicationsType;
 
     public WoSTaggedFieldsIterator(String filePath, IArticleWoSTagParser parserRegistry) {
@@ -41,6 +45,7 @@ public class WoSTaggedFieldsIterator implements BibEntryIterator {
         publicationsType = new HashMap<String, String>();
         publicationsType.put(WoSDocumentTypes.ARTICLE, Publication.ARTICLE);
         publicationsType.put(WoSDocumentTypes.BOOK, Publication.BOOK);
+        publicationsType.put(WoSDocumentTypes.BOOK_CHAPTER, Publication.BOOK_CHAPTER);
         
         try {
             lineIterator = FileUtils.lineIterator(new File(filePath));
@@ -88,7 +93,12 @@ public class WoSTaggedFieldsIterator implements BibEntryIterator {
                 // we only take the first vale (might be several separated by ';')
                 String[] types = value.split(";");
                 if (types.length > 0) {
-                    entry.setArticleType(publicationsType.get(types[0]));
+                    String pubType = publicationsType.get(types[0].trim());
+                    if (pubType == null && types.length > 1) {
+                        // let's try the next one if we can't find the first type
+                        pubType = publicationsType.get(types[1].trim());
+                    }
+                    entry.setArticleType(pubType);
                 }
             } else {
                 if (field.trim().isEmpty()) {

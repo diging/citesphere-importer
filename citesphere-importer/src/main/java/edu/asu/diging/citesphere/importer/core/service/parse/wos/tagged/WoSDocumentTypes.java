@@ -4,4 +4,5 @@ public interface WoSDocumentTypes {
 
     public final static String ARTICLE = "Article";
     public final static String BOOK = "Book";
+    public final static String BOOK_CHAPTER = "Book Chapter";
 }

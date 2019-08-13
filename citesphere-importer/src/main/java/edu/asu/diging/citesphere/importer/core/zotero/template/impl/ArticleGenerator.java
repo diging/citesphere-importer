@@ -22,7 +22,7 @@ public class ArticleGenerator extends ItemJsonGenerator {
     }
 
     public String processPublicationTitle(JsonNode node, BibEntry article) {
-        return article.getContainerMeta().getJournalTitle();
+        return article.getContainerMeta().getContainerTitle();
     }
     
     public String processIssue(JsonNode node, BibEntry article) {

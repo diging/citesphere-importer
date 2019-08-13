@@ -11,7 +11,7 @@ import java.util.List;
 public class ContainerMeta {
 
     private List<JournalId> journalIds;
-    private String journalTitle;
+    private String containerTitle;
     private List<String> journalAbbreviations;
     private String publisherName;
     private String publisherLocation;
@@ -27,11 +27,11 @@ public class ContainerMeta {
     public void setJournalIds(List<JournalId> journalIds) {
         this.journalIds = journalIds;
     }
-    public String getJournalTitle() {
-        return journalTitle;
+    public String getContainerTitle() {
+        return containerTitle;
     }
-    public void setJournalTitle(String journalTitle) {
-        this.journalTitle = journalTitle;
+    public void setContainerTitle(String containerTitle) {
+        this.containerTitle = containerTitle;
     }
     public List<String> getJournalAbbreviations() {
         return journalAbbreviations;

@@ -6,6 +6,7 @@ public class Publication implements BibEntry {
     
     public final static String ARTICLE = "article";
     public final static String BOOK = "book";
+    public final static String BOOK_CHAPTER = "bookChapter";
     public final static String REVIEW = "review";
 
     private String articleType;

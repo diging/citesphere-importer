@@ -194,6 +194,22 @@ public abstract class ItemJsonGenerator {
         return article.getArticleMeta().getVolume();
     }
     
+    public String processPublisher(JsonNode node, BibEntry article) {
+        String name = article.getContainerMeta().getPublisherName();
+        if (name != null && !name.trim().isEmpty())  {
+            return name;
+        }
+        return "";
+    }
+    
+    public String processPlace(JsonNode node, BibEntry article) {
+        String location = article.getContainerMeta().getPublisherLocation();
+        if (location != null && !location.trim().isEmpty()) {
+            return location;
+        }
+        return "";
+    }
+    
     public String processDate(JsonNode node, BibEntry article) {
         List<String> date = new ArrayList<>();
         if (article.getArticleMeta().getPublicationDate() != null) {

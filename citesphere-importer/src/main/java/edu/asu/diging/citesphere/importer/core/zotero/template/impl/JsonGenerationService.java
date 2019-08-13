@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
-import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
 import edu.asu.diging.citesphere.importer.core.zotero.template.IJsonGenerationService;
 import edu.asu.diging.citesphere.importer.core.zotero.template.ItemJsonGenerator;
 

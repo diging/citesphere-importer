@@ -16,8 +16,8 @@ public class SOTagHandler implements WoSMetaTagHandler {
     @Override
     public void handle(String field, String value, String previousField, int fieldIdx, ContainerMeta containerMeta,
             ArticleMeta articleMeta) {
-        String existing = containerMeta.getJournalTitle() != null ? containerMeta.getJournalTitle() : "";
-        containerMeta.setJournalTitle(existing + value);
+        String existing = containerMeta.getContainerTitle() != null ? containerMeta.getContainerTitle() : "";
+        containerMeta.setContainerTitle(existing + value);
     }
 
 }
