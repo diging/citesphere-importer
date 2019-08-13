@@ -4,4 +4,5 @@ public interface IdTypes {
 
     public final static String ISBN = "isbn";
     public final static String ISSN = "issn";
+    public final static String DOI = "doi";
 }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.springframework.stereotype.Component;
 
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
+import edu.asu.diging.citesphere.importer.core.model.IdTypes;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleId;
 
 @Component
@@ -23,7 +24,7 @@ public class DITagHandler extends CreatorTagHandler {
 
         ArticleId id = new ArticleId();
         id.setId(value);
-        id.setPubIdType("doi");
+        id.setPubIdType(IdTypes.DOI);
         entry.getArticleMeta().getArticleIds().add(id);
     }
 

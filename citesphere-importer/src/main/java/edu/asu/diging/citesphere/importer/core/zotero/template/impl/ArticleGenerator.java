@@ -1,8 +1,5 @@
 package edu.asu.diging.citesphere.importer.core.zotero.template.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -29,17 +26,7 @@ public class ArticleGenerator extends ItemJsonGenerator {
         return article.getArticleMeta().getIssue();
     }
 
-    public String processPages(JsonNode node, BibEntry article) {
-        List<String> pages = new ArrayList<>();
-        if (article.getArticleMeta().getFirstPage() != null && !article.getArticleMeta().getFirstPage().isEmpty()) {
-            pages.add(article.getArticleMeta().getFirstPage());
-        }
-        if (article.getArticleMeta().getLastPage() != null && !article.getArticleMeta().getLastPage().isEmpty()) {
-            pages.add(article.getArticleMeta().getLastPage());
-        }
-
-        return String.join(" - ", pages);
-    }
+    
     
     public String processLanguage(JsonNode node, BibEntry article) {
         return article.getArticleMeta().getLanguage();

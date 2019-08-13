@@ -128,6 +128,18 @@ public abstract class ItemJsonGenerator {
         return null;
     }
     
+    public String processPages(JsonNode node, BibEntry article) {
+        List<String> pages = new ArrayList<>();
+        if (article.getArticleMeta().getFirstPage() != null && !article.getArticleMeta().getFirstPage().isEmpty()) {
+            pages.add(article.getArticleMeta().getFirstPage());
+        }
+        if (article.getArticleMeta().getLastPage() != null && !article.getArticleMeta().getLastPage().isEmpty()) {
+            pages.add(article.getArticleMeta().getLastPage());
+        }
+
+        return String.join(" - ", pages);
+    }
+    
     public ArrayNode processCreators(JsonNode node, BibEntry article) {
         ArrayNode creators = getObjectMapper().createArrayNode();
         if (article.getArticleMeta().getContributors() != null) {
@@ -213,10 +225,6 @@ public abstract class ItemJsonGenerator {
     public String processDate(JsonNode node, BibEntry article) {
         List<String> date = new ArrayList<>();
         if (article.getArticleMeta().getPublicationDate() != null) {
-            if (article.getArticleMeta().getPublicationDate().getPublicationDate() != null
-                    && !article.getArticleMeta().getPublicationDate().getPublicationDate().isEmpty()) {
-                return article.getArticleMeta().getPublicationDate().getPublicationDate();
-            }
             ArticlePublicationDate pubDate = article.getArticleMeta().getPublicationDate();
             if (pubDate.getPublicationYear() != null && !pubDate.getPublicationYear().isEmpty()) {
                 date.add(pubDate.getPublicationYear());
@@ -227,8 +235,15 @@ public abstract class ItemJsonGenerator {
             if (pubDate.getPublicationDay() != null && !pubDate.getPublicationDay().isEmpty()) {
                 date.add(pubDate.getPublicationDay());
             }
+            if (!date.isEmpty()) {
+                return String.join("-", date);
+            }
+            if (article.getArticleMeta().getPublicationDate().getPublicationDate() != null
+                    && !article.getArticleMeta().getPublicationDate().getPublicationDate().isEmpty()) {
+                return article.getArticleMeta().getPublicationDate().getPublicationDate();
+            }
         }
-        return String.join("-", date);
+        return "";
     }
     
     public String processLanguage(JsonNode node, BibEntry article) {
