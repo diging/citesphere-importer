@@ -26,6 +26,8 @@ public class DTTagHandler implements WoSMetaTagHandler {
         publicationsType.put(WoSDocumentTypes.BOOK, Publication.BOOK);
         publicationsType.put(WoSDocumentTypes.BOOK_CHAPTER, Publication.BOOK_CHAPTER);
         publicationsType.put(WoSDocumentTypes.LETTER, Publication.ARTICLE);
+        publicationsType.put(WoSDocumentTypes.REVIEW, Publication.ARTICLE);
+        publicationsType.put(WoSDocumentTypes.BOOK_REVIEW, Publication.ARTICLE);
         publicationsType.put(WoSDocumentTypes.NEWS_ITEM, Publication.NEWS_ITEM);
         publicationsType.put(WoSDocumentTypes.PROCEEDINGS_PAPER, Publication.PROCEEDINGS_PAPER);
         publicationsType.put(WoSDocumentTypes.ARTICLE_PROCEEDINGS_PAPER, Publication.PROCEEDINGS_PAPER);
@@ -51,7 +53,11 @@ public class DTTagHandler implements WoSMetaTagHandler {
                 }
             }
         }
-        entry.setArticleType(pubType);
+        if (pubType == null) {
+            entry.setArticleType(Publication.DOCUMENT);
+        } else {
+            entry.setArticleType(pubType);
+        }
 
         if (value.equals(WoSDocumentTypes.LETTER)) {
             String title = "Letter to the Editor: ";

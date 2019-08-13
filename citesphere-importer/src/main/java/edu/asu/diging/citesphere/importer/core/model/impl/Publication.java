@@ -11,6 +11,7 @@ public class Publication implements BibEntry {
     public final static String LETTER = "letter";
     public final static String NEWS_ITEM = "newspaperArticle";
     public final static String PROCEEDINGS_PAPER = "conferencePaper";
+    public final static String DOCUMENT = "document";
 
     private String articleType;
     private ContainerMeta containerMeta;

@@ -61,10 +61,6 @@ public class ArticleGenerator extends ItemJsonGenerator {
         return epubIssn;
     }
 
-    public String processUrl(JsonNode node, BibEntry article) {
-        return article.getArticleMeta().getSelfUri();
-    }
-
     public String processJournalAbbreviation(JsonNode node, BibEntry entry) {
         String abbrev = "";
         if (entry.getContainerMeta().getJournalAbbreviations() != null) {

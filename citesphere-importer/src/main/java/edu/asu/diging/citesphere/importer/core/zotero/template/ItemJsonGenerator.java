@@ -188,6 +188,10 @@ public abstract class ItemJsonGenerator {
         return article.getArticleMeta().getArticleAbstract();
     }
     
+    public String processUrl(JsonNode node, BibEntry article) {
+        return article.getArticleMeta().getSelfUri();
+    }
+    
     public String processSeries(JsonNode node, BibEntry article) {
         StringBuffer seriesTitle = new StringBuffer();
         if (article.getContainerMeta().getSeriesTitle() != null) {

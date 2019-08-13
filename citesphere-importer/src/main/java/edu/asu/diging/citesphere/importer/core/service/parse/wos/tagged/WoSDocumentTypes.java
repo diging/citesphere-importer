@@ -8,5 +8,7 @@ public interface WoSDocumentTypes {
     public final static String LETTER = "Letter";
     public final static String NEWS_ITEM = "News Item";
     public final static String PROCEEDINGS_PAPER = "Proceedings Paper";
+    public final static String REVIEW = "Review";
+    public final static String BOOK_REVIEW = "Book Review";
     public final static String ARTICLE_PROCEEDINGS_PAPER = "Article; Proceedings Paper";
 }

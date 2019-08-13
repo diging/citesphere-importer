@@ -80,6 +80,7 @@ public class ImportProcessor implements IImportProcessor {
         itemTypeMapping.put(Publication.LETTER, ItemType.LETTER);
         itemTypeMapping.put(Publication.NEWS_ITEM, ItemType.NEWSPAPER_ARTICLE);
         itemTypeMapping.put(Publication.PROCEEDINGS_PAPER, ItemType.CONFERENCE_PAPER);
+        itemTypeMapping.put(Publication.DOCUMENT, ItemType.DOCUMENT);
     }
 
     /*
@@ -104,11 +105,15 @@ public class ImportProcessor implements IImportProcessor {
         }
 
         sendMessage(null, message.getId(), Status.PROCESSING, ResponseCode.P00);
-        BibEntryIterator bibIterator;
+        BibEntryIterator bibIterator = null;
         try {
             bibIterator = handlerRegistry.handleFile(info, filePath);
         } catch (IteratorCreationException e1) {
             logger.error("Could not create iterator.", e1);
+        }
+        
+        if (bibIterator == null) {
+            sendMessage(null, message.getId(), Status.FAILED, ResponseCode.X30);
             return;
         }
 
@@ -117,6 +122,10 @@ public class ImportProcessor implements IImportProcessor {
         int entryCounter = 0;
         while (bibIterator.hasNext()) {
             BibEntry entry = bibIterator.next();
+            if (entry.getArticleType() == null) {
+                // something is wrong with this entry, let's ignore it
+                continue;
+            }
             ItemType type = itemTypeMapping.get(entry.getArticleType());
             JsonNode template = zoteroConnector.getTemplate(type);
             ObjectNode bibNode = generationService.generateJson(template, entry);

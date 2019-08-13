@@ -84,10 +84,6 @@ public class WoSTaggedFieldsIterator implements BibEntryIterator {
             previousField = field;
         }
 
-        if (entry.getArticleType() == null) {
-            entry.setArticleType(Publication.ARTICLE);
-        }
-
         // in case there are several empty lines between entries
         // let's skip them
         advanceToNext();
