@@ -4,8 +4,7 @@ import java.util.ArrayList;
 
 import org.springframework.stereotype.Component;
 
-import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
-import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
+import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.impl.Reference;
 
 @Component
@@ -17,11 +16,10 @@ public class CRTagHandler implements WoSMetaTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, ContainerMeta containerMeta,
-            ArticleMeta articleMeta) {
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
         
-        if (articleMeta.getReferences() == null) {
-            articleMeta.setReferences(new ArrayList<>());
+        if (entry.getArticleMeta().getReferences() == null) {
+            entry.getArticleMeta().setReferences(new ArrayList<>());
         }
         
         String[] parts = value.split(",");
@@ -46,7 +44,7 @@ public class CRTagHandler implements WoSMetaTagHandler {
         }
         
         ref.setReferenceString(value.trim());
-        articleMeta.getReferences().add(ref);
+        entry.getArticleMeta().getReferences().add(ref);
     }
 
     private void setDOI(Reference ref, String part) {

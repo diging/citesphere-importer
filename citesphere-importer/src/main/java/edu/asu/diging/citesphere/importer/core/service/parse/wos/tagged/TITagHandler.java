@@ -2,8 +2,7 @@ package edu.asu.diging.citesphere.importer.core.service.parse.wos.tagged;
 
 import org.springframework.stereotype.Component;
 
-import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
-import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
+import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 
 @Component
 public class TITagHandler implements WoSMetaTagHandler {
@@ -14,10 +13,9 @@ public class TITagHandler implements WoSMetaTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, ContainerMeta containerMeta,
-            ArticleMeta articleMeta) {
-        String title = articleMeta.getArticleTitle() != null ? articleMeta.getArticleTitle() : "";
-        articleMeta.setArticleTitle(title + value);
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
+        String title = entry.getArticleMeta().getArticleTitle() != null ? entry.getArticleMeta().getArticleTitle() : "";
+        entry.getArticleMeta().setArticleTitle(title + value);
     }
 
 }

@@ -4,8 +4,7 @@ import java.util.ArrayList;
 
 import org.springframework.stereotype.Component;
 
-import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
-import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
+import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.impl.Issn;
 
 @Component
@@ -19,16 +18,15 @@ public class SNTagHandler extends IdHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, ContainerMeta containerMeta,
-            ArticleMeta articleMeta) {
-        if (containerMeta.getIssns() == null) {
-            containerMeta.setIssns(new ArrayList<>());
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
+        if (entry.getContainerMeta().getIssns() == null) {
+            entry.getContainerMeta().setIssns(new ArrayList<>());
         }
         
         Issn issn = new Issn();
         issn.setIssn(value);
         issn.setPubType(ISSN);
-        containerMeta.getIssns().add(issn);
+        entry.getContainerMeta().getIssns().add(issn);
     }
 
 }

@@ -77,6 +77,7 @@ public class ImportProcessor implements IImportProcessor {
         itemTypeMapping.put(Publication.ARTICLE, ItemType.JOURNAL_ARTICLE);
         itemTypeMapping.put(Publication.BOOK, ItemType.BOOK);
         itemTypeMapping.put(Publication.BOOK_CHAPTER, ItemType.BOOK_SECTION);
+        itemTypeMapping.put(Publication.LETTER, ItemType.LETTER);
     }
 
     /*

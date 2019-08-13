@@ -4,9 +4,8 @@ import java.util.ArrayList;
 
 import org.springframework.stereotype.Component;
 
+import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.impl.AdditionalData;
-import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
-import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
 
 @Component
 public class EATagHandler implements WoSMetaTagHandler {
@@ -17,13 +16,12 @@ public class EATagHandler implements WoSMetaTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, ContainerMeta containerMeta,
-            ArticleMeta articleMeta) {
-        if (articleMeta.getAdditionalData() == null) {
-            articleMeta.setAdditionalData(new ArrayList<>());
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
+        if (entry.getArticleMeta().getAdditionalData() == null) {
+            entry.getArticleMeta().setAdditionalData(new ArrayList<>());
         }
         
-        articleMeta.getAdditionalData().add(new AdditionalData(AdditionalData.EARLY_ACCESS_DATE, value)); 
+        entry.getArticleMeta().getAdditionalData().add(new AdditionalData(AdditionalData.EARLY_ACCESS_DATE, value)); 
     }
 
 }

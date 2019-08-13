@@ -2,8 +2,7 @@ package edu.asu.diging.citesphere.importer.core.service.parse.wos.tagged;
 
 import org.springframework.stereotype.Component;
 
-import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
-import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
+import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 
 @Component
 public class FUTagHandler implements WoSMetaTagHandler {
@@ -14,10 +13,9 @@ public class FUTagHandler implements WoSMetaTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, ContainerMeta containerMeta,
-            ArticleMeta articleMeta) {
-        String existing = articleMeta.getFundingInfo() != null ? articleMeta.getFundingInfo() : "";
-        articleMeta.setFundingInfo(existing + value);
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
+        String existing = entry.getArticleMeta().getFundingInfo() != null ? entry.getArticleMeta().getFundingInfo() : "";
+        entry.getArticleMeta().setFundingInfo(existing + value);
     }
 
 }

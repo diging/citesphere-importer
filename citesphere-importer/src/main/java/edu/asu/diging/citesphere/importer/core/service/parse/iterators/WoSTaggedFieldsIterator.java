@@ -2,8 +2,6 @@ package edu.asu.diging.citesphere.importer.core.service.parse.iterators;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
@@ -16,8 +14,6 @@ import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
 import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
 import edu.asu.diging.citesphere.importer.core.service.parse.wos.tagged.IArticleWoSTagParser;
-import edu.asu.diging.citesphere.importer.core.service.parse.wos.tagged.WoSDocumentTypes;
-import edu.asu.diging.citesphere.importer.core.service.parse.wos.tagged.WoSFieldTags;
 
 public class WoSTaggedFieldsIterator implements BibEntryIterator {
 
@@ -27,12 +23,6 @@ public class WoSTaggedFieldsIterator implements BibEntryIterator {
     private String filePath;
     private LineIterator lineIterator;
     private String currentLine = null;
-    
-    /** 
-     * Map to map WoS document types ({@link WoSDocumentTypes} constants) to internal
-     *  bibliographical types ({@link Publication} constants).
-     */
-    private Map<String, String> publicationsType;
 
     public WoSTaggedFieldsIterator(String filePath, IArticleWoSTagParser parserRegistry) {
         this.filePath = filePath;
@@ -41,12 +31,6 @@ public class WoSTaggedFieldsIterator implements BibEntryIterator {
     }
 
     private void init() {
-        
-        publicationsType = new HashMap<String, String>();
-        publicationsType.put(WoSDocumentTypes.ARTICLE, Publication.ARTICLE);
-        publicationsType.put(WoSDocumentTypes.BOOK, Publication.BOOK);
-        publicationsType.put(WoSDocumentTypes.BOOK_CHAPTER, Publication.BOOK_CHAPTER);
-        
         try {
             lineIterator = FileUtils.lineIterator(new File(filePath));
             if (lineIterator.hasNext()) {
@@ -67,10 +51,10 @@ public class WoSTaggedFieldsIterator implements BibEntryIterator {
         BibEntry entry = new Publication();
         entry.setArticleMeta(articleMeta);
         entry.setJournalMeta(containerMeta);
-        
+
         String previousField = null;
         int fieldIdx = 0;
-        
+
         while (lineIterator.hasNext()) {
             String line = lineIterator.nextLine();
             // this means we are at the end of an entry
@@ -84,35 +68,22 @@ public class WoSTaggedFieldsIterator implements BibEntryIterator {
             }
             String field = line.substring(0, 2);
             String value = "";
-            
+
             if (line.length() > 2) {
                 value = line.substring(3);
             }
 
-            if (field.equals(WoSFieldTags.DT)) {
-                // we only take the first vale (might be several separated by ';')
-                String[] types = value.split(";");
-                if (types.length > 0) {
-                    String pubType = publicationsType.get(types[0].trim());
-                    if (pubType == null && types.length > 1) {
-                        // let's try the next one if we can't find the first type
-                        pubType = publicationsType.get(types[1].trim());
-                    }
-                    entry.setArticleType(pubType);
-                }
+            if (field.trim().isEmpty()) {
+                field = previousField;
+                fieldIdx++;
             } else {
-                if (field.trim().isEmpty()) {
-                    field = previousField;
-                    fieldIdx++;
-                } else {
-                    fieldIdx = 0;
-                }
-                tagParserRegistry.parseMetaTag(field, value, previousField, fieldIdx, containerMeta, articleMeta);
+                fieldIdx = 0;
             }
-            
+            tagParserRegistry.parseMetaTag(field, value, previousField, fieldIdx, entry);
+
             previousField = field;
         }
-        
+
         if (entry.getArticleType() == null) {
             entry.setArticleType(Publication.ARTICLE);
         }

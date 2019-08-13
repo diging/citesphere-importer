@@ -4,8 +4,7 @@ import java.util.ArrayList;
 
 import org.springframework.stereotype.Component;
 
-import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
-import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
+import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.impl.Keyword;
 import edu.asu.diging.citesphere.importer.core.model.impl.KeywordType;
 
@@ -18,10 +17,9 @@ public class DETagHandler implements WoSMetaTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, ContainerMeta containerMeta,
-            ArticleMeta articleMeta) {
-        if (articleMeta.getKeywords() == null) {
-            articleMeta.setKeywords(new ArrayList<Keyword>());
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
+        if (entry.getArticleMeta().getKeywords() == null) {
+            entry.getArticleMeta().setKeywords(new ArrayList<Keyword>());
         }
         
         String[] keywords = value.split(";");
@@ -31,7 +29,7 @@ public class DETagHandler implements WoSMetaTagHandler {
                 Keyword authorKeyword = new Keyword();
                 authorKeyword.setKeyword(keyword.trim());
                 authorKeyword.setCreator(KeywordType.AUTHOR);
-                articleMeta.getKeywords().add(authorKeyword);
+                entry.getArticleMeta().getKeywords().add(authorKeyword);
             }
         }
     }

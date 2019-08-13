@@ -4,8 +4,7 @@ import java.util.ArrayList;
 
 import org.springframework.stereotype.Component;
 
-import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
-import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
+import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.impl.ContributionType;
 import edu.asu.diging.citesphere.importer.core.model.impl.Contributor;
 
@@ -19,18 +18,18 @@ public class CATagHandler implements WoSMetaTagHandler {
 
     @Override
     public void handle(String field, String value, String previousField, int fieldIdx,
-            ContainerMeta containerMeta, ArticleMeta articleMeta) {
+            BibEntry entry) {
         Contributor contributor = new Contributor();
         contributor.setContributionType(ContributionType.AUTHOR);
         contributor.setFullStandardizedName(value);
         contributor.setSurname(value);
         contributor.setFullSurname(value);
         
-        if (articleMeta.getContributors() == null) {
-            articleMeta.setContributors(new ArrayList<Contributor>());
+        if (entry.getArticleMeta().getContributors() == null) {
+            entry.getArticleMeta().setContributors(new ArrayList<Contributor>());
         }
         
-        articleMeta.getContributors().add(contributor);
+        entry.getArticleMeta().getContributors().add(contributor);
     }
 
 }

@@ -4,9 +4,8 @@ import java.util.ArrayList;
 
 import org.springframework.stereotype.Component;
 
+import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.impl.AdditionalData;
-import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
-import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
 
 @Component
 public class GATagHandler implements WoSMetaTagHandler {
@@ -17,15 +16,14 @@ public class GATagHandler implements WoSMetaTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, ContainerMeta containerMeta,
-            ArticleMeta articleMeta) {
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
         // apparently it's just a random list of email addresses that we can't easily assign
         // to contributors; so we'll just save them.
-        if (articleMeta.getAdditionalData() == null) {
-            articleMeta.setAdditionalData(new ArrayList<>());
+        if (entry.getArticleMeta().getAdditionalData() == null) {
+            entry.getArticleMeta().setAdditionalData(new ArrayList<>());
         }
         
-        articleMeta.getAdditionalData().add(new AdditionalData(AdditionalData.DOCUMENT_DELIVERY_NUMBER, value)); 
+        entry.getArticleMeta().getAdditionalData().add(new AdditionalData(AdditionalData.DOCUMENT_DELIVERY_NUMBER, value)); 
     }
 
 }
