@@ -7,5 +7,7 @@ public interface BibEntryIterator {
     BibEntry next();
     
     boolean hasNext();
+    
+    void close();
 
 }

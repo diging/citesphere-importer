@@ -19,7 +19,7 @@ import edu.asu.diging.citesphere.importer.core.zotero.template.ItemJsonGenerator
 @Service
 public class JsonGenerationService implements IJsonGenerationService {
 
-    private Map<Class<?>, ItemJsonGenerator> generators;
+    private Map<String, ItemJsonGenerator> generators;
     
     @Autowired
     private ApplicationContext ctx;
@@ -38,7 +38,7 @@ public class JsonGenerationService implements IJsonGenerationService {
      */
     @Override
     public ObjectNode generateJson(JsonNode template, BibEntry entry) {
-        ItemJsonGenerator generator = generators.get(entry.getClass());
+        ItemJsonGenerator generator = generators.get(entry.getArticleType());
         if (generator != null) {
             return generator.generate(template, entry);
         }

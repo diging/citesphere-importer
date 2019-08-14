@@ -10,8 +10,8 @@ import edu.asu.diging.citesphere.importer.core.service.impl.JobInfo;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
 import edu.asu.diging.citesphere.importer.core.service.parse.FileHandler;
 import edu.asu.diging.citesphere.importer.core.service.parse.IHandlerRegistry;
+import edu.asu.diging.citesphere.importer.core.service.parse.iterators.JStorArticleXmlIterator;
 import edu.asu.diging.citesphere.importer.core.service.parse.jstor.xml.IArticleTagParser;
-import edu.asu.diging.citesphere.importer.core.service.parse.jstor.xml.JStorArticleXmlIterator;
 
 @Service
 public class XMLFileHandler implements FileHandler {

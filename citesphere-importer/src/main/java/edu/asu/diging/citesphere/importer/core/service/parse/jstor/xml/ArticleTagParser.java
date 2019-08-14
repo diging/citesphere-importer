@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import org.w3c.dom.Node;
 
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
-import edu.asu.diging.citesphere.importer.core.model.impl.JournalMeta;
+import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
 
 @Component
 public class ArticleTagParser implements IArticleTagParser {
@@ -37,7 +37,7 @@ public class ArticleTagParser implements IArticleTagParser {
      * @see edu.asu.diging.citesphere.importer.core.service.parse.jstor.xml.IArticleTagParser#parseJournalMetaTag(org.w3c.dom.Node, edu.asu.diging.citesphere.importer.core.model.impl.JournalMeta)
      */
     @Override
-    public void parseJournalMetaTag(Node node, JournalMeta meta) {
+    public void parseJournalMetaTag(Node node, ContainerMeta meta) {
         JournalMetaTagHandler handler = journalMetaHandlers.get(node.getNodeName());
         if (handler != null) {
             handler.handle(node, meta);

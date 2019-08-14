@@ -6,6 +6,7 @@ import java.util.List;
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
 
+
 public class MultipleEntryIterator implements BibEntryIterator {
     
     private List<BibEntryIterator> iterators;
@@ -53,6 +54,11 @@ public class MultipleEntryIterator implements BibEntryIterator {
         if (iterator != null) {
             iterators.add(iterator);
         }
+    }
+
+    @Override
+    public void close() {
+        // nothing to do
     }
 
 }

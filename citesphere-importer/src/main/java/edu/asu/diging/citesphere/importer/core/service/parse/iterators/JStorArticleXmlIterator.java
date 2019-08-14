@@ -1,6 +1,8 @@
-package edu.asu.diging.citesphere.importer.core.service.parse.jstor.xml;
+package edu.asu.diging.citesphere.importer.core.service.parse.iterators;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -15,10 +17,11 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
-import edu.asu.diging.citesphere.importer.core.model.impl.Article;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
-import edu.asu.diging.citesphere.importer.core.model.impl.JournalMeta;
+import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
+import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
+import edu.asu.diging.citesphere.importer.core.service.parse.jstor.xml.IArticleTagParser;
 
 public class JStorArticleXmlIterator implements BibEntryIterator {
     
@@ -26,9 +29,10 @@ public class JStorArticleXmlIterator implements BibEntryIterator {
 
     private IArticleTagParser tagParserRegistry;
     private String filePath;
-    private Article article;
+    private BibEntry article;
     
     private boolean iteratorDone = false;
+    private Map<String, String> typeMap;
     
     public JStorArticleXmlIterator(String filePath, IArticleTagParser registry) {
         this.filePath = filePath;
@@ -37,6 +41,9 @@ public class JStorArticleXmlIterator implements BibEntryIterator {
     }
     
     private void init() {
+        typeMap = new HashMap<String, String>();
+        typeMap.put("research-article", Publication.ARTICLE);
+        typeMap.put("book-review", Publication.REVIEW);
         parseDocument();        
     }
     
@@ -52,20 +59,20 @@ public class JStorArticleXmlIterator implements BibEntryIterator {
             return;
         } 
         
-        article = new Article();
-        article.setArticleType(doc.getDocumentElement().getAttribute("article-type"));
+        article = new Publication();
+        article.setArticleType(typeMap.get(doc.getDocumentElement().getAttribute("article-type")));
         article.setJournalMeta(parseJournalMeta(doc.getDocumentElement()));
         article.setArticleMeta(parseArticleMeta(doc.getDocumentElement()));
         
     }
     
-    private JournalMeta parseJournalMeta(Element element) {
+    private ContainerMeta parseJournalMeta(Element element) {
         NodeList journalMetaList = element.getElementsByTagName("journal-meta");
         if (journalMetaList.getLength() == 0) {
             return null;
         }
         
-        JournalMeta meta = new JournalMeta();
+        ContainerMeta meta = new ContainerMeta();
         // there should only be one
         Node journalMetaNode = journalMetaList.item(0);
         
@@ -106,5 +113,10 @@ public class JStorArticleXmlIterator implements BibEntryIterator {
     @Override
     public boolean hasNext() {
         return !iteratorDone;
+    }
+
+    @Override
+    public void close() {
+        // nothing to do
     }
 }
