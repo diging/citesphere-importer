@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerFactoryConfigurationError;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +65,11 @@ public class JStorArticleXmlIterator implements BibEntryIterator {
         article.setArticleType(typeMap.get(doc.getDocumentElement().getAttribute("article-type")));
         article.setJournalMeta(parseJournalMeta(doc.getDocumentElement()));
         article.setArticleMeta(parseArticleMeta(doc.getDocumentElement()));
+        try {
+            parseBack(doc.getDocumentElement(), article.getArticleMeta());
+        } catch (TransformerConfigurationException | TransformerFactoryConfigurationError e) {
+            logger.error("Could not parse back.", e);
+        }
         
     }
     
@@ -96,6 +103,19 @@ public class JStorArticleXmlIterator implements BibEntryIterator {
             tagParserRegistry.parseArticleMetaTag(children.item(i), meta);
         }
         return meta;
+    }
+    
+    private void parseBack(Element element, ArticleMeta meta) throws TransformerConfigurationException, TransformerFactoryConfigurationError {
+        NodeList backList = element.getElementsByTagName("back");
+        if (backList.getLength() == 0) {
+            return;
+        }
+        Node backNode = backList.item(0);
+        NodeList children = backNode.getChildNodes();
+        
+        for (int i = 0; i<children.getLength(); i++) {
+            tagParserRegistry.parseArticleMetaTag(children.item(i), meta);
+        }
     }
     
     /* (non-Javadoc)
