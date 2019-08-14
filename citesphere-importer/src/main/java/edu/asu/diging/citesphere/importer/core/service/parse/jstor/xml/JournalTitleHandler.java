@@ -5,7 +5,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import edu.asu.diging.citesphere.importer.core.model.impl.JournalMeta;
+import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
 
 @Component
 public class JournalTitleHandler implements JournalMetaTagHandler {
@@ -16,7 +16,7 @@ public class JournalTitleHandler implements JournalMetaTagHandler {
     }
 
     @Override
-    public void handle(Node node, JournalMeta journalMeta) {
+    public void handle(Node node, ContainerMeta journalMeta) {
         if (node instanceof Element) {
             NodeList title = ((Element) node).getChildNodes();
             if (title != null) {
@@ -25,7 +25,7 @@ public class JournalTitleHandler implements JournalMetaTagHandler {
                     if (!titleNode.getNodeName().equals("journal-title")) {
                         continue;
                     } 
-                    journalMeta.setJournalTitle(titleNode.getTextContent());
+                    journalMeta.setContainerTitle(titleNode.getTextContent());
                     break;
                 }
             }

@@ -8,7 +8,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import edu.asu.diging.citesphere.importer.core.model.impl.JournalId;
-import edu.asu.diging.citesphere.importer.core.model.impl.JournalMeta;
+import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
 
 public class JournalIdHandlerTest extends TagHandlerTest {
 
@@ -22,7 +22,7 @@ public class JournalIdHandlerTest extends TagHandlerTest {
     @Test
     public void test_handle_oneId() {
         Node node = getNode("journal-id");
-        JournalMeta  meta = new JournalMeta();
+        ContainerMeta  meta = new ContainerMeta();
         handlerToTest.handle(node, meta);
         
         List<JournalId> ids = meta.getJournalIds();
@@ -34,7 +34,7 @@ public class JournalIdHandlerTest extends TagHandlerTest {
     @Test
     public void test_handle_twoIds() {
         Node node = getNode("journal-id");
-        JournalMeta  meta = new JournalMeta();
+        ContainerMeta  meta = new ContainerMeta();
         
         handlerToTest.handle(node, meta);
         

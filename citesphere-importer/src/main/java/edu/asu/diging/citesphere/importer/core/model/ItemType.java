@@ -4,6 +4,11 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 
+/**
+ * Enum of all Zotero item types and their string representation.
+ * @author jdamerow
+ *
+ */
 public enum ItemType {
     ARTWORK("artwork"),
     ATTACHMENT("attachment"),
