@@ -51,6 +51,7 @@ public class JStorArticleXmlIterator implements BibEntryIterator {
     
     private void parseDocument() {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        dbFactory.setNamespaceAware(true);
         DocumentBuilder dBuilder;
         Document doc;
         try {
