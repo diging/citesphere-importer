@@ -367,6 +367,9 @@ public class ExtraFieldHelper {
                         idx++;
                     }
                 }
+                if (ref.getTitle() != null) {
+                    refNode.put("title", ref.getTitle());
+                }
                 if (ref.getEndPage() != null) {
                     refNode.put("endPage", ref.getEndPage());
                 }
@@ -382,11 +385,29 @@ public class ExtraFieldHelper {
                 if (ref.getReferenceString() != null) {
                     refNode.put("referenceString", ref.getReferenceString());
                 }
+                if (ref.getReferenceStringRaw() != null) {
+                    refNode.put("referenceStringRaw", ref.getReferenceStringRaw());
+                }
                 if (ref.getSource() != null) {
                     refNode.put("source", ref.getSource());
                 }
+                if (ref.getVolume() != null) {
+                    refNode.put("volume", ref.getVolume());
+                }
                 if (ref.getYear() != null) {
                     refNode.put("year", ref.getYear());
+                }
+                if (ref.getPublicationType() != null) {
+                    refNode.put("publicationType", ref.getPublicationType());
+                }
+                if (ref.getCitationId()!= null) {
+                    refNode.put("citationId", ref.getCitationId());
+                }
+                if (ref.getReferenceId() != null) {
+                    refNode.put("referenceId", ref.getReferenceId());
+                }
+                if (ref.getReferenceLabel() != null) {
+                    refNode.put("referenceLabel", ref.getReferenceLabel());
                 }
             }
         }
