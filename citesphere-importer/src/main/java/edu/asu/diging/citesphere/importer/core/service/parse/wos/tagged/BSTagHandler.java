@@ -13,7 +13,7 @@ public class BSTagHandler implements WoSMetaTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry, boolean isColumnFormat) {
         String existing = entry.getContainerMeta().getSeriesSubTitle() != null ? entry.getContainerMeta().getSeriesSubTitle() : "";
         entry.getContainerMeta().setSeriesSubTitle(existing + value);
     }

@@ -17,15 +17,19 @@ public class AUTagHandler extends CreatorTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
-        Contributor contributor = createContributor(value, ContributionType.AUTHOR);
-        
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry,
+            boolean isColumnFormat) {
+
         if (entry.getArticleMeta().getContributors() == null) {
             entry.getArticleMeta().setContributors(new ArrayList<Contributor>());
         }
-        
-        entry.getArticleMeta().getContributors().add(contributor);
-    }
 
+        String[] values = splitValues(value, isColumnFormat);
+        for (String fieldValue : values) {
+            Contributor contributor = createContributor(fieldValue, ContributionType.AUTHOR);
+            entry.getArticleMeta().getContributors().add(contributor);
+        }
+
+    }
 
 }

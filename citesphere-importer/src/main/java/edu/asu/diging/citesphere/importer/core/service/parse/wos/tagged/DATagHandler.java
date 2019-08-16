@@ -14,7 +14,7 @@ public class DATagHandler implements WoSMetaTagHandler {
 
     @Override
     public void handle(String field, String value, String previousField, int fieldIdx,
-            BibEntry entry) {
+            BibEntry entry, boolean isColumnFormat) {
         entry.getArticleMeta().setRetrievalDate(value);
     }
 

@@ -13,8 +13,8 @@ public class VLTagHandler implements WoSMetaTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx,
-            BibEntry entry) {
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry,
+            boolean isColumnFormat) {
         String existing = entry.getArticleMeta().getVolume() != null ? entry.getArticleMeta().getVolume() : "";
         entry.getArticleMeta().setVolume(existing + value);
     }

@@ -16,11 +16,17 @@ public class BFTagHandler extends CreatorTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
+    public void handle(String field, String fieldValue, String previousField, int fieldIdx, BibEntry entry,
+            boolean isColumnFormat) {
         if (entry.getContainerMeta().getContributors() == null) {
             entry.getContainerMeta().setContributors(new ArrayList<>());
         }
 
-        addFullnameToContributor(value, fieldIdx, entry.getContainerMeta().getContributors(), ContributionType.AUTHOR);
+        String[] values = splitValues(fieldValue, isColumnFormat);
+        for (int i = 0; i < values.length; i++) {
+            addFullnameToContributor(values[i], fieldIdx == -1 ? i : fieldIdx,
+                    entry.getContainerMeta().getContributors(), ContributionType.AUTHOR);
+        }
+
     }
 }

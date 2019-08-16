@@ -1,6 +1,8 @@
 package edu.asu.diging.citesphere.importer.core.service.parse.wos.tagged;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Component;
 
@@ -22,7 +24,16 @@ public class C1TagHandler implements WoSMetaTagHandler {
      */
     @Override
     public void handle(String field, String value, String previousField, int fieldIdx,
-            BibEntry entry) {
+            BibEntry entry, boolean isColumnFormat) {
+        
+        Pattern pattern = Pattern.compile("((\\[.+?\\].+?)(;|$))+");
+        Matcher match = pattern.matcher(value);
+        while (match.find()) {
+            setAddress(match.group(2), entry);
+        }
+    }
+
+    private void setAddress(String value, BibEntry entry) {
         String[] authorsAddress = value.split("]", 2);
         if (authorsAddress.length == 2) {
             // cut [ from author string
@@ -31,7 +42,7 @@ public class C1TagHandler implements WoSMetaTagHandler {
             
             for (String author : authorsList) {
                 for (Contributor contributor : entry.getArticleMeta().getContributors()) {
-                    if (contributor.getFullStandardizeName().equals(author) || contributor.getFullName().equals(author)) {
+                    if ((contributor.getFullStandardizeName() != null && contributor.getFullStandardizeName().equals(author)) || (contributor.getFullName() != null && contributor.getFullName().equals(author))) {
                         Affiliation affiliation = new Affiliation();
                         affiliation.setName(authorsAddress[1]);
                         if (contributor.getAffiliations() == null) {

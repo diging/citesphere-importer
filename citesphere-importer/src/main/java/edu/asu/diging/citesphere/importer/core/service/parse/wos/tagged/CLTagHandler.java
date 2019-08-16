@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 
 @Component
-public class CLTagHandler implements WoSMetaTagHandler {
+public class CLTagHandler extends MetaTagHandler {
 
     @Override
     public String handledTag() {
@@ -14,7 +14,7 @@ public class CLTagHandler implements WoSMetaTagHandler {
 
     @Override
     public void handle(String field, String value, String previousField, int fieldIdx,
-            BibEntry entry) {
+            BibEntry entry, boolean isColumnFormat) {
         String existing = entry.getArticleMeta().getConferenceLocation() != null ? entry.getArticleMeta().getConferenceLocation() : "";
         entry.getArticleMeta().setConferenceLocation(existing + value);
     }

@@ -14,7 +14,7 @@ public class PATagHandler implements WoSMetaTagHandler {
 
     @Override
     public void handle(String field, String value, String previousField, int fieldIdx,
-            BibEntry entry) {
+            BibEntry entry, boolean isColumnFormat) {
         String existing = entry.getContainerMeta().getPublisherAddress() != null ? entry.getContainerMeta().getPublisherAddress() : "";
         entry.getContainerMeta().setPublisherAddress(existing + value);
     }

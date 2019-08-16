@@ -13,8 +13,8 @@ public class SUTagHandler implements WoSMetaTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx,
-            BibEntry entry) {
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry,
+            boolean isColumnFormat) {
         String existing = entry.getArticleMeta().getSupplement() != null ? entry.getArticleMeta().getSupplement() : "";
         entry.getArticleMeta().setSupplement(existing + value);
     }

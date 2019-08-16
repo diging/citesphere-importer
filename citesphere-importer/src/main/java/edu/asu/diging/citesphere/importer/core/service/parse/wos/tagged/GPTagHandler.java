@@ -9,7 +9,7 @@ import edu.asu.diging.citesphere.importer.core.model.impl.ContributionType;
 import edu.asu.diging.citesphere.importer.core.model.impl.Contributor;
 
 @Component
-public class GPTagHandler implements WoSMetaTagHandler {
+public class GPTagHandler extends MetaTagHandler {
 
     @Override
     public String handledTag() {
@@ -17,18 +17,22 @@ public class GPTagHandler implements WoSMetaTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
-        Contributor contributor = new Contributor();
-        contributor.setContributionType(ContributionType.AUTHOR);
-        contributor.setFullStandardizedName(value);
-        contributor.setSurname(value);
-        contributor.setFullSurname(value);
-        
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry,
+            boolean isColumnFormat) {
         if (entry.getArticleMeta().getContributors() == null) {
             entry.getArticleMeta().setContributors(new ArrayList<Contributor>());
         }
-        
-        entry.getArticleMeta().getContributors().add(contributor);
+
+        String[] contributors = splitValues(value, isColumnFormat);
+        for (String contrib : contributors) {
+            Contributor contributor = new Contributor();
+            contributor.setContributionType(ContributionType.AUTHOR);
+            contributor.setFullStandardizedName(contrib);
+            contributor.setSurname(contrib);
+            contributor.setFullSurname(contrib);
+
+            entry.getArticleMeta().getContributors().add(contributor);
+        }
     }
 
 }

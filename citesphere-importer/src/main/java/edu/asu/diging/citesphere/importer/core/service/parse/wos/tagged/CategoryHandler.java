@@ -7,7 +7,7 @@ import edu.asu.diging.citesphere.importer.core.model.impl.ArticleCategory;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleCategoryGroup;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
 
-public abstract class CategoryHandler implements WoSMetaTagHandler {
+public abstract class CategoryHandler extends MetaTagHandler {
 
     protected void addCategories(String value, String previousField, ArticleMeta articleMeta, String categoryGroup) {
         if (articleMeta.getCategories() == null) {

@@ -13,8 +13,10 @@ public class FUTagHandler implements WoSMetaTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
-        String existing = entry.getArticleMeta().getFundingInfo() != null ? entry.getArticleMeta().getFundingInfo() : "";
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry,
+            boolean isColumnFormat) {
+        String existing = entry.getArticleMeta().getFundingInfo() != null ? entry.getArticleMeta().getFundingInfo()
+                : "";
         entry.getArticleMeta().setFundingInfo(existing + value);
     }
 

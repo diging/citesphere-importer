@@ -20,7 +20,7 @@ public class RITagHandler extends ContributorIdsHandler implements WoSMetaTagHan
      * matched with id, ids are added to article meta object directly.
      */
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry, boolean isColumnFormat) {
         parseIds(value, entry.getArticleMeta(), ID_SYSTEM);
     }
 

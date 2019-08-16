@@ -14,7 +14,7 @@ public class CTTagHandler implements WoSMetaTagHandler {
 
     @Override
     public void handle(String field, String value, String previousField, int fieldIdx,
-            BibEntry entry) {
+            BibEntry entry, boolean isColumnFormat) {
         String existing = entry.getArticleMeta().getConferenceTitle() != null ? entry.getArticleMeta().getConferenceTitle() : "";
         entry.getArticleMeta().setConferenceTitle(existing + value);
     }

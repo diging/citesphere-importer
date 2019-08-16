@@ -14,7 +14,7 @@ public class PNTagHandler implements WoSMetaTagHandler {
 
     @Override
     public void handle(String field, String value, String previousField, int fieldIdx,
-            BibEntry entry) {
+            BibEntry entry, boolean isColumnFormat) {
         String existing = entry.getArticleMeta().getPartNumber() != null ? entry.getArticleMeta().getPartNumber() : "";
         entry.getArticleMeta().setPartNumber(existing + value);
     }

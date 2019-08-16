@@ -16,12 +16,24 @@ public class AFTagHandler extends CreatorTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry,
+            boolean isColumnFormat) {
         if (entry.getArticleMeta().getContributors() == null) {
             entry.getArticleMeta().setContributors(new ArrayList<>());
         }
 
-        addFullnameToContributor(value, fieldIdx, entry.getArticleMeta().getContributors(), ContributionType.AUTHOR);
+        if (isColumnFormat) {
+            if (value != null && !value.trim().isEmpty()) {
+                String[] authors = value.split(";");
+                for (fieldIdx = 0; fieldIdx < authors.length; fieldIdx++) {
+                    addFullnameToContributor(authors[fieldIdx], fieldIdx, entry.getArticleMeta().getContributors(),
+                            ContributionType.AUTHOR);
+                }
+            }
+        } else {
+            addFullnameToContributor(value, fieldIdx, entry.getArticleMeta().getContributors(),
+                    ContributionType.AUTHOR);
+        }
     }
 
 }
