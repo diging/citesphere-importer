@@ -79,7 +79,7 @@ public class WoSTaggedFieldsIterator implements BibEntryIterator {
             } else {
                 fieldIdx = 0;
             }
-            tagParserRegistry.parseMetaTag(field, value, previousField, fieldIdx, entry);
+            tagParserRegistry.parseMetaTag(field, value, previousField, fieldIdx, entry, false);
 
             previousField = field;
         }

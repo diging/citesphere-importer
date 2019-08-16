@@ -16,7 +16,8 @@ public class ARTagHandler extends CreatorTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry,
+            boolean isColumnFormat) {
         if (entry.getArticleMeta().getArticleIds() == null) {
             entry.getArticleMeta().setArticleIds(new ArrayList<>());
         }

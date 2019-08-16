@@ -6,6 +6,6 @@ public interface WoSMetaTagHandler {
 
     String handledTag();
 
-    void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry);
+    void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry, boolean isColumnFormat);
 
 }

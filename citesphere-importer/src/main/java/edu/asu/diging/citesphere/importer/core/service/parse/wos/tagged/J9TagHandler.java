@@ -17,7 +17,7 @@ public class J9TagHandler implements WoSMetaTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry, boolean isColumnFormat) {
         if (entry.getContainerMeta().getJournalAbbreviations() == null) {
             entry.getContainerMeta().setJournalAbbreviations(new ArrayList<>());
         }

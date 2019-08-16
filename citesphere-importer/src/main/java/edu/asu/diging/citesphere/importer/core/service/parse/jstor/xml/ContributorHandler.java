@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import edu.asu.diging.citesphere.importer.core.model.impl.Affiliation;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
@@ -17,6 +17,9 @@ import edu.asu.diging.citesphere.importer.core.model.impl.Contributor;
 @Component
 public class ContributorHandler extends TagHandler implements ArticleMetaTagHandler {
 
+    @Autowired
+    private ContributorHelper contributorHelper;
+    
     @Override
     public String handledTag() {
         return "contrib-group";
@@ -38,8 +41,7 @@ public class ContributorHandler extends TagHandler implements ArticleMetaTagHand
                 if (!names.isEmpty()) {
                     // there should be only one name inside a contributor tag
                     Node stringName = names.get(0);
-                    NodeList nameParts = stringName.getChildNodes();
-                    setContributorName(contributor, nameParts);
+                    contributorHelper.setContributorData(stringName, contributor);
                     
                     articleMeta.getContributors().add(contributor);
                 }
@@ -126,18 +128,5 @@ public class ContributorHandler extends TagHandler implements ArticleMetaTagHand
         }
     }
 
-    private void setContributorName(Contributor contributor, NodeList nameParts) {
-        if (nameParts != null) {
-            for (int i = 0; i<nameParts.getLength(); i++) {
-                Node namePart = nameParts.item(i);
-                if (namePart.getNodeName().equals("given-names")) {
-                    contributor.setGivenName(namePart.getTextContent());
-                    continue;
-                }
-                if (namePart.getNodeName().equals("surname")) {
-                    contributor.setSurname(namePart.getTextContent());
-                }
-            }
-        }
-    }
+    
 }

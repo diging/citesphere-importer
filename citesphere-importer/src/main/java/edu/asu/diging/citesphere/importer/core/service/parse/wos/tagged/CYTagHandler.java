@@ -14,7 +14,7 @@ public class CYTagHandler implements WoSMetaTagHandler {
 
     @Override
     public void handle(String field, String value, String previousField, int fieldIdx,
-            BibEntry entry) {
+            BibEntry entry, boolean isColumnFormat) {
         String existing = entry.getArticleMeta().getConferenceDate() != null ? entry.getArticleMeta().getConferenceDate() : "";
         entry.getArticleMeta().setConferenceDate(existing + value);
     }

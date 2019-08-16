@@ -13,9 +13,11 @@ public class HOTagHandler implements WoSMetaTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx,
-            BibEntry entry) {
-        String existing = entry.getArticleMeta().getConferenceHost() != null ? entry.getArticleMeta().getConferenceHost() : "";
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry,
+            boolean isColumnFormat) {
+        String existing = entry.getArticleMeta().getConferenceHost() != null
+                ? entry.getArticleMeta().getConferenceHost()
+                : "";
         entry.getArticleMeta().setConferenceHost(existing + value);
     }
 

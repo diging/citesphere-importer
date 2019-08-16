@@ -9,7 +9,7 @@ import edu.asu.diging.citesphere.importer.core.model.impl.Issn;
 
 @Component
 public class SNTagHandler extends IdHandler {
-    
+
     private final String ISSN = "issn";
 
     @Override
@@ -18,11 +18,12 @@ public class SNTagHandler extends IdHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry,
+            boolean isColumnFormat) {
         if (entry.getContainerMeta().getIssns() == null) {
             entry.getContainerMeta().setIssns(new ArrayList<>());
         }
-        
+
         Issn issn = new Issn();
         issn.setIssn(value);
         issn.setPubType(ISSN);

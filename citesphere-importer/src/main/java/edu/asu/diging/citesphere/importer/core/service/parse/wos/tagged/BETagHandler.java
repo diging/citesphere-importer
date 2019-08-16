@@ -17,13 +17,16 @@ public class BETagHandler extends CreatorTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
+    public void handle(String field, String fieldValue, String previousField, int fieldIdx, BibEntry entry, boolean isColumnFormat) {
         if (entry.getContainerMeta().getContributors() == null) {
             entry.getContainerMeta().setContributors(new ArrayList<Contributor>());
         }
         
-        Contributor c = createContributor(value, ContributionType.EDITOR);
-        entry.getContainerMeta().getContributors().add(c);
+        String[] values = splitValues(fieldValue, isColumnFormat);
+        for (String value : values) {
+            Contributor c = createContributor(value, ContributionType.EDITOR);
+            entry.getContainerMeta().getContributors().add(c);
+        }
     }
 
 }
