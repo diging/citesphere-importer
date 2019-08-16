@@ -7,9 +7,9 @@ import edu.asu.diging.citesphere.importer.core.model.impl.ArticleCategory;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleCategoryGroup;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
 
-public abstract class CategoryHandler implements WoSMetaTagHandler {
+public abstract class CategoryHandler extends MetaTagHandler {
 
-    protected void addCategories(String value, String previousField, ArticleMeta articleMeta, String categoryGroup) {
+    protected void addCategories(String value, String previousField, ArticleMeta articleMeta, String categoryGroup, boolean isColumnFormat) {
         if (articleMeta.getCategories() == null) {
             articleMeta.setCategories(new ArrayList<>());
         }
@@ -36,7 +36,7 @@ public abstract class CategoryHandler implements WoSMetaTagHandler {
 
                 // if the last line had categories and the last one was incomplete (didn't end
                 // with ';')
-                if (i == 0 && previousField.equals(handledTag()) && categoryList.size() > 0
+                if (!isColumnFormat && i == 0 && previousField.equals(handledTag()) && categoryList.size() > 0
                         && categoryList.get(categoryList.size() - 1).isMightBeIncomplete()) {
                     categoryObj = categoryList.get(categoryList.size() - 1);
                     categoryObj.setSubject(categoryObj.getSubject() + " " + categories[i]);

@@ -14,7 +14,7 @@ public class PUTagHandler implements WoSMetaTagHandler {
 
     @Override
     public void handle(String field, String value, String previousField, int fieldIdx,
-            BibEntry entry) {
+            BibEntry entry, boolean isColumnFormat) {
         String existing = entry.getContainerMeta().getPublisherName() != null ? entry.getContainerMeta().getPublisherName() : "";
         entry.getContainerMeta().setPublisherName(existing + value);
     }

@@ -4,7 +4,7 @@ import java.util.List;
 
 import edu.asu.diging.citesphere.importer.core.model.impl.Contributor;
 
-public abstract class CreatorTagHandler implements WoSMetaTagHandler {
+public abstract class CreatorTagHandler extends MetaTagHandler {
 
     protected Contributor createContributor(String name, String contributionType) {
         Contributor contributor = new Contributor();
@@ -17,14 +17,15 @@ public abstract class CreatorTagHandler implements WoSMetaTagHandler {
             } else if (nameParts.length == 2) {
                 contributor.setSurname(nameParts[0]);
                 contributor.setGivenName(nameParts[1]);
-            } else {
-                contributor.setSurname(name);
             }
+        } else {
+            contributor.setSurname(name);
         }
         return contributor;
     }
 
-    protected void addFullnameToContributor(String nameString, int fieldIdx, List<Contributor> contributors, String contributionType) {
+    protected void addFullnameToContributor(String nameString, int fieldIdx, List<Contributor> contributors,
+            String contributionType) {
         Name name = getName(nameString);
 
         // we assume that the order of standardized names is the same as of fullnames

@@ -16,7 +16,8 @@ public class D2TagHandler extends CreatorTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry,
+            boolean isColumnFormat) {
         if (entry.getContainerMeta().getJournalIds() == null) {
             entry.getContainerMeta().setJournalIds(new ArrayList<>());
         }

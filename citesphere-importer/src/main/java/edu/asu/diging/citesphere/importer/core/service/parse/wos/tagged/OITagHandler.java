@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 
 @Component
-public class OITagHandler extends ContributorIdsHandler implements WoSMetaTagHandler {
+public class OITagHandler extends ContributorIdsHandler {
 
     private final String ID_SYSTEM = "orcid";
 
@@ -20,8 +20,12 @@ public class OITagHandler extends ContributorIdsHandler implements WoSMetaTagHan
      * matched with id, ids are added to article meta object directly.
      */
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
-        parseIds(value, entry.getArticleMeta(), ID_SYSTEM);
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry,
+            boolean isColumnFormat) {
+        String[] ids = splitValues(value, isColumnFormat);
+        for (String id : ids) {
+            parseIds(id, entry.getArticleMeta(), ID_SYSTEM);
+        }
     }
 
 }

@@ -13,8 +13,10 @@ public class FXTagHandler implements WoSMetaTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
-        String existing = entry.getArticleMeta().getFundingText() != null ? entry.getArticleMeta().getFundingText() : "";
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry,
+            boolean isColumnFormat) {
+        String existing = entry.getArticleMeta().getFundingText() != null ? entry.getArticleMeta().getFundingText()
+                : "";
         entry.getArticleMeta().setFundingText(existing + value);
     }
 

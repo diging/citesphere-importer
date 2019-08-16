@@ -18,7 +18,8 @@ public class HCTagHandler implements WoSMetaTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry,
+            boolean isColumnFormat) {
         if (entry.getArticleMeta().getAdditionalData() == null) {
             entry.getArticleMeta().setAdditionalData(new ArrayList<>());
         }

@@ -13,8 +13,10 @@ public class SETagHandler implements WoSMetaTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
-        String existing = entry.getContainerMeta().getSeriesTitle() != null ? entry.getContainerMeta().getSeriesTitle() : "";
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry,
+            boolean isColumnFormat) {
+        String existing = entry.getContainerMeta().getSeriesTitle() != null ? entry.getContainerMeta().getSeriesTitle()
+                : "";
         entry.getContainerMeta().setSeriesTitle(existing + value);
     }
 

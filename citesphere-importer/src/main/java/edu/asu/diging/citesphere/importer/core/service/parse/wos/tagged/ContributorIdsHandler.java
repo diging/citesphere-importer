@@ -6,7 +6,7 @@ import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
 import edu.asu.diging.citesphere.importer.core.model.impl.Contributor;
 import edu.asu.diging.citesphere.importer.core.model.impl.ContributorId;
 
-public class ContributorIdsHandler {
+public abstract class ContributorIdsHandler extends MetaTagHandler {
 
     public ContributorIdsHandler() {
         super();

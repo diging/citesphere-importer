@@ -141,7 +141,9 @@ public class ImportProcessor implements IImportProcessor {
             }
 
         }
-
+        
+        bibIterator.close();
+        
         ItemCreationResponse response = null;
         if (entryCounter > 0) {
             response = submitEntries(root, info);

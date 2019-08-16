@@ -13,10 +13,13 @@ public class SPTagHandler implements WoSMetaTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx,
-            BibEntry entry) {
-        String existing = entry.getArticleMeta().getConferenceSponsor() != null ? entry.getArticleMeta().getConferenceSponsor() : "";
-        entry.getArticleMeta().setConferenceSponsor(existing + value);;
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry,
+            boolean isColumnFormat) {
+        String existing = entry.getArticleMeta().getConferenceSponsor() != null
+                ? entry.getArticleMeta().getConferenceSponsor()
+                : "";
+        entry.getArticleMeta().setConferenceSponsor(existing + value);
+        ;
     }
 
 }

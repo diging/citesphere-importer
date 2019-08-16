@@ -13,8 +13,11 @@ public class RPTagHandler implements WoSMetaTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
-        String existing = entry.getArticleMeta().getReprintAddress() != null ? entry.getArticleMeta().getReprintAddress() : "";
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry,
+            boolean isColumnFormat) {
+        String existing = entry.getArticleMeta().getReprintAddress() != null
+                ? entry.getArticleMeta().getReprintAddress()
+                : "";
         entry.getArticleMeta().setReprintAddress(existing + value);
     }
 

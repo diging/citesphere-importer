@@ -13,7 +13,8 @@ public class TITagHandler implements WoSMetaTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry,
+            boolean isColumnFormat) {
         String title = entry.getArticleMeta().getArticleTitle() != null ? entry.getArticleMeta().getArticleTitle() : "";
         entry.getArticleMeta().setArticleTitle(title + value);
     }

@@ -16,14 +16,13 @@ public class MATagHandler implements WoSMetaTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
-        // apparently it's just a random list of email addresses that we can't easily assign
-        // to contributors; so we'll just save them.
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry,
+            boolean isColumnFormat) {
         if (entry.getArticleMeta().getAdditionalData() == null) {
             entry.getArticleMeta().setAdditionalData(new ArrayList<>());
         }
-        
-        entry.getArticleMeta().getAdditionalData().add(new AdditionalData(AdditionalData.MEETING_ABSTRACT, value)); 
+
+        entry.getArticleMeta().getAdditionalData().add(new AdditionalData(AdditionalData.MEETING_ABSTRACT, value));
     }
 
 }

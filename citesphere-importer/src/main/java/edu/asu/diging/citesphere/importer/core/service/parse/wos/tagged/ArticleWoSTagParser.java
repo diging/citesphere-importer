@@ -30,10 +30,10 @@ public class ArticleWoSTagParser implements IArticleWoSTagParser {
      * @see edu.asu.diging.citesphere.importer.core.service.parse.jstor.xml.IArticleTagParser#parseArticleMetaTag(org.w3c.dom.Node, edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta)
      */
     @Override
-    public void parseMetaTag(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
+    public void parseMetaTag(String field, String value, String previousField, int fieldIdx, BibEntry entry, boolean isColumnFormat) {
         WoSMetaTagHandler handler = metaHanders.get(field);
         if (handler != null) {
-            handler.handle(field, value, previousField, fieldIdx, entry);
+            handler.handle(field, value, previousField, fieldIdx, entry, isColumnFormat);
         }
     }
 }

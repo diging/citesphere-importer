@@ -17,13 +17,14 @@ public class DETagHandler implements WoSMetaTagHandler {
     }
 
     @Override
-    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry) {
+    public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry,
+            boolean isColumnFormat) {
         if (entry.getArticleMeta().getKeywords() == null) {
             entry.getArticleMeta().setKeywords(new ArrayList<Keyword>());
         }
-        
+
         String[] keywords = value.split(";");
-        
+
         if (keywords.length > 0) {
             for (String keyword : keywords) {
                 Keyword authorKeyword = new Keyword();
