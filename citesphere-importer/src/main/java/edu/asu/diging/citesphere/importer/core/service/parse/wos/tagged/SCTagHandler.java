@@ -17,7 +17,7 @@ public class SCTagHandler extends CategoryHandler {
     @Override
     public void handle(String field, String value, String previousField, int fieldIdx, BibEntry entry,
             boolean isColumnFormat) {
-        addCategories(value, previousField, entry.getArticleMeta(), CATEGORY_GROUP);
+        addCategories(value, previousField, entry.getArticleMeta(), CATEGORY_GROUP, isColumnFormat);
     }
 
 }

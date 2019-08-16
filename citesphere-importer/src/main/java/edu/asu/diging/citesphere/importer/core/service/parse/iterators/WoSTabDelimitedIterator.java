@@ -61,8 +61,12 @@ public class WoSTabDelimitedIterator implements BibEntryIterator {
             return null;
         }
 
-        if (line != null && line.length <= headers.length) {
+        if (line != null) {
             for (int i = 0; i < line.length; i++) {
+                // apparently some lines have additional tabs at the end
+                if (i >= headers.length) {
+                    break;
+                }
                 String field = headers[i];
                 String value = line[i];
                 tagParserRegistry.parseMetaTag(field, value, null, -1, entry, true);
