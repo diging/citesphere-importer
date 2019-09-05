@@ -31,6 +31,8 @@ public abstract class CreatorTagHandler extends MetaTagHandler {
         // we assume that the order of standardized names is the same as of fullnames
         if (contributors.size() > fieldIdx) {
             Contributor c = contributors.get(fieldIdx);
+            c.setGivenName(name.givenName);
+            c.setSurname(name.surname);
             c.setFullGivenName(name.givenName);
             c.setFullSurname(name.surname);
             c.setFullName(nameString);
