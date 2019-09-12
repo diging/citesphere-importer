@@ -445,13 +445,17 @@ public class ExtraFieldHelper {
             creatorNode.put("name", String.join(" ", fullNameParts));
             creatorNode.put("firstName", contrib.getFullGivenName());
             creatorNode.put("lastName", contrib.getFullSurname());
-            creatorNode.put("fullName", String.join(" ", fullNameParts));
         } else {
             creatorNode.put("name", String.join(" ", nameParts));
             creatorNode.put("firstName", contrib.getGivenName());
             creatorNode.put("lastName", contrib.getSurname());
         }
-        creatorNode.put("fullStandardizeName", String.join(" ", nameParts));
+        creatorNode.put("fullName", String.join(" ", fullNameParts));
+        creatorNode.put("fullFirstName", contrib.getFullGivenName());
+        creatorNode.put("fullLastName", contrib.getFullSurname());
+        creatorNode.put("standardizeName", String.join(" ", nameParts));
+        creatorNode.put("standardizeFirstName", contrib.getGivenName());
+        creatorNode.put("standardizeLastName", contrib.getSurname());
         creatorNode.put("positionInList", idx);
 
         ArrayNode affiliationArray = creatorNode.arrayNode();
