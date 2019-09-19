@@ -2,14 +2,18 @@ package edu.asu.diging.citesphere.importer.core.service.parse.impl;
 
 import java.io.File;
 import java.io.IOException;
+
 import java.nio.charset.StandardCharsets;
+
 import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.commons.io.input.BOMInputStream;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import edu.asu.diging.citesphere.importer.core.exception.HandlerTestException;
 import edu.asu.diging.citesphere.importer.core.exception.IteratorCreationException;
 import edu.asu.diging.citesphere.importer.core.service.impl.JobInfo;
