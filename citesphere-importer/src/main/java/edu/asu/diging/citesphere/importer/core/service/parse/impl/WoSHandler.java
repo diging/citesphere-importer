@@ -37,14 +37,11 @@ public class WoSHandler implements FileHandler {
             BOMInputStream inputStream;
             inputStream = new BOMInputStream(FileUtils.openInputStream(file), false, ByteOrderMark.UTF_8, 
                     ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_32BE, ByteOrderMark.UTF_32LE);
-        
             String content;
             if (inputStream.hasBOM()) {
                 content = IOUtils.toString(inputStream, inputStream.getBOMCharsetName());
-            } else {
-                content = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+                FileUtils.write(file, content, "UTF8");
             }
-            FileUtils.write(file, content, "UTF8");
         } catch (IOException e1) {
             throw new HandlerTestException("Unsupported file format.", e1);
         }
