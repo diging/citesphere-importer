@@ -63,6 +63,7 @@ public class WoSHandler implements FileHandler {
                 // followed by a space; if they all match, we assume it's WoS' data format.
                 while (it.hasNext() && linesRead < linesToRead) {
                     String line = it.nextLine();
+                    line = line.replaceAll("\\p{C}", "");
                     if (!line.matches("([A-Z0-9]{2}| {2})( .*$|$)") && !line.trim().isEmpty()) {
                         return false;
                     }
