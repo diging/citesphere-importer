@@ -1,5 +1,8 @@
 package edu.asu.diging.citesphere.importer.core.service.impl;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class JobInfo {
 
     private String zotero;

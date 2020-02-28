@@ -200,6 +200,7 @@ public class CitesphereConnector implements ICitesphereConnector {
             }
             
             // let's try again after getting a new OAuth token
+            entity = buildHeaders(apiToken);
             response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
         }
         return response;
