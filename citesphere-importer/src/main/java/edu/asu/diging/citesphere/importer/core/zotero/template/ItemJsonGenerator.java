@@ -293,11 +293,16 @@ public abstract class ItemJsonGenerator {
     }
     
     protected void fillContributorName(Contributor contributor, ObjectNode contributorNode) {
-        if (contributor.getGivenName() != null && !contributor.getGivenName().trim().isEmpty()
+        if (contributor.getFullGivenName() != null && !contributor.getFullGivenName().trim().isEmpty()
+                && contributor.getFullSurname() != null && !contributor.getFullSurname().trim().isEmpty()) {
+            contributorNode.put("firstName", contributor.getFullGivenName());
+            contributorNode.put("lastName", contributor.getFullSurname());
+        } else if (contributor.getFullSurname() != null && !contributor.getFullSurname().trim().isEmpty()) {
+            contributorNode.put("name", contributor.getFullSurname());
+        } else if (contributor.getGivenName() != null && !contributor.getGivenName().trim().isEmpty()
                 && contributor.getSurname() != null && !contributor.getSurname().trim().isEmpty()) {
             contributorNode.put("firstName", contributor.getGivenName());
             contributorNode.put("lastName", contributor.getSurname());
-
         } else if (contributor.getGivenName() != null && !contributor.getGivenName().trim().isEmpty()) {
             contributorNode.put("name", contributor.getGivenName());
         } else if (contributor.getSurname() != null && !contributor.getSurname().trim().isEmpty()) {

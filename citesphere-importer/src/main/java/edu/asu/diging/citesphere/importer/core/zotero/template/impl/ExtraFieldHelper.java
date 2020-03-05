@@ -433,9 +433,29 @@ public class ExtraFieldHelper {
         if (contrib.getSurname() != null && !contrib.getSurname().isEmpty()) {
             nameParts.add(contrib.getSurname());
         }
-        creatorNode.put("name", String.join(" ", nameParts));
-        creatorNode.put("firstName", contrib.getGivenName());
-        creatorNode.put("lastName", contrib.getSurname());
+
+        List<String> fullNameParts = new ArrayList<>();
+        if (contrib.getFullGivenName() != null && !contrib.getFullGivenName().isEmpty()) {
+            fullNameParts.add(contrib.getFullGivenName());
+        }
+        if (contrib.getFullSurname() != null && !contrib.getFullSurname().isEmpty()) {
+            fullNameParts.add(contrib.getFullSurname());
+        }
+        if(fullNameParts.size() != 0) {
+            creatorNode.put("name", String.join(" ", fullNameParts));
+            creatorNode.put("firstName", contrib.getFullGivenName());
+            creatorNode.put("lastName", contrib.getFullSurname());
+        } else {
+            creatorNode.put("name", String.join(" ", nameParts));
+            creatorNode.put("firstName", contrib.getGivenName());
+            creatorNode.put("lastName", contrib.getSurname());
+        }
+        creatorNode.put("fullName", String.join(" ", fullNameParts));
+        creatorNode.put("fullFirstName", contrib.getFullGivenName());
+        creatorNode.put("fullLastName", contrib.getFullSurname());
+        creatorNode.put("standardizedName", String.join(" ", nameParts));
+        creatorNode.put("standardizedFirstName", contrib.getGivenName());
+        creatorNode.put("standardizedLastName", contrib.getSurname());
         creatorNode.put("positionInList", idx);
 
         ArrayNode affiliationArray = creatorNode.arrayNode();
