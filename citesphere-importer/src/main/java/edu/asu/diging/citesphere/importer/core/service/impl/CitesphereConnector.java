@@ -63,6 +63,15 @@ public class CitesphereConnector implements ICitesphereConnector {
     @Value("${_citesphere_download_path}")
     private String downloadPath;
     
+    @Value("${_citesphere_token_endpoint}")
+    private String tokenEndpoint;
+
+    @Value("${_citesphere_upload_path}")
+    private String uploadPath;
+    
+    @Value("${_citesphere_job_info_path}")
+    private String jobInfoPath;
+    
     private RestTemplate restTemplate;
     
     private String accessToken;
@@ -95,7 +104,7 @@ public class CitesphereConnector implements ICitesphereConnector {
     @Override
     public JobInfo getJobInfo(String apiToken) throws CitesphereCommunicationException {
         @SuppressWarnings("unchecked")
-        ResponseEntity<String> response = (ResponseEntity<String>) makeApiCall("api/v1/job/info", apiToken, String.class);
+        ResponseEntity<String> response = (ResponseEntity<String>) makeApiCall(jobInfoPath, apiToken, String.class);
         HttpStatus status = response.getStatusCode();
         
         JobInfo info = null;
@@ -159,7 +168,7 @@ public class CitesphereConnector implements ICitesphereConnector {
         
         Map<HttpStatus, String> response;
         try {
-            response = restTemplate.execute("api/v1/upload", HttpMethod.GET, callback, responseExtractor);
+            response = restTemplate.execute(uploadPath, HttpMethod.GET, callback, responseExtractor);
         } catch (RestClientException ex) {
             throw new CitesphereCommunicationException("Could not understand server.", ex);
         }
@@ -171,7 +180,7 @@ public class CitesphereConnector implements ICitesphereConnector {
             }
             
             // let's try again after getting a new OAuth token
-            response = restTemplate.execute("api/v1/upload", HttpMethod.GET, callback, responseExtractor);
+            response = restTemplate.execute(uploadPath, HttpMethod.GET, callback, responseExtractor);
         }
         
         String filepath = null;
@@ -224,7 +233,7 @@ public class CitesphereConnector implements ICitesphereConnector {
         HttpEntity<String> entity = new HttpEntity<>("body", headers);
 
         // not working? FIXME
-        ResponseEntity<String> response = restTemplate.exchange("api/v1/oauth/token?grant_type=client_credentials", HttpMethod.POST, entity, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(tokenEndpoint, HttpMethod.POST, entity, String.class);
         
         ObjectMapper mapper = new ObjectMapper();
         JsonNode node = null;
