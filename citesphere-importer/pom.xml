@@ -16,6 +16,8 @@
         <thymeleaf.version>3.0.11.RELEASE</thymeleaf.version>
         <spring.kafka.version>2.2.6.RELEASE</spring.kafka.version>
         <citesphere.messages.version>0.2</citesphere.messages.version>
+        <citesphere.model.version>1.12</citesphere.model.version>
+        <spring-security-oauth2-version>2.4.0.RELEASE</spring-security-oauth2-version>
 
         <admin.password>$2a$04$oQo44vqcDIFRoYKiAXoNheurzkwX9dcNmowvTX/hsWuBMwijqn44i</admin.password>
 
@@ -69,7 +71,11 @@
             <artifactId>citesphere-messages</artifactId>
             <version>${citesphere.messages.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>edu.asu.diging</groupId>
+            <artifactId>citesphere-model</artifactId>
+            <version>${citesphere.model.version}</version>
+        </dependency>
         <!-- Spring -->
         <dependency>
             <groupId>org.springframework</groupId>
@@ -120,6 +126,12 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.security.oauth</groupId>
+            <artifactId>spring-security-oauth2</artifactId>
+            <version>${spring-security-oauth2-version}</version>
         </dependency>
 
         <dependency>
