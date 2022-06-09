@@ -79,19 +79,4 @@ public class GilesUploadServiceImpl implements GilesUploadService{
         return token.getValue();
     }
     
-    public class MultipartFileResource extends ByteArrayResource {
-
-        private String filename;
-
-        public MultipartFileResource(byte[] bytearray, String filename) {
-            super(bytearray);
-            this.filename = filename;
-        }
-
-        @Override
-        public String getFilename() {
-            return this.filename;
-        }
-    }
-
 }
