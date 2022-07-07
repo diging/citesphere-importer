@@ -6,8 +6,6 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,20 +17,16 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.asu.diging.citesphere.importer.core.exception.CitesphereCommunicationException;
 import edu.asu.diging.citesphere.importer.core.exception.IteratorCreationException;
-import edu.asu.diging.citesphere.importer.core.exception.MessageCreationException;
-import edu.asu.diging.citesphere.importer.core.kafka.impl.KafkaRequestProducer;
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.ItemType;
 import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
+import edu.asu.diging.citesphere.importer.core.service.AbstractImportProcessor;
 import edu.asu.diging.citesphere.importer.core.service.ICitesphereConnector;
-import edu.asu.diging.citesphere.importer.core.service.IImportProcessor;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
 import edu.asu.diging.citesphere.importer.core.service.parse.IHandlerRegistry;
 import edu.asu.diging.citesphere.importer.core.zotero.IZoteroConnector;
 import edu.asu.diging.citesphere.importer.core.zotero.template.IJsonGenerationService;
-import edu.asu.diging.citesphere.messages.KafkaTopics;
 import edu.asu.diging.citesphere.messages.model.ItemCreationResponse;
-import edu.asu.diging.citesphere.messages.model.KafkaImportReturnMessage;
 import edu.asu.diging.citesphere.messages.model.KafkaJobMessage;
 import edu.asu.diging.citesphere.messages.model.ResponseCode;
 import edu.asu.diging.citesphere.messages.model.Status;
@@ -46,12 +40,7 @@ import edu.asu.diging.citesphere.messages.model.Status;
  *
  */
 @Service
-public class ImportProcessor implements IImportProcessor {
-
-    private final Logger logger = LoggerFactory.getLogger(getClass());
-
-    @Autowired
-    private ICitesphereConnector connector;
+public class FileImportProcessor extends AbstractImportProcessor {
 
     @Autowired
     private IHandlerRegistry handlerRegistry;
@@ -62,9 +51,7 @@ public class ImportProcessor implements IImportProcessor {
     @Autowired
     private IJsonGenerationService generationService;
     
-    @Autowired
-    private KafkaRequestProducer requestProducer;
-
+    
     /**
      * Map that maps internal bibliographical formats (contants of {@link Publication} 
      * class) to Zotero item types ({@link ItemType} enum).
@@ -91,13 +78,7 @@ public class ImportProcessor implements IImportProcessor {
      * (edu.asu.diging.citesphere.importer.core.kafka.impl.KafkaJobMessage)
      */
     @Override
-    public void process(KafkaJobMessage message) {
-        JobInfo info = getJobInfo(message);
-        if (info == null) {
-            sendMessage(null, message.getId(), Status.FAILED, ResponseCode.X10);
-            return;
-        }
-
+    public void startImport(KafkaJobMessage message, JobInfo info) {
         String filePath = downloadFile(message);
         if (filePath == null) {
             sendMessage(null, message.getId(), Status.FAILED, ResponseCode.X20);
@@ -153,18 +134,6 @@ public class ImportProcessor implements IImportProcessor {
         sendMessage(response, message.getId(), Status.DONE, ResponseCode.S00);
     }
     
-    private void sendMessage(ItemCreationResponse message, String jobId, Status status, ResponseCode code) {
-        KafkaImportReturnMessage returnMessage = new KafkaImportReturnMessage(message, jobId);
-        returnMessage.setStatus(status);
-        returnMessage.setCode(code);
-        try {
-            requestProducer.sendRequest(returnMessage, KafkaTopics.REFERENCES_IMPORT_DONE_TOPIC);
-        } catch (MessageCreationException e) {
-            // FIXME handle this case
-            logger.error("Exception sending message.", e);
-        }
-    }
-
     private ItemCreationResponse submitEntries(ArrayNode entries, JobInfo info) {
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -186,22 +155,10 @@ public class ImportProcessor implements IImportProcessor {
         return null;
     }
 
-    private JobInfo getJobInfo(KafkaJobMessage message) {
-        JobInfo info = null;
-        try {
-            info = connector.getJobInfo(message.getId());
-        } catch (CitesphereCommunicationException e) {
-            // FIXME this needs to be handled better
-            logger.error("Could not get Zotero info.", e);
-            return null;
-        }
-        return info;
-    }
-
     private String downloadFile(KafkaJobMessage message) {
         String file = null;
         try {
-            file = connector.getUploadeFile(message.getId());
+            file = getCitesphereConnector().getUploadeFile(message.getId());
         } catch (CitesphereCommunicationException e) {
             // FIXME this needs to be handled better
             logger.error("Could not get Zotero info.", e);
@@ -209,4 +166,5 @@ public class ImportProcessor implements IImportProcessor {
         }
         return file;
     }
+
 }
