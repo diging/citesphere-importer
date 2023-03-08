@@ -1,6 +1,7 @@
 package edu.asu.diging.citesphere.importer.core.service.impl;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,8 +12,10 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -21,6 +24,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.ItemType;
 import edu.asu.diging.citesphere.importer.core.service.AbstractImportProcessor;
+import edu.asu.diging.citesphere.importer.core.zotero.IZoteroConnector;
+import edu.asu.diging.citesphere.importer.core.zotero.template.IJsonGenerationService;
 import edu.asu.diging.citesphere.messages.model.ItemCreationResponse;
 import edu.asu.diging.citesphere.messages.model.KafkaJobMessage;
 import edu.asu.diging.citesphere.messages.model.ResponseCode;
@@ -39,6 +44,12 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
     private CrossrefWorksService crossrefService;
     
     private Map<String, ItemType> itemTypeMapping = new HashMap<>();
+    
+    @Autowired
+    private IZoteroConnector zoteroConnector;
+    
+    @Autowired
+    private IJsonGenerationService generationService;
     
     @PostConstruct
     public void init() {
@@ -76,7 +87,7 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
             }
             ItemType type = itemTypeMapping.get(item.getDoi());
             JsonNode template = zoteroConnector.getTemplate(type);
-            ObjectNode bibNode = generationService.generateJson(template, entry);
+            ObjectNode bibNode = generationService.generateJson(template, item);
 
             root.add(item);
             entryCounter++;
@@ -99,4 +110,26 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
         sendMessage(response, message.getId(), Status.DONE, ResponseCode.S00);
                 
     }
+    
+    private ItemCreationResponse submitEntries(ArrayNode entries, JobInfo info) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            String msg = mapper.writeValueAsString(entries);
+            logger.info("Submitting " + msg);
+            ItemCreationResponse response = zoteroConnector.addEntries(info, entries);
+            if (response != null) {
+                logger.info(response.getSuccessful() + "");
+                logger.error(response.getFailed() + "");
+            } else {
+                logger.error("Item creation failed.");
+            }
+            return response;
+        } catch (URISyntaxException e) {
+            logger.error("Could not store new entry.", e);
+        } catch (JsonProcessingException e) {
+            logger.error("Could not write JSON.");
+        }
+        return null;
+    }
+
 }
