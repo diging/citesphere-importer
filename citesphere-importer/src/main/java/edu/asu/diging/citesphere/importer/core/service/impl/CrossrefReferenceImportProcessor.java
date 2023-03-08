@@ -2,7 +2,9 @@ package edu.asu.diging.citesphere.importer.core.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -36,6 +38,8 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
     
     private CrossrefWorksService crossrefService;
     
+    private Map<String, ItemType> itemTypeMapping = new HashMap<>();
+    
     @PostConstruct
     public void init() {
         crossrefService = new CrossrefWorksServiceImpl(CrossrefConfiguration.getDefaultConfig());    
@@ -45,45 +49,16 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
         logger.info("Starting import for " + info.getDois());
         
         List<Item> items = new ArrayList<>();
+        
+        //
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayNode root = mapper.createArrayNode();
+        int entryCounter = 0;
+       // 
+       
         for (String doi : info.getDois()) {
             try {
                 items.add(crossrefService.get(doi));
-                
-                //
-                ObjectMapper mapper = new ObjectMapper();
-                ArrayNode root = mapper.createArrayNode();
-                int entryCounter = 0;
-                while (items.hasNext()) {
-                    BibEntry entry = bibIterator.next();
-                    if (entry.getArticleType() == null) {
-                        // something is wrong with this entry, let's ignore it
-                        continue;
-                    }
-//                    ItemType type = itemTypeMapping.get(entry.getArticleType());
-//                    JsonNode template = zoteroConnector.getTemplate(type);
-//                    ObjectNode bibNode = generationService.generateJson(template, entry);
-
-                    root.add(bibNode);
-                    entryCounter++;
-
-                    // we can submit max 50 entries to Zotoro
-                    if (entryCounter >= 50) {
-                        submitEntries(root, info);
-                        entryCounter = 0;
-                        root = mapper.createArrayNode();
-                    }
-
-                }
-                
-                bibIterator.close();
-                
-                ItemCreationResponse response = null;
-                if (entryCounter > 0) {
-                    response = submitEntries(root, info);
-                }
-
-                response = response != null ? response : new ItemCreationResponse();
-                sendMessage(response, message.getId(), Status.DONE, ResponseCode.S00);
             } catch (RequestFailedException | IOException e) {
                 logger.error("Couuld not retrieve work for doi: "+ doi, e);
                 // for now we just log the exceptions
@@ -91,6 +66,37 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
                 // service might be down and we should stop sending requests.
             }
         }
+        
+        //
+        
+        items.forEach((item) -> {
+            if (item.getDoi() == null) {
+                // something is wrong with this entry, let's ignore it
+                continue;
+            }
+            ItemType type = itemTypeMapping.get(item.getDoi());
+            JsonNode template = zoteroConnector.getTemplate(type);
+            ObjectNode bibNode = generationService.generateJson(template, entry);
+
+            root.add(item);
+            entryCounter++;
+
+            // we can submit max 50 entries to Zotoro
+            if (entryCounter >= 50) {
+                submitEntries(root, info);
+                entryCounter = 0;
+                root = mapper.createArrayNode();
+            }
+
+        });
+        
+        ItemCreationResponse response = null;
+        if (entryCounter > 0) {
+            response = submitEntries(root, info);
+        }
+
+        response = response != null ? response : new ItemCreationResponse();
+        sendMessage(response, message.getId(), Status.DONE, ResponseCode.S00);
                 
     }
 }
