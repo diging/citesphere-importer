@@ -57,6 +57,11 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
     }
     
     public void startImport(KafkaJobMessage message, JobInfo info) {
+        // message = jobToken: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJKT0IxOTciLCJleHAiOjE2NzgzNDU3NDF9.5Xqh_AoMHcdlatULkCLFtny9pOF_uJ-SRARw0gCybY3h3qHL2mkIIQlk-qTA0Pn0VlhOLuW4FwACHmIdwZVmoA
+        // info = dois: [10.2307/j.ctvcm4h07.67, 10.1515/9780691242507]
+//        null
+//        zotero: byRZjIk2y4e3kay1cnwy3KpB
+//        zoteroId: 9154965
         logger.info("Starting import for " + info.getDois());
         
         List<Item> items = new ArrayList<>();
@@ -69,7 +74,24 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
        
         for (String doi : info.getDois()) {
             try {
-                items.add(crossrefService.get(doi));
+                Item item = crossrefService.get(doi);
+                
+                if (item.getType() == null) {
+                    // something is wrong with this entry, let's ignore it
+                    continue;
+                }
+                
+                ItemType type = itemTypeMapping.get(item.getType());
+                JsonNode template = zoteroConnector.getTemplate(type);
+//                ObjectNode crossRefNode = generationService.generateJson(template, item);
+                
+//                items.add(item);
+                
+//                root.add(crossRefNode);
+                entryCounter++;
+                
+                
+                
             } catch (RequestFailedException | IOException e) {
                 logger.error("Couuld not retrieve work for doi: "+ doi, e);
                 // for now we just log the exceptions
@@ -80,34 +102,34 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
         
         //
         
-        items.forEach((item) -> {
-            if (item.getDoi() == null) {
-                // something is wrong with this entry, let's ignore it
-                continue;
-            }
-            ItemType type = itemTypeMapping.get(item.getDoi());
-            JsonNode template = zoteroConnector.getTemplate(type);
-            ObjectNode bibNode = generationService.generateJson(template, item);
-
-            root.add(item);
-            entryCounter++;
-
-            // we can submit max 50 entries to Zotoro
-            if (entryCounter >= 50) {
-                submitEntries(root, info);
-                entryCounter = 0;
-                root = mapper.createArrayNode();
-            }
-
-        });
-        
-        ItemCreationResponse response = null;
-        if (entryCounter > 0) {
-            response = submitEntries(root, info);
-        }
-
-        response = response != null ? response : new ItemCreationResponse();
-        sendMessage(response, message.getId(), Status.DONE, ResponseCode.S00);
+//        items.forEach((item) -> {
+//            if (item.getDoi() == null) {
+//                // something is wrong with this entry, let's ignore it
+//                continue;
+//            }
+//            ItemType type = itemTypeMapping.get(item.getDoi());
+//            JsonNode template = zoteroConnector.getTemplate(type);
+//            ObjectNode bibNode = generationService.generateJson(template, item);
+//
+//            root.add(item);
+//            entryCounter++;
+//
+//            // we can submit max 50 entries to Zotoro
+//            if (entryCounter >= 50) {
+//                submitEntries(root, info);
+//                entryCounter = 0;
+//                root = mapper.createArrayNode();
+//            }
+//
+//        });
+//        
+//        ItemCreationResponse response = null;
+//        if (entryCounter > 0) {
+//            response = submitEntries(root, info);
+//        }
+//
+//        response = response != null ? response : new ItemCreationResponse();
+//        sendMessage(response, message.getId(), Status.DONE, ResponseCode.S00);
                 
     }
     
