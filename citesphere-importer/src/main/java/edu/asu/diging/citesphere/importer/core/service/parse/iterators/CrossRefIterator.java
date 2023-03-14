@@ -5,10 +5,16 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
@@ -51,6 +57,52 @@ public class CrossRefIterator implements BibEntryIterator {
         iteratorDone = true;
         return article;
     }
+    
+    private ContainerMeta parseJournalMeta(Element element) {
+        NodeList journalMetaList = element.getElementsByTagName("journal-meta");
+        if (journalMetaList.getLength() == 0) {
+            return null;
+        }
+        
+        ContainerMeta meta = new ContainerMeta();
+        // there should only be one
+        Node journalMetaNode = journalMetaList.item(0);
+        
+        NodeList children = journalMetaNode.getChildNodes();
+        for (int i = 0; i<children.getLength(); i++) {
+            tagParserRegistry.parseJournalMetaTag(children.item(i), meta);
+        }
+        return meta;
+    }
+    
+    private ArticleMeta parseArticleMeta(Element element) {
+        NodeList articlelMetaList = element.getElementsByTagName("article-meta");
+        if (articlelMetaList.getLength() == 0) {
+            return null;
+        }
+        
+        ArticleMeta meta = new ArticleMeta();
+        Node articleMetaNode = articlelMetaList.item(0);
+        NodeList children = articleMetaNode.getChildNodes();
+        for (int i = 0; i<children.getLength(); i++) {
+            tagParserRegistry.parseArticleMetaTag(children.item(i), meta);
+        }
+        return meta;
+    }
+    
+    private void parseBack(Element element, ArticleMeta meta) throws TransformerConfigurationException, TransformerFactoryConfigurationError {
+        NodeList backList = element.getElementsByTagName("back");
+        if (backList.getLength() == 0) {
+            return;
+        }
+        Node backNode = backList.item(0);
+        NodeList children = backNode.getChildNodes();
+        
+        for (int i = 0; i<children.getLength(); i++) {
+            tagParserRegistry.parseArticleMetaTag(children.item(i), meta);
+        }
+    }
+    
 
 //    private void advanceToNext() {
 //        if (lineIterator.hasNext()) {
