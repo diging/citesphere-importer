@@ -21,9 +21,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import edu.asu.diging.citesphere.importer.core.exception.IteratorCreationException;
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.ItemType;
 import edu.asu.diging.citesphere.importer.core.service.AbstractImportProcessor;
+import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
+import edu.asu.diging.citesphere.importer.core.service.parse.IHandlerRegistry;
 import edu.asu.diging.citesphere.importer.core.zotero.IZoteroConnector;
 import edu.asu.diging.citesphere.importer.core.zotero.template.IJsonGenerationService;
 import edu.asu.diging.citesphere.messages.model.ItemCreationResponse;
@@ -51,6 +54,9 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
     @Autowired
     private IJsonGenerationService generationService;
     
+    @Autowired
+    private IHandlerRegistry handlerRegistry;
+    
     @PostConstruct
     public void init() {
         crossrefService = new CrossrefWorksServiceImpl(CrossrefConfiguration.getDefaultConfig());    
@@ -71,7 +77,19 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
         ArrayNode root = mapper.createArrayNode();
         int entryCounter = 0;
        // 
-       
+        sendMessage(null, message.getId(), Status.PROCESSING, ResponseCode.P00);
+        BibEntryIterator bibIterator = null;
+        try {
+            bibIterator = handlerRegistry.handleFile(info, );
+        } catch (IteratorCreationException e1) {
+            logger.error("Could not create iterator.", e1);
+        }
+        
+        if (bibIterator == null) {
+            sendMessage(null, message.getId(), Status.FAILED, ResponseCode.X30);
+            return;
+        }
+        
         for (String doi : info.getDois()) {
             try {
                 Item item = crossrefService.get(doi);
@@ -83,11 +101,11 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
                 
                 ItemType type = itemTypeMapping.get(item.getType());
                 JsonNode template = zoteroConnector.getTemplate(type);
-//                ObjectNode crossRefNode = generationService.generateJson(template, item);
+                ObjectNode crossRefNode = generationService.generateJson(template, item);
                 
-//                items.add(item);
+                items.add(item);
                 
-//                root.add(crossRefNode);
+                root.add(crossRefNode);
                 entryCounter++;
                 
                 
