@@ -80,7 +80,7 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
         sendMessage(null, message.getId(), Status.PROCESSING, ResponseCode.P00);
         BibEntryIterator bibIterator = null;
         try {
-            bibIterator = handlerRegistry.handleFile(info, );
+            bibIterator = handlerRegistry.handleFile(info, null);
         } catch (IteratorCreationException e1) {
             logger.error("Could not create iterator.", e1);
         }
@@ -120,34 +120,34 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
         
         //
         
-//        items.forEach((item) -> {
-//            if (item.getDoi() == null) {
-//                // something is wrong with this entry, let's ignore it
-//                continue;
-//            }
-//            ItemType type = itemTypeMapping.get(item.getDoi());
-//            JsonNode template = zoteroConnector.getTemplate(type);
-//            ObjectNode bibNode = generationService.generateJson(template, item);
-//
-//            root.add(item);
-//            entryCounter++;
-//
-//            // we can submit max 50 entries to Zotoro
-//            if (entryCounter >= 50) {
-//                submitEntries(root, info);
-//                entryCounter = 0;
-//                root = mapper.createArrayNode();
-//            }
-//
-//        });
-//        
-//        ItemCreationResponse response = null;
-//        if (entryCounter > 0) {
-//            response = submitEntries(root, info);
-//        }
-//
-//        response = response != null ? response : new ItemCreationResponse();
-//        sendMessage(response, message.getId(), Status.DONE, ResponseCode.S00);
+        items.forEach((item) -> {
+            if (item.getDoi() == null) {
+                // something is wrong with this entry, let's ignore it
+                continue;
+            }
+            ItemType type = itemTypeMapping.get(item.getDoi());
+            JsonNode template = zoteroConnector.getTemplate(type);
+            ObjectNode bibNode = generationService.generateJson(template, item);
+
+            root.add(item);
+            entryCounter++;
+
+            // we can submit max 50 entries to Zotoro
+            if (entryCounter >= 50) {
+                submitEntries(root, info);
+                entryCounter = 0;
+                root = mapper.createArrayNode();
+            }
+
+        });
+        
+        ItemCreationResponse response = null;
+        if (entryCounter > 0) {
+            response = submitEntries(root, info);
+        }
+
+        response = response != null ? response : new ItemCreationResponse();
+        sendMessage(response, message.getId(), Status.DONE, ResponseCode.S00);
                 
     }
     
