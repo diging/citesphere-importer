@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import edu.asu.diging.citesphere.importer.core.exception.IteratorCreationException;
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.ItemType;
+import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
 import edu.asu.diging.citesphere.importer.core.service.AbstractImportProcessor;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
 import edu.asu.diging.citesphere.importer.core.service.parse.IHandlerRegistry;
@@ -59,7 +60,14 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
     
     @PostConstruct
     public void init() {
-        crossrefService = new CrossrefWorksServiceImpl(CrossrefConfiguration.getDefaultConfig());    
+        crossrefService = new CrossrefWorksServiceImpl(CrossrefConfiguration.getDefaultConfig());
+        itemTypeMapping.put(Publication.ARTICLE, ItemType.JOURNAL_ARTICLE);
+        itemTypeMapping.put(Publication.BOOK, ItemType.BOOK);
+        itemTypeMapping.put(Publication.BOOK_CHAPTER, ItemType.BOOK_SECTION);
+        itemTypeMapping.put(Publication.LETTER, ItemType.LETTER);
+        itemTypeMapping.put(Publication.NEWS_ITEM, ItemType.NEWSPAPER_ARTICLE);
+        itemTypeMapping.put(Publication.PROCEEDINGS_PAPER, ItemType.CONFERENCE_PAPER);
+        itemTypeMapping.put(Publication.DOCUMENT, ItemType.DOCUMENT);
     }
     
     public void startImport(KafkaJobMessage message, JobInfo info) {
@@ -118,18 +126,17 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
             }
         }
         
-        //
-        
-        items.forEach((item) -> {
-            if (item.getDoi() == null) {
+        while (bibIterator.hasNext()) {
+            BibEntry entry = bibIterator.next();
+            if (entry.getArticleType() == null) {
                 // something is wrong with this entry, let's ignore it
                 continue;
             }
-            ItemType type = itemTypeMapping.get(item.getDoi());
+            ItemType type = itemTypeMapping.get(entry.getArticleType());
             JsonNode template = zoteroConnector.getTemplate(type);
-            ObjectNode bibNode = generationService.generateJson(template, item);
+            ObjectNode bibNode = generationService.generateJson(template, entry);
 
-            root.add(item);
+            root.add(bibNode);
             entryCounter++;
 
             // we can submit max 50 entries to Zotoro
@@ -139,15 +146,38 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
                 root = mapper.createArrayNode();
             }
 
-        });
-        
-        ItemCreationResponse response = null;
-        if (entryCounter > 0) {
-            response = submitEntries(root, info);
         }
-
-        response = response != null ? response : new ItemCreationResponse();
-        sendMessage(response, message.getId(), Status.DONE, ResponseCode.S00);
+        
+        //
+        
+//        items.forEach((item) -> {
+//            if (item.getDoi() == null) {
+//                // something is wrong with this entry, let's ignore it
+//                continue;
+//            }
+//            ItemType type = itemTypeMapping.get(item.getDoi());
+//            JsonNode template = zoteroConnector.getTemplate(type);
+//            ObjectNode bibNode = generationService.generateJson(template, item);
+//
+//            root.add(item);
+//            entryCounter++;
+//
+//            // we can submit max 50 entries to Zotoro
+//            if (entryCounter >= 50) {
+//                submitEntries(root, info);
+//                entryCounter = 0;
+//                root = mapper.createArrayNode();
+//            }
+//
+//        });
+//        
+//        ItemCreationResponse response = null;
+//        if (entryCounter > 0) {
+//            response = submitEntries(root, info);
+//        }
+//
+//        response = response != null ? response : new ItemCreationResponse();
+//        sendMessage(response, message.getId(), Status.DONE, ResponseCode.S00);
                 
     }
     
