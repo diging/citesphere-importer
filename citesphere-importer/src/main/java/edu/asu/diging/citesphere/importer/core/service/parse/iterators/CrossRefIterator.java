@@ -35,9 +35,9 @@ public class CrossRefIterator implements BibEntryIterator {
     private boolean iteratorDone = false;
     private Map<String, String> typeMap;
 
-    public CrossRefIterator(String filePath, IArticleTagParser parserRegistry) {
-        this.filePath = filePath;
-        this.tagParserRegistry = parserRegistry;
+    public CrossRefIterator() {
+//        this.filePath = filePath;
+//        this.tagParserRegistry = parserRegistry;
         init();
     }
 
@@ -88,19 +88,6 @@ public class CrossRefIterator implements BibEntryIterator {
             tagParserRegistry.parseArticleMetaTag(children.item(i), meta);
         }
         return meta;
-    }
-    
-    private void parseBack(Element element, ArticleMeta meta) throws TransformerConfigurationException, TransformerFactoryConfigurationError {
-        NodeList backList = element.getElementsByTagName("back");
-        if (backList.getLength() == 0) {
-            return;
-        }
-        Node backNode = backList.item(0);
-        NodeList children = backNode.getChildNodes();
-        
-        for (int i = 0; i<children.getLength(); i++) {
-            tagParserRegistry.parseArticleMetaTag(children.item(i), meta);
-        }
     }
     
 
