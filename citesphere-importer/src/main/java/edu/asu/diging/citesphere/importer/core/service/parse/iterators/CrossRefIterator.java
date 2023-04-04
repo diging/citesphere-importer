@@ -58,49 +58,6 @@ public class CrossRefIterator implements BibEntryIterator {
         return article;
     }
     
-    private ContainerMeta parseJournalMeta(Element element) {
-        NodeList journalMetaList = element.getElementsByTagName("journal-meta");
-        if (journalMetaList.getLength() == 0) {
-            return null;
-        }
-        
-        ContainerMeta meta = new ContainerMeta();
-        // there should only be one
-        Node journalMetaNode = journalMetaList.item(0);
-        
-        NodeList children = journalMetaNode.getChildNodes();
-        for (int i = 0; i<children.getLength(); i++) {
-            tagParserRegistry.parseJournalMetaTag(children.item(i), meta);
-        }
-        return meta;
-    }
-    
-    private ArticleMeta parseArticleMeta(Element element) {
-        NodeList articlelMetaList = element.getElementsByTagName("article-meta");
-        if (articlelMetaList.getLength() == 0) {
-            return null;
-        }
-        
-        ArticleMeta meta = new ArticleMeta();
-        Node articleMetaNode = articlelMetaList.item(0);
-        NodeList children = articleMetaNode.getChildNodes();
-        for (int i = 0; i<children.getLength(); i++) {
-            tagParserRegistry.parseArticleMetaTag(children.item(i), meta);
-        }
-        return meta;
-    }
-    
-
-//    private void advanceToNext() {
-//        if (lineIterator.hasNext()) {
-//            currentLine = lineIterator.next();
-//            if (currentLine.trim().isEmpty()) {
-//                advanceToNext();
-//            }
-//        } else {
-//            currentLine = null;
-//        }
-//    }
 
     @Override
     public boolean hasNext() {
