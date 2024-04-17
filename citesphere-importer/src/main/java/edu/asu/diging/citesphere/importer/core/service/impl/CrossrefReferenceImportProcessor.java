@@ -107,9 +107,12 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
                     continue;
                 }
                 
+                BibEntry entry = new Publication();
+                entry.setArticleType(item.getType()); 
+                
                 ItemType type = itemTypeMapping.get(item.getType());
                 JsonNode template = zoteroConnector.getTemplate(type);
-                ObjectNode crossRefNode = generationService.generateJson(template, item);
+                ObjectNode crossRefNode = generationService.generateJson(template, entry);
                 
                 items.add(item);
                 
