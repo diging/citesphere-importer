@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import edu.asu.diging.citesphere.importer.core.exception.IteratorCreationException;
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.ItemType;
+import edu.asu.diging.citesphere.importer.core.model.impl.CrossRefPublication;
 import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
 import edu.asu.diging.citesphere.importer.core.service.AbstractImportProcessor;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
@@ -61,13 +62,13 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
     @PostConstruct
     public void init() {
         crossrefService = new CrossrefWorksServiceImpl(CrossrefConfiguration.getDefaultConfig());
-        itemTypeMapping.put(Publication.ARTICLE, ItemType.JOURNAL_ARTICLE);
-        itemTypeMapping.put(Publication.BOOK, ItemType.BOOK);
-        itemTypeMapping.put(Publication.BOOK_CHAPTER, ItemType.BOOK_SECTION);
-        itemTypeMapping.put(Publication.LETTER, ItemType.LETTER);
-        itemTypeMapping.put(Publication.NEWS_ITEM, ItemType.NEWSPAPER_ARTICLE);
-        itemTypeMapping.put(Publication.PROCEEDINGS_PAPER, ItemType.CONFERENCE_PAPER);
-        itemTypeMapping.put(Publication.DOCUMENT, ItemType.DOCUMENT);
+        itemTypeMapping.put(CrossRefPublication.ARTICLE, ItemType.JOURNAL_ARTICLE);
+        itemTypeMapping.put(CrossRefPublication.BOOK, ItemType.BOOK);
+        itemTypeMapping.put(CrossRefPublication.BOOK_CHAPTER, ItemType.BOOK_SECTION);
+//        itemTypeMapping.put(CrossRefPublication.LETTER, ItemType.LETTER);
+//        itemTypeMapping.put(CrossRefPublication.NEWS_ITEM, ItemType.NEWSPAPER_ARTICLE);
+//        itemTypeMapping.put(CrossRefPublication.PROCEEDINGS_PAPER, ItemType.CONFERENCE_PAPER);
+//        itemTypeMapping.put(CrossRefPublication.DOCUMENT, ItemType.DOCUMENT);
     }
     
     public void startImport(KafkaJobMessage message, JobInfo info) {
@@ -88,6 +89,7 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
         sendMessage(null, message.getId(), Status.PROCESSING, ResponseCode.P00);
         BibEntryIterator bibIterator = null;
         try {
+            //TODO: Change the handleFile method. returns null currrently for crossref. 
             bibIterator = handlerRegistry.handleFile(info, null);
         } catch (IteratorCreationException e1) {
             logger.error("Could not create iterator.", e1);
@@ -106,8 +108,8 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
                     // something is wrong with this entry, let's ignore it
                     continue;
                 }
-                
-                BibEntry entry = new Publication();
+
+                BibEntry entry = new CrossRefPublication();
                 entry.setArticleType(item.getType()); 
                 
                 ItemType type = itemTypeMapping.get(item.getType());
