@@ -1,12 +1,8 @@
 package edu.asu.diging.citesphere.importer.core.service.impl;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -25,7 +21,6 @@ import edu.asu.diging.citesphere.importer.core.exception.IteratorCreationExcepti
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.ItemType;
 import edu.asu.diging.citesphere.importer.core.model.impl.CrossRefPublication;
-import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
 import edu.asu.diging.citesphere.importer.core.service.AbstractImportProcessor;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
 import edu.asu.diging.citesphere.importer.core.service.parse.IHandlerRegistry;
@@ -35,19 +30,12 @@ import edu.asu.diging.citesphere.messages.model.ItemCreationResponse;
 import edu.asu.diging.citesphere.messages.model.KafkaJobMessage;
 import edu.asu.diging.citesphere.messages.model.ResponseCode;
 import edu.asu.diging.citesphere.messages.model.Status;
-import edu.asu.diging.crossref.exception.RequestFailedException;
-import edu.asu.diging.crossref.model.Item;
-import edu.asu.diging.crossref.service.CrossrefConfiguration;
-import edu.asu.diging.crossref.service.CrossrefWorksService;
-import edu.asu.diging.crossref.service.impl.CrossrefWorksServiceImpl;
 
 @Service
 public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
     
     private final Logger logger = LoggerFactory.getLogger(getClass());
-    
-    private CrossrefWorksService crossrefService;
-    
+      
     private Map<String, ItemType> itemTypeMapping = new HashMap<>();
     
     @Autowired
@@ -60,8 +48,7 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
     private IHandlerRegistry handlerRegistry;
     
     @PostConstruct
-    public void init() {
-        crossrefService = new CrossrefWorksServiceImpl(CrossrefConfiguration.getDefaultConfig());
+    public void init() {      
         itemTypeMapping.put(CrossRefPublication.ARTICLE, ItemType.JOURNAL_ARTICLE);
         itemTypeMapping.put(CrossRefPublication.BOOK, ItemType.BOOK);
         itemTypeMapping.put(CrossRefPublication.BOOK_CHAPTER, ItemType.BOOK_SECTION);
@@ -79,13 +66,10 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
 //        zoteroId: 9154965
         logger.info("Starting import for " + info.getDois());
         
-        List<Item> items = new ArrayList<>();
-        
-        //
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode root = mapper.createArrayNode();
         int entryCounter = 0;
-       // 
+
         sendMessage(null, message.getId(), Status.PROCESSING, ResponseCode.P00);
         BibEntryIterator bibIterator = null;
         try {
@@ -100,36 +84,7 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
             return;
         }
         
-        for (String doi : info.getDois()) {
-            try {
-                Item item = crossrefService.get(doi);
-                
-                if (item.getType() == null) {
-                    // something is wrong with this entry, let's ignore it
-                    continue;
-                }
 
-                BibEntry entry = new CrossRefPublication();
-                entry.setArticleType(item.getType()); 
-                
-                ItemType type = itemTypeMapping.get(item.getType());
-                JsonNode template = zoteroConnector.getTemplate(type);
-                ObjectNode crossRefNode = generationService.generateJson(template, entry);
-                
-                items.add(item);
-                
-                root.add(crossRefNode);
-                entryCounter++;
-                
-                
-                
-            } catch (RequestFailedException | IOException e) {
-                logger.error("Couuld not retrieve work for doi: "+ doi, e);
-                // for now we just log the exceptions
-                // we might want to devise a way to decide if the 
-                // service might be down and we should stop sending requests.
-            }
-        }
         
         while (bibIterator.hasNext()) {
             BibEntry entry = bibIterator.next();

@@ -33,7 +33,7 @@ public class CrossRefHandler implements FileHandler {
     @Override
     public BibEntryIterator getIterator(String path, IHandlerRegistry callback, JobInfo info)
             throws IteratorCreationException {
-        return new CrossRefIterator();
+        return new CrossRefIterator(info);
     }
 
 }

@@ -6,11 +6,6 @@ public class CrossRefPublication implements BibEntry {
     public final static String ARTICLE = "journal-article";
     public final static String BOOK = "book";
     public final static String BOOK_CHAPTER = "book-chapter";
-//    public final static String REVIEW = "review";
-//    public final static String LETTER = "letter";
-//    public final static String NEWS_ITEM = "newspaperArticle";
-//    public final static String PROCEEDINGS_PAPER = "conferencePaper";
-//    public final static String DOCUMENT = "document";
     public final static String MONOGRAPH = "monograph";
     public final static String JOURNAL_ISSUE = "journal-issue";
     public final static String REFERNCE_ENTRY = "reference-entry";
