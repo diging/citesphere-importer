@@ -92,6 +92,7 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
                 // something is wrong with this entry, let's ignore it
                 continue;
             }
+            System.out.println("======================================" + entry.getArticleType());
             ItemType type = itemTypeMapping.get(entry.getArticleType());
             JsonNode template = zoteroConnector.getTemplate(type);
             ObjectNode bibNode = generationService.generateJson(template, entry);
@@ -108,7 +109,16 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
 
         }
         
-        //
+        bibIterator.close();
+        
+        ItemCreationResponse response = null;
+        if (entryCounter > 0) {
+            response = submitEntries(root, info);
+        }
+
+        response = response != null ? response : new ItemCreationResponse();
+        sendMessage(response, message.getId(), Status.DONE, ResponseCode.S00);  // giving error 500 as response code mentioned
+    }
         
 //        items.forEach((item) -> {
 //            if (item.getDoi() == null) {
@@ -139,7 +149,7 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
 //        response = response != null ? response : new ItemCreationResponse();
 //        sendMessage(response, message.getId(), Status.DONE, ResponseCode.S00);
                 
-    }
+//    }
     
     private ItemCreationResponse submitEntries(ArrayNode entries, JobInfo info) {
         ObjectMapper mapper = new ObjectMapper();
