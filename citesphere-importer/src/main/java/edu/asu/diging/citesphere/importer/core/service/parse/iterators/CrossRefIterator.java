@@ -74,17 +74,8 @@ public class CrossRefIterator implements BibEntryIterator {
                 article.setArticleType(typeMap.get(item.getType())); 
                 article.setJournalMeta(parseJournalMeta(item));
                 article.setArticleMeta(parseArticleMeta(item));
-                //                
-                //                ItemType type = typeMap.get(entry.getArticleType());
-                //                System.out.println("type ================================= " + type.toString() + " " + type.getZoteroKey());
-                //                JsonNode template = zoteroConnector.getTemplate(type);
-                //                ObjectNode crossRefNode = generationService.generateJson(template, entry);
 
                 items.add(article);
-
-                //                root.add(crossRefNode);
-                //                entryCounter++;
-
             } catch (RequestFailedException | IOException e) {
                 logger.error("Couuld not retrieve work for doi: "+ doi, e);
                 // for now we just log the exceptions
@@ -140,69 +131,15 @@ public class CrossRefIterator implements BibEntryIterator {
         List<Contributor> contributors = new ArrayList<>();
         // List of authors
         if(item.getAuthor() != null) {
-            for(Person itemAuthor: item.getAuthor()) {
-                Contributor author = new Contributor();
-                author.setContributionType(ContributionType.AUTHOR);
-                author.setGivenName(itemAuthor.getGiven());
-                author.setSurname(itemAuthor.getFamily());
-                author.setFullName(itemAuthor.getName());
-                List<Affiliation> affiliations = new ArrayList<>();
-                for(Institution institute: itemAuthor.getAffiliation()) {
-                    Affiliation affiliation = new Affiliation();
-                    affiliation.setName(institute.getName());
-                    affiliations.add(affiliation);
-                }
-                author.setAffiliations(affiliations);
-                ContributorId contributorID = new ContributorId();
-                contributorID.setId(itemAuthor.getOrcid());
-                contributorID.setIdSystem("ORCID");
-                author.setIds(Arrays.asList(contributorID));
-                contributors.add(author);
-            }
+            contributors.addAll(mapPersonToContributor(item.getAuthor()));
         }
         // List of editors
         if(item.getEditor() != null) {
-            for(Person itemEditor: item.getEditor()) {
-                Contributor editor = new Contributor();
-                editor.setContributionType(ContributionType.EDITOR);
-                editor.setGivenName(itemEditor.getGiven());
-                editor.setSurname(itemEditor.getFamily());
-                editor.setFullName(itemEditor.getName());
-                List<Affiliation> affiliations = new ArrayList<>();
-                for(Institution institute: itemEditor.getAffiliation()) {
-                    Affiliation affiliation = new Affiliation();
-                    affiliation.setName(institute.getName());
-                    affiliations.add(affiliation);
-                }
-                editor.setAffiliations(affiliations);
-                ContributorId contributorID = new ContributorId();
-                contributorID.setId(itemEditor.getOrcid());
-                contributorID.setIdSystem("ORCID");
-                editor.setIds(Arrays.asList(contributorID));
-                contributors.add(editor); 
-            }
+            contributors.addAll(mapPersonToContributor(item.getEditor()));
         }
         // List of translators
         if(item.getTranslator() != null) {
-            for(Person itemTranslator: item.getTranslator()) {
-                Contributor translator = new Contributor();
-                translator.setContributionType(ContributionType.EDITOR);
-                translator.setGivenName(itemTranslator.getGiven());
-                translator.setSurname(itemTranslator.getFamily());
-                translator.setFullName(itemTranslator.getName());
-                List<Affiliation> affiliations = new ArrayList<>();
-                for(Institution institute: itemTranslator.getAffiliation()) {
-                    Affiliation affiliation = new Affiliation();
-                    affiliation.setName(institute.getName());
-                    affiliations.add(affiliation);
-                }
-                translator.setAffiliations(affiliations);
-                ContributorId contributorID = new ContributorId();
-                contributorID.setId(itemTranslator.getOrcid());
-                contributorID.setIdSystem("ORCID");
-                translator.setIds(Arrays.asList(contributorID));
-                contributors.add(translator); 
-            }
+            contributors.addAll(mapPersonToContributor(item.getTranslator()));
         }
         meta.setContributors(contributors);
         meta.setAuthorNotesCorrespondence(null);
@@ -221,41 +158,68 @@ public class CrossRefIterator implements BibEntryIterator {
         meta.setSelfUri(item.getUrl());
         meta.setArticleAbstract(item.getAbstractText());
         meta.setLanguage(item.getLanguage());
-        Review itemReview = item.getReview();
         ReviewInfo review = new ReviewInfo();
-//        review.setFullDescription(itemReview.getCompetingInterestStatement());  //TODO: giving null pointer error
+        if (item.getReview() != null) {
+            review.setFullDescription(item.getReview().getCompetingInterestStatement());  //TODO: giving null pointer error
+        }
         meta.setReviewInfo(review);       
         meta.setDocumentType(item.getType());        
 
         List<Reference> references = new ArrayList<>();
-//        for(edu.asu.diging.crossref.model.Reference itemRef: item.getReference()) {     // TODO: giving null pointer error
-//            Reference ref = new Reference();
-//            ref.setAuthorString(itemRef.getAuthor());
-//            ref.setContributors(null);
-//            ref.setTitle(itemRef.getArticleTitle());
-//            ref.setYear(itemRef.getYear());
-//            if(itemRef.getDoi()!=null && !itemRef.getDoi().isBlank()) {
-//                ref.setIdentifier(itemRef.getDoi());
-//                ref.setIdentifierType("DOI");
-//                ref.setSource(itemRef.getDoiAssertedBy());
-//            } else if (itemRef.getIssn()!=null && !itemRef.getIssn().isBlank()) {
-//                ref.setIdentifier(itemRef.getIssn());
-//                ref.setIdentifierType("ISSN");
-//            } else if (itemRef.getIsbn()!=null && !itemRef.getIsbn().isBlank()) {
-//                ref.setIdentifier(itemRef.getIsbn());
-//                ref.setIdentifierType("ISBN");
-//            }
-//            ref.setFirstPage(itemRef.getFirstPage());
-//            ref.setVolume(itemRef.getVolume());
-//            ref.setReferenceId(itemRef.getKey());
-//            ref.setReferenceString(itemRef.getUnstructured());
-//            ref.setReferenceStringRaw(itemRef.getUnstructured());
-//            references.add(ref);
-//        }
+        if(item.getReference() != null) {
+            for(edu.asu.diging.crossref.model.Reference itemRef: item.getReference()) {     // TODO: giving null pointer error
+                Reference ref = new Reference();
+                ref.setAuthorString(itemRef.getAuthor());
+                ref.setContributors(null);
+                ref.setTitle(itemRef.getArticleTitle());
+                ref.setYear(itemRef.getYear());
+                if(itemRef.getDoi()!=null && !itemRef.getDoi().isBlank()) {
+                    ref.setIdentifier(itemRef.getDoi());
+                    ref.setIdentifierType("DOI");
+                    ref.setSource(itemRef.getDoiAssertedBy());
+                } else if (itemRef.getIssn()!=null && !itemRef.getIssn().isBlank()) {
+                    ref.setIdentifier(itemRef.getIssn());
+                    ref.setIdentifierType("ISSN");
+                } else if (itemRef.getIsbn()!=null && !itemRef.getIsbn().isBlank()) {
+                    ref.setIdentifier(itemRef.getIsbn());
+                    ref.setIdentifierType("ISBN");
+                }
+                ref.setFirstPage(itemRef.getFirstPage());
+                ref.setVolume(itemRef.getVolume());
+                ref.setReferenceId(itemRef.getKey());
+                ref.setReferenceString(itemRef.getUnstructured());
+                ref.setReferenceStringRaw(itemRef.getUnstructured());
+                references.add(ref);
+            }
+        }
         meta.setReferences(references);
         meta.setReferenceCount(item.getReferenceCount().toString());
 
         return meta;
+    }
+
+    public List<Contributor> mapPersonToContributor(List<Person> personList) {
+        List<Contributor> contributors = new ArrayList<Contributor>();
+        for(Person person: personList) {
+            Contributor contributor = new Contributor();
+            contributor.setContributionType(ContributionType.EDITOR);
+            contributor.setGivenName(person.getGiven());
+            contributor.setSurname(person.getFamily());
+            contributor.setFullName(person.getName());
+            List<Affiliation> affiliations = new ArrayList<>();
+            for(Institution institute: person.getAffiliation()) {
+                Affiliation affiliation = new Affiliation();
+                affiliation.setName(institute.getName());
+                affiliations.add(affiliation);
+            }
+            contributor.setAffiliations(affiliations);
+            ContributorId contributorID = new ContributorId();
+            contributorID.setId(person.getOrcid());
+            contributorID.setIdSystem("ORCID");
+            contributor.setIds(Arrays.asList(contributorID));
+            contributors.add(contributor); 
+        }
+        return contributors;
     }
 
     @Override
