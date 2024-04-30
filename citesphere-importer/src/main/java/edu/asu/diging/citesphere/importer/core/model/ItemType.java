@@ -45,7 +45,9 @@ public enum ItemType {
     THESIS("thesis"),
     TV_BROADCAST("tvBroadcast"),
     VIDEO_RECORDIG("videoRecording"),
-    WEBPAGE("webpage");
+    WEBPAGE("webpage"),
+    MONOGRAPH("monograph"),
+    JOURNAL_ISSUE("journal-issue");
     
     final private String zoteroKey;
     

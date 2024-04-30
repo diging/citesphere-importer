@@ -52,10 +52,33 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
         itemTypeMapping.put(CrossRefPublication.ARTICLE, ItemType.JOURNAL_ARTICLE);
         itemTypeMapping.put(CrossRefPublication.BOOK, ItemType.BOOK);
         itemTypeMapping.put(CrossRefPublication.BOOK_CHAPTER, ItemType.BOOK_SECTION);
-//        itemTypeMapping.put(CrossRefPublication.LETTER, ItemType.LETTER);
-//        itemTypeMapping.put(CrossRefPublication.NEWS_ITEM, ItemType.NEWSPAPER_ARTICLE);
-//        itemTypeMapping.put(CrossRefPublication.PROCEEDINGS_PAPER, ItemType.CONFERENCE_PAPER);
-//        itemTypeMapping.put(CrossRefPublication.DOCUMENT, ItemType.DOCUMENT);
+        itemTypeMapping.put(CrossRefPublication.MONOGRAPH, ItemType.MONOGRAPH);
+        itemTypeMapping.put(CrossRefPublication.JOURNAL_ISSUE, ItemType.JOURNAL_ISSUE);
+        itemTypeMapping.put(CrossRefPublication.REFERNCE_ENTRY, ItemType.REFERNCE_ENTRY);
+        itemTypeMapping.put(CrossRefPublication.POSTED_CONTENT, ItemType.POSTED_CONTENT);
+        itemTypeMapping.put(CrossRefPublication.COMPONENT, ItemType.COMPONENT);
+        itemTypeMapping.put(CrossRefPublication.EDITED_BOOK, ItemType.BOOK);
+        itemTypeMapping.put(CrossRefPublication.PROCEEDINGS_ARTICLE, ItemType.CONFERENCE_PAPER);
+        itemTypeMapping.put(CrossRefPublication.DISSERTATION, ItemType.DISSERTATION);
+        itemTypeMapping.put(CrossRefPublication.BOOK_SECTION, ItemType.BOOK_SECTION);
+        itemTypeMapping.put(CrossRefPublication.REPORT_COMPONENT, ItemType.REPORT_COMPONENT);
+        itemTypeMapping.put(CrossRefPublication.REPORT, ItemType.REPORT);
+        itemTypeMapping.put(CrossRefPublication.PEER_REVIEW, ItemType.PEER_REVIEW);
+        itemTypeMapping.put(CrossRefPublication.BOOK_TRACK, ItemType.BOOK_TRACK);
+        itemTypeMapping.put(CrossRefPublication.BOOK_PART, ItemType.BOOK_PART);
+        itemTypeMapping.put(CrossRefPublication.OTHER, ItemType.OTHER);
+        itemTypeMapping.put(CrossRefPublication.JORUNAL_VOLUME, ItemType.JORUNAL_VOLUME);
+        itemTypeMapping.put(CrossRefPublication.BOOK_SET, ItemType.BOOK_SET);
+        itemTypeMapping.put(CrossRefPublication.JOURNAL, ItemType.JOURNAL);
+        itemTypeMapping.put(CrossRefPublication.PROCEEDINGS_SERIES, ItemType.PROCEEDINGS_SERIES);
+        itemTypeMapping.put(CrossRefPublication.REPORT_SERIES, ItemType.REPORT_SERIES);
+        itemTypeMapping.put(CrossRefPublication.PROCEEDINGS, ItemType.PROCEEDINGS);
+        itemTypeMapping.put(CrossRefPublication.DATABASE, ItemType.DATABASE);
+        itemTypeMapping.put(CrossRefPublication.STANDARD, ItemType.STANDARD);
+        itemTypeMapping.put(CrossRefPublication.REFERENCE_BOOK, ItemType.REFERENCE_BOOK);
+        itemTypeMapping.put(CrossRefPublication.GRANT, ItemType.GRANT);
+        itemTypeMapping.put(CrossRefPublication.DATASET, ItemType.DATASET);
+        itemTypeMapping.put(CrossRefPublication.BOOK_SERIES, ItemType.BOOK_SERIES);
     }
     
     public void startImport(KafkaJobMessage message, JobInfo info) {

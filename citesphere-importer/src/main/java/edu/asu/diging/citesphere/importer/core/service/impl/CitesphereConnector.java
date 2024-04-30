@@ -109,8 +109,7 @@ public class CitesphereConnector implements ICitesphereConnector {
         
         JobInfo info = null;
         if (status == HttpStatus.OK) {
-            String responseBody = response.getBody();  //TODO: Not gettting group ID here. 
-            System.out.println("==================== response - " + responseBody);
+            String responseBody = response.getBody();
             ObjectMapper mapper = new ObjectMapper();
             try {
                 info = mapper.readValue(responseBody, JobInfo.class);
