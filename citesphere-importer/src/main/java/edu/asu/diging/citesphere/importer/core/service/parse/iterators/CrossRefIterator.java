@@ -59,6 +59,7 @@ public class CrossRefIterator implements BibEntryIterator {
         typeMap = new HashMap<String, String>();
         typeMap.put("journal-article", CrossRefPublication.ARTICLE);
         typeMap.put("book", CrossRefPublication.BOOK);
+        //TODO: Add more to the list
         parseCrossRef();
 
     }
