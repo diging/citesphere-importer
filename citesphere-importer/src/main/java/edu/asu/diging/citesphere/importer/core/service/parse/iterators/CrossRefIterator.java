@@ -39,7 +39,9 @@ public class CrossRefIterator implements BibEntryIterator {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private JobInfo info;
+    private List<BibEntry> articles;
     private BibEntry article;
+    private int currentIndex;
 
     private boolean iteratorDone = false;
     private Map<String, String> typeMap;
@@ -50,7 +52,7 @@ public class CrossRefIterator implements BibEntryIterator {
 
     public CrossRefIterator(JobInfo info) {
         this.info = info;
-        System.out.println(info.toString());
+        currentIndex = 0;
         init();
     }
 
@@ -59,24 +61,50 @@ public class CrossRefIterator implements BibEntryIterator {
         typeMap = new HashMap<String, String>();
         typeMap.put("journal-article", CrossRefPublication.ARTICLE);
         typeMap.put("book", CrossRefPublication.BOOK);
-        //TODO: Add more to the list
+        typeMap.put("book-chapter", CrossRefPublication.BOOK_CHAPTER); 
+        typeMap.put("monograph", CrossRefPublication.MONOGRAPH);
+        typeMap.put("journal-issue", CrossRefPublication.JOURNAL_ISSUE);
+        typeMap.put("reference-entry", CrossRefPublication.REFERNCE_ENTRY);
+        typeMap.put("posted-content", CrossRefPublication.POSTED_CONTENT);
+        typeMap.put("component", CrossRefPublication.COMPONENT);
+        typeMap.put("edited-book", CrossRefPublication.EDITED_BOOK);
+        typeMap.put("proceedings-article", CrossRefPublication.PROCEEDINGS_ARTICLE);
+        typeMap.put("dissertation", CrossRefPublication.DISSERTATION);
+        typeMap.put("book-section", CrossRefPublication.BOOK_SECTION);
+        typeMap.put("report-component", CrossRefPublication.REPORT_COMPONENT);
+        typeMap.put("report", CrossRefPublication.REPORT);
+        typeMap.put("peer-review", CrossRefPublication.PEER_REVIEW);
+        typeMap.put("book-track", CrossRefPublication.BOOK_TRACK);
+        typeMap.put("book-part", CrossRefPublication.BOOK_PART);
+        typeMap.put("other", CrossRefPublication.OTHER);
+        typeMap.put("journal-volume", CrossRefPublication.JORUNAL_VOLUME);
+        typeMap.put("book-set", CrossRefPublication.BOOK_SET);
+        typeMap.put("journal", CrossRefPublication.JOURNAL);
+        typeMap.put("proceedings-series", CrossRefPublication.PROCEEDINGS_SERIES);
+        typeMap.put("report-series", CrossRefPublication.REPORT_SERIES);
+        typeMap.put("proceedings", CrossRefPublication.PROCEEDINGS);
+        typeMap.put("database", CrossRefPublication.DATABASE);
+        typeMap.put("standard", CrossRefPublication.STANDARD);
+        typeMap.put("reference-book", CrossRefPublication.REFERENCE_BOOK);
+        typeMap.put("grant", CrossRefPublication.GRANT);
+        typeMap.put("dataset", CrossRefPublication.DATASET);
+        typeMap.put("book-series", CrossRefPublication.BOOK_SERIES);
         parseCrossRef();
 
     }
 
     private void parseCrossRef() {
 
-        List<BibEntry> items = new ArrayList<>();
+        articles = new ArrayList<>();
         for (String doi : info.getDois()) {
             try {
                 Item item = crossrefService.get(doi);
-
                 article = new CrossRefPublication();
                 article.setArticleType(typeMap.get(item.getType())); 
                 article.setJournalMeta(parseJournalMeta(item));
                 article.setArticleMeta(parseArticleMeta(item));
 
-                items.add(article);
+                articles.add(article);
             } catch (RequestFailedException | IOException e) {
                 logger.error("Couuld not retrieve work for doi: "+ doi, e);
                 // for now we just log the exceptions
@@ -161,14 +189,14 @@ public class CrossRefIterator implements BibEntryIterator {
         meta.setLanguage(item.getLanguage());
         ReviewInfo review = new ReviewInfo();
         if (item.getReview() != null) {
-            review.setFullDescription(item.getReview().getCompetingInterestStatement());  //TODO: giving null pointer error
+            review.setFullDescription(item.getReview().getCompetingInterestStatement());  
         }
         meta.setReviewInfo(review);       
         meta.setDocumentType(item.getType());        
 
         List<Reference> references = new ArrayList<>();
         if(item.getReference() != null) {
-            for(edu.asu.diging.crossref.model.Reference itemRef: item.getReference()) {     // TODO: giving null pointer error
+            for(edu.asu.diging.crossref.model.Reference itemRef: item.getReference()) { 
                 Reference ref = new Reference();
                 ref.setAuthorString(itemRef.getAuthor());
                 ref.setContributors(null);
@@ -228,13 +256,18 @@ public class CrossRefIterator implements BibEntryIterator {
         if (iteratorDone) {
             return null;
         }
-        iteratorDone = true;
-        return article;
+//        iteratorDone = true;
+        BibEntry nextEntry = articles.get(currentIndex);
+        currentIndex++;
+        return nextEntry;
     }
 
 
     @Override
     public boolean hasNext() {
+        if (currentIndex >= articles.size()) {
+            iteratorDone = true;
+        }
         return !iteratorDone;
     }
 
