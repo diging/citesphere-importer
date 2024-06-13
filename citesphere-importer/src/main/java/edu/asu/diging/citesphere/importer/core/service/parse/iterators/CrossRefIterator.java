@@ -120,11 +120,13 @@ public class CrossRefIterator implements BibEntryIterator {
         meta.setPublisherName(item.getPublisher());
         meta.setPublisherLocation(item.getPublisherLocation());
         List<Issn> issnList = new ArrayList<Issn>();
-        for(IssnType issnType : item.getIssnType()) {
-            Issn issn = new Issn();
-            issn.setIssn(issnType.getValue());
-            issn.setPubType(issnType.getType());
-            issnList.add(issn);
+        if(item.getIssnType() != null) {
+            for(IssnType issnType : item.getIssnType()) {
+                Issn issn = new Issn();
+                issn.setIssn(issnType.getValue());
+                issn.setPubType(issnType.getType());
+                issnList.add(issn);
+            }
         }
         meta.setIssns(issnList);
 
