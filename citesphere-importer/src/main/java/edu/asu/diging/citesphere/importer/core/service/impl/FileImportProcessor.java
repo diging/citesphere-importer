@@ -160,7 +160,6 @@ public class FileImportProcessor extends AbstractImportProcessor {
         try {
             file = getCitesphereConnector().getUploadeFile(message.getId());
         } catch (CitesphereCommunicationException e) {
-            // FIXME this needs to be handled better
             logger.error("Could not get Zotero info.", e);
             return null;
         }

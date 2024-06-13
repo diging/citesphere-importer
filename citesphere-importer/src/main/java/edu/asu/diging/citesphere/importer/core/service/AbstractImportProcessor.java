@@ -43,7 +43,6 @@ public abstract class AbstractImportProcessor implements ImportProcessor {
         try {
             info = connector.getJobInfo(message.getId());
         } catch (CitesphereCommunicationException e) {
-            // FIXME this needs to be handled better
             logger.error("Could not get Zotero info.", e);
             return null;
         }
@@ -57,7 +56,6 @@ public abstract class AbstractImportProcessor implements ImportProcessor {
         try {
             requestProducer.sendRequest(returnMessage, KafkaTopics.REFERENCES_IMPORT_DONE_TOPIC);
         } catch (MessageCreationException e) {
-            // FIXME handle this case
             logger.error("Exception sending message.", e);
         }
     }

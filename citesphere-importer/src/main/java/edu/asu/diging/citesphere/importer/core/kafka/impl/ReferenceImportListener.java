@@ -49,7 +49,6 @@ public class ReferenceImportListener {
             msg = mapper.readValue(message, KafkaJobMessage.class);
         } catch (IOException e) {
             logger.error("Could not unmarshall message.", e);
-            // FIXME: handle this case
             return;
         }
         
