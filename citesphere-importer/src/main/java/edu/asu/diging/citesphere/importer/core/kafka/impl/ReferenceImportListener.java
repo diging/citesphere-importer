@@ -10,7 +10,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.asu.diging.citesphere.importer.core.service.ImportProcessor;
+import edu.asu.diging.citesphere.importer.core.service.IImportProcessor;
 import edu.asu.diging.citesphere.messages.KafkaTopics;
 import edu.asu.diging.citesphere.messages.model.KafkaJobMessage;
 
@@ -20,11 +20,11 @@ public class ReferenceImportListener {
     
     @Autowired
     @Qualifier("fileImportProcessor")
-    private ImportProcessor fileProcessor;
+    private IImportProcessor fileProcessor;
     
     @Autowired
     @Qualifier("crossrefReferenceImportProcessor")
-    private ImportProcessor crossrefProcessor;
+    private IImportProcessor crossrefProcessor;
 
     @KafkaListener(topics = KafkaTopics.REFERENCES_IMPORT_TOPIC)
     public void receiveMessage(String message) {

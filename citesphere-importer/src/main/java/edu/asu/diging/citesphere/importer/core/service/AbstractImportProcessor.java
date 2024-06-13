@@ -15,7 +15,7 @@ import edu.asu.diging.citesphere.messages.model.KafkaJobMessage;
 import edu.asu.diging.citesphere.messages.model.ResponseCode;
 import edu.asu.diging.citesphere.messages.model.Status;
 
-public abstract class AbstractImportProcessor implements ImportProcessor {
+public abstract class AbstractImportProcessor implements IImportProcessor {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     
