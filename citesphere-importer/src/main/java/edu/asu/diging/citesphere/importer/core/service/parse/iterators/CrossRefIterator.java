@@ -256,7 +256,6 @@ public class CrossRefIterator implements BibEntryIterator {
         if (iteratorDone) {
             return null;
         }
-//        iteratorDone = true;
         BibEntry nextEntry = articles.get(currentIndex);
         currentIndex++;
         return nextEntry;
@@ -273,13 +272,7 @@ public class CrossRefIterator implements BibEntryIterator {
 
     @Override
     public void close() {
-        //        if (lineIterator != null) {
-        //            try {
-        //                lineIterator.close();
-        //            } catch (IOException e) {
-        //                logger.error("Couldn't close line iterator.", e);
-        //            }
-        //        }
+        // do nothing
     }
 
 }

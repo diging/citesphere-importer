@@ -84,9 +84,9 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
     public void startImport(KafkaJobMessage message, JobInfo info) {
         // message = jobToken: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJKT0IxOTciLCJleHAiOjE2NzgzNDU3NDF9.5Xqh_AoMHcdlatULkCLFtny9pOF_uJ-SRARw0gCybY3h3qHL2mkIIQlk-qTA0Pn0VlhOLuW4FwACHmIdwZVmoA
         // info = dois: [10.2307/j.ctvcm4h07.67, 10.1515/9780691242507]
-//        null
-//        zotero: byRZjIk2y4e3kay1cnwy3KpB
-//        zoteroId: 9154965
+        // null
+        // zotero: byRZjIk2y4e3kay1cnwy3KpB
+        // zoteroId: 9154965
         logger.info("Starting import for " + info.getDois());
         
         ObjectMapper mapper = new ObjectMapper();
@@ -112,7 +112,6 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
                 // something is wrong with this entry, let's ignore it
                 continue;
             }
-            System.out.println("======================================" + entry.getArticleType());
             ItemType type = itemTypeMapping.get(entry.getArticleType());
             JsonNode template = zoteroConnector.getTemplate(type);
             ObjectNode bibNode = generationService.generateJson(template, entry);
