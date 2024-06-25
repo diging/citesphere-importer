@@ -6,8 +6,6 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,9 +31,7 @@ import edu.asu.diging.citesphere.messages.model.Status;
 
 @Service
 public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
-    
-    private final Logger logger = LoggerFactory.getLogger(getClass());
-      
+         
     private Map<String, ItemType> itemTypeMapping = new HashMap<>();
     
     @Autowired
@@ -82,11 +78,6 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
     }
     
     public void startImport(KafkaJobMessage message, JobInfo info) {
-        // message = jobToken: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJKT0IxOTciLCJleHAiOjE2NzgzNDU3NDF9.5Xqh_AoMHcdlatULkCLFtny9pOF_uJ-SRARw0gCybY3h3qHL2mkIIQlk-qTA0Pn0VlhOLuW4FwACHmIdwZVmoA
-        // info = dois: [10.2307/j.ctvcm4h07.67, 10.1515/9780691242507]
-        // null
-        // zotero: byRZjIk2y4e3kay1cnwy3KpB
-        // zoteroId: 9154965
         logger.info("Starting import for " + info.getDois());
         
         ObjectMapper mapper = new ObjectMapper();

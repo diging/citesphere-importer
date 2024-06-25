@@ -60,7 +60,7 @@ public abstract class AbstractImportProcessor implements IImportProcessor {
         }
     }
     
-    public ICitesphereConnector getCitesphereConnector() {
+    protected ICitesphereConnector getCitesphereConnector() {
         return connector;
     }
 }
