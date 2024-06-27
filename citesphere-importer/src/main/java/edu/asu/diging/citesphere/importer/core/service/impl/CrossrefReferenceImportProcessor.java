@@ -21,7 +21,7 @@ import edu.asu.diging.citesphere.importer.core.model.ItemType;
 import edu.asu.diging.citesphere.importer.core.model.impl.CrossRefPublication;
 import edu.asu.diging.citesphere.importer.core.service.AbstractImportProcessor;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
-import edu.asu.diging.citesphere.importer.core.service.parse.IHandlerRegistry;
+import edu.asu.diging.citesphere.importer.core.service.parse.impl.CrossRefHandler;
 import edu.asu.diging.citesphere.importer.core.zotero.IZoteroConnector;
 import edu.asu.diging.citesphere.importer.core.zotero.template.IJsonGenerationService;
 import edu.asu.diging.citesphere.messages.model.ItemCreationResponse;
@@ -40,8 +40,11 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
     @Autowired
     private IJsonGenerationService generationService;
     
+//    @Autowired
+//    private IHandlerRegistry handlerRegistry;
+    
     @Autowired
-    private IHandlerRegistry handlerRegistry;
+    private CrossRefHandler crossRefHandler;
     
     @PostConstruct
     public void init() {      
@@ -87,7 +90,8 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
         sendMessage(null, message.getId(), Status.PROCESSING, ResponseCode.P00);
         BibEntryIterator bibIterator = null;
         try {
-            bibIterator = handlerRegistry.handleFile(info, null);
+//            bibIterator = handlerRegistry.handleFile(info, null);
+            bibIterator = crossRefHandler.getIterator(null, null, info);
         } catch (IteratorCreationException e1) {
             logger.error("Could not create iterator.", e1);
         }
@@ -127,7 +131,7 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
         }
 
         response = response != null ? response : new ItemCreationResponse();
-        sendMessage(response, message.getId(), Status.DONE, ResponseCode.S00);  // giving error 500 as response code mentioned
+        sendMessage(response, message.getId(), Status.DONE, ResponseCode.S00);
     }
     
     private ItemCreationResponse submitEntries(ArrayNode entries, JobInfo info) {
