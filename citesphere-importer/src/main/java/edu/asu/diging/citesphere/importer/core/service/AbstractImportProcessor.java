@@ -1,13 +1,20 @@
 package edu.asu.diging.citesphere.importer.core.service;
 
+import java.net.URISyntaxException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import edu.asu.diging.citesphere.importer.core.exception.CitesphereCommunicationException;
 import edu.asu.diging.citesphere.importer.core.exception.MessageCreationException;
 import edu.asu.diging.citesphere.importer.core.kafka.impl.KafkaRequestProducer;
 import edu.asu.diging.citesphere.importer.core.service.impl.JobInfo;
+import edu.asu.diging.citesphere.importer.core.zotero.IZoteroConnector;
 import edu.asu.diging.citesphere.messages.KafkaTopics;
 import edu.asu.diging.citesphere.messages.model.ItemCreationResponse;
 import edu.asu.diging.citesphere.messages.model.KafkaImportReturnMessage;
@@ -25,6 +32,8 @@ public abstract class AbstractImportProcessor implements IImportProcessor {
     @Autowired
     private ICitesphereConnector connector;
     
+    @Autowired
+    private IZoteroConnector zoteroConnector;
    
     @Override
     public void process(KafkaJobMessage message) {
@@ -62,5 +71,26 @@ public abstract class AbstractImportProcessor implements IImportProcessor {
     
     protected ICitesphereConnector getCitesphereConnector() {
         return connector;
+    }
+    
+    protected ItemCreationResponse submitEntries(ArrayNode entries, JobInfo info) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            String msg = mapper.writeValueAsString(entries);
+            logger.info("Submitting " + msg);
+            ItemCreationResponse response = zoteroConnector.addEntries(info, entries);
+            if (response != null) {
+                logger.info(response.getSuccessful() + "");
+                logger.error(response.getFailed() + "");
+            } else {
+                logger.error("Item creation failed.");
+            }
+            return response;
+        } catch (URISyntaxException e) {
+            logger.error("Could not store new entry.", e);
+        } catch (JsonProcessingException e) {
+            logger.error("Could not write JSON.");
+        }
+        return null;
     }
 }

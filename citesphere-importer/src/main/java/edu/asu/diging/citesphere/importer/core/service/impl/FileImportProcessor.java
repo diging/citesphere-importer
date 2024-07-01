@@ -1,6 +1,5 @@
 package edu.asu.diging.citesphere.importer.core.service.impl;
 
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,7 +8,6 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -21,7 +19,6 @@ import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.ItemType;
 import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
 import edu.asu.diging.citesphere.importer.core.service.AbstractImportProcessor;
-import edu.asu.diging.citesphere.importer.core.service.ICitesphereConnector;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
 import edu.asu.diging.citesphere.importer.core.service.parse.IHandlerRegistry;
 import edu.asu.diging.citesphere.importer.core.zotero.IZoteroConnector;
@@ -132,27 +129,6 @@ public class FileImportProcessor extends AbstractImportProcessor {
 
         response = response != null ? response : new ItemCreationResponse();
         sendMessage(response, message.getId(), Status.DONE, ResponseCode.S00);
-    }
-    
-    private ItemCreationResponse submitEntries(ArrayNode entries, JobInfo info) {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            String msg = mapper.writeValueAsString(entries);
-            logger.info("Submitting " + msg);
-            ItemCreationResponse response = zoteroConnector.addEntries(info, entries);
-            if (response != null) {
-                logger.info(response.getSuccessful() + "");
-                logger.error(response.getFailed() + "");
-            } else {
-                logger.error("Item creation failed.");
-            }
-            return response;
-        } catch (URISyntaxException e) {
-            logger.error("Could not store new entry.", e);
-        } catch (JsonProcessingException e) {
-            logger.error("Could not write JSON.");
-        }
-        return null;
     }
 
     private String downloadFile(KafkaJobMessage message) {

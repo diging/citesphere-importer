@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
-import edu.asu.diging.citesphere.importer.core.model.impl.CrossRefPublication;
+import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
 import edu.asu.diging.citesphere.importer.core.zotero.template.IJsonGenerationService;
 import edu.asu.diging.citesphere.importer.core.zotero.template.ItemJsonGenerator;
 
@@ -42,7 +42,7 @@ public class JsonGenerationService implements IJsonGenerationService {
         ItemJsonGenerator generator = generators.get(entry.getArticleType());
         if (generator != null) {
             return generator.generate(template, entry);
-        } else if (entry instanceof CrossRefPublication){
+        } else if (entry instanceof Publication){
             generator = generators.get("CrossRef");
             return generator.generate(template, entry);
         }

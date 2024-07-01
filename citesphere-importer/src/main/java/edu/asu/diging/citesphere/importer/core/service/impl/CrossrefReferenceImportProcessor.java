@@ -1,6 +1,5 @@
 package edu.asu.diging.citesphere.importer.core.service.impl;
 
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,19 +8,17 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import edu.asu.diging.citesphere.importer.core.exception.IteratorCreationException;
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.ItemType;
-import edu.asu.diging.citesphere.importer.core.model.impl.CrossRefPublication;
+import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
 import edu.asu.diging.citesphere.importer.core.service.AbstractImportProcessor;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
-import edu.asu.diging.citesphere.importer.core.service.parse.impl.CrossRefHandler;
+import edu.asu.diging.citesphere.importer.core.service.parse.iterators.CrossRefIterator;
 import edu.asu.diging.citesphere.importer.core.zotero.IZoteroConnector;
 import edu.asu.diging.citesphere.importer.core.zotero.template.IJsonGenerationService;
 import edu.asu.diging.citesphere.messages.model.ItemCreationResponse;
@@ -40,44 +37,38 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
     @Autowired
     private IJsonGenerationService generationService;
     
-//    @Autowired
-//    private IHandlerRegistry handlerRegistry;
-    
-    @Autowired
-    private CrossRefHandler crossRefHandler;
-    
     @PostConstruct
     public void init() {      
-        itemTypeMapping.put(CrossRefPublication.ARTICLE, ItemType.JOURNAL_ARTICLE);
-        itemTypeMapping.put(CrossRefPublication.BOOK, ItemType.BOOK);
-        itemTypeMapping.put(CrossRefPublication.BOOK_CHAPTER, ItemType.BOOK_SECTION);
-        itemTypeMapping.put(CrossRefPublication.MONOGRAPH, ItemType.BOOK);
-        itemTypeMapping.put(CrossRefPublication.JOURNAL_ISSUE, ItemType.JOURNAL_ARTICLE);
-        itemTypeMapping.put(CrossRefPublication.REFERNCE_ENTRY, ItemType.DICTIONARY_ENTRY);
-        itemTypeMapping.put(CrossRefPublication.POSTED_CONTENT, ItemType.WEBPAGE);
-        itemTypeMapping.put(CrossRefPublication.COMPONENT, ItemType.ATTACHMENT);
-        itemTypeMapping.put(CrossRefPublication.EDITED_BOOK, ItemType.BOOK);
-        itemTypeMapping.put(CrossRefPublication.PROCEEDINGS_ARTICLE, ItemType.CONFERENCE_PAPER);
-        itemTypeMapping.put(CrossRefPublication.DISSERTATION, ItemType.THESIS);
-        itemTypeMapping.put(CrossRefPublication.BOOK_SECTION, ItemType.BOOK_SECTION);
-        itemTypeMapping.put(CrossRefPublication.REPORT_COMPONENT, ItemType.REPORT);
-        itemTypeMapping.put(CrossRefPublication.REPORT, ItemType.REPORT);
-        itemTypeMapping.put(CrossRefPublication.PEER_REVIEW, ItemType.JOURNAL_ARTICLE);
-        itemTypeMapping.put(CrossRefPublication.BOOK_TRACK, ItemType.BOOK);
-        itemTypeMapping.put(CrossRefPublication.BOOK_PART, ItemType.BOOK_SECTION);
-        itemTypeMapping.put(CrossRefPublication.OTHER, ItemType.DOCUMENT);
-        itemTypeMapping.put(CrossRefPublication.JORUNAL_VOLUME, ItemType.JOURNAL_ARTICLE);
-        itemTypeMapping.put(CrossRefPublication.BOOK_SET, ItemType.BOOK);
-        itemTypeMapping.put(CrossRefPublication.JOURNAL, ItemType.JOURNAL_ARTICLE);
-        itemTypeMapping.put(CrossRefPublication.PROCEEDINGS_SERIES, ItemType.CONFERENCE_PAPER);
-        itemTypeMapping.put(CrossRefPublication.REPORT_SERIES, ItemType.REPORT);
-        itemTypeMapping.put(CrossRefPublication.PROCEEDINGS, ItemType.CONFERENCE_PAPER);
-        itemTypeMapping.put(CrossRefPublication.DATABASE, ItemType.DATABASE);
-        itemTypeMapping.put(CrossRefPublication.STANDARD, ItemType.STATUTE);
-        itemTypeMapping.put(CrossRefPublication.REFERENCE_BOOK, ItemType.DICTIONARY_ENTRY);
-        itemTypeMapping.put(CrossRefPublication.GRANT, ItemType.DOCUMENT);
-        itemTypeMapping.put(CrossRefPublication.DATASET, ItemType.DATABASE);
-        itemTypeMapping.put(CrossRefPublication.BOOK_SERIES, ItemType.BOOK);
+        itemTypeMapping.put(Publication.ARTICLE, ItemType.JOURNAL_ARTICLE);
+        itemTypeMapping.put(Publication.BOOK, ItemType.BOOK);
+        itemTypeMapping.put(Publication.BOOK_CHAPTER, ItemType.BOOK_SECTION);
+        itemTypeMapping.put(Publication.MONOGRAPH, ItemType.BOOK);
+        itemTypeMapping.put(Publication.JOURNAL_ISSUE, ItemType.JOURNAL_ARTICLE);
+        itemTypeMapping.put(Publication.REFERNCE_ENTRY, ItemType.DICTIONARY_ENTRY);
+        itemTypeMapping.put(Publication.POSTED_CONTENT, ItemType.WEBPAGE);
+        itemTypeMapping.put(Publication.COMPONENT, ItemType.ATTACHMENT);
+        itemTypeMapping.put(Publication.EDITED_BOOK, ItemType.BOOK);
+        itemTypeMapping.put(Publication.PROCEEDINGS_ARTICLE, ItemType.CONFERENCE_PAPER);
+        itemTypeMapping.put(Publication.DISSERTATION, ItemType.THESIS);
+        itemTypeMapping.put(Publication.BOOK_SECTION, ItemType.BOOK_SECTION);
+        itemTypeMapping.put(Publication.REPORT_COMPONENT, ItemType.REPORT);
+        itemTypeMapping.put(Publication.REPORT, ItemType.REPORT);
+        itemTypeMapping.put(Publication.PEER_REVIEW, ItemType.JOURNAL_ARTICLE);
+        itemTypeMapping.put(Publication.BOOK_TRACK, ItemType.BOOK);
+        itemTypeMapping.put(Publication.BOOK_PART, ItemType.BOOK_SECTION);
+        itemTypeMapping.put(Publication.OTHER, ItemType.DOCUMENT);
+        itemTypeMapping.put(Publication.JORUNAL_VOLUME, ItemType.JOURNAL_ARTICLE);
+        itemTypeMapping.put(Publication.BOOK_SET, ItemType.BOOK);
+        itemTypeMapping.put(Publication.JOURNAL, ItemType.JOURNAL_ARTICLE);
+        itemTypeMapping.put(Publication.PROCEEDINGS_SERIES, ItemType.CONFERENCE_PAPER);
+        itemTypeMapping.put(Publication.REPORT_SERIES, ItemType.REPORT);
+        itemTypeMapping.put(Publication.PROCEEDINGS, ItemType.CONFERENCE_PAPER);
+        itemTypeMapping.put(Publication.DATABASE, ItemType.DATABASE);
+        itemTypeMapping.put(Publication.STANDARD, ItemType.STATUTE);
+        itemTypeMapping.put(Publication.REFERENCE_BOOK, ItemType.DICTIONARY_ENTRY);
+        itemTypeMapping.put(Publication.GRANT, ItemType.DOCUMENT);
+        itemTypeMapping.put(Publication.DATASET, ItemType.DATABASE);
+        itemTypeMapping.put(Publication.BOOK_SERIES, ItemType.BOOK);
     }
     
     public void startImport(KafkaJobMessage message, JobInfo info) {
@@ -89,12 +80,7 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
 
         sendMessage(null, message.getId(), Status.PROCESSING, ResponseCode.P00);
         BibEntryIterator bibIterator = null;
-        try {
-//            bibIterator = handlerRegistry.handleFile(info, null);
-            bibIterator = crossRefHandler.getIterator(null, null, info);
-        } catch (IteratorCreationException e1) {
-            logger.error("Could not create iterator.", e1);
-        }
+        bibIterator = new CrossRefIterator(info);
         
         if (bibIterator == null) {
             sendMessage(null, message.getId(), Status.FAILED, ResponseCode.X30);
@@ -134,25 +120,6 @@ public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
         sendMessage(response, message.getId(), Status.DONE, ResponseCode.S00);
     }
     
-    private ItemCreationResponse submitEntries(ArrayNode entries, JobInfo info) {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            String msg = mapper.writeValueAsString(entries);
-            logger.info("Submitting " + msg);
-            ItemCreationResponse response = zoteroConnector.addEntries(info, entries);
-            if (response != null) {
-                logger.info(response.getSuccessful() + "");
-                logger.error(response.getFailed() + "");
-            } else {
-                logger.error("Item creation failed.");
-            }
-            return response;
-        } catch (URISyntaxException e) {
-            logger.error("Could not store new entry.", e);
-        } catch (JsonProcessingException e) {
-            logger.error("Could not write JSON.");
-        }
-        return null;
-    }
+
 
 }
