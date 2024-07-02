@@ -28,7 +28,7 @@ import edu.asu.diging.citesphere.importer.core.exception.IteratorCreationExcepti
 import edu.asu.diging.citesphere.importer.core.kafka.impl.KafkaRequestProducer;
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.ItemType;
-import edu.asu.diging.citesphere.importer.core.model.impl.CrossRefPublication;
+import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
 import edu.asu.diging.citesphere.importer.core.service.impl.CrossrefReferenceImportProcessor;
 import edu.asu.diging.citesphere.importer.core.service.impl.JobInfo;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
@@ -86,7 +86,7 @@ public class CrossrefReferenceImportProcessorTest {
         BibEntry entry = mock(BibEntry.class);
         when(bibIterator.hasNext()).thenReturn(true, false);
         when(bibIterator.next()).thenReturn(entry);
-        when(entry.getArticleType()).thenReturn(CrossRefPublication.ARTICLE);
+        when(entry.getArticleType()).thenReturn(Publication.ARTICLE);
 
         JsonNode template = mock(ObjectNode.class);
         when(zoteroConnector.getTemplate(ItemType.JOURNAL_ARTICLE)).thenReturn(template);
