@@ -42,11 +42,7 @@ public class JsonGenerationService implements IJsonGenerationService {
         ItemJsonGenerator generator = generators.get(entry.getArticleType());
         if (generator != null) {
             return generator.generate(template, entry);
-        } else if (entry instanceof Publication){
-            generator = generators.get("CrossRef");
-            return generator.generate(template, entry);
-        }
-
+        }        
         return null;
     }
 }

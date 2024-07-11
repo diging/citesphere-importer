@@ -38,8 +38,6 @@ public class CrossRefIterator implements BibEntryIterator {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private JobInfo info;
-    private List<BibEntry> articles;
-    private BibEntry article;
     private int currentIndex;
 
     private boolean iteratorDone = false;
@@ -88,29 +86,6 @@ public class CrossRefIterator implements BibEntryIterator {
         typeMap.put("grant", Publication.GRANT);
         typeMap.put("dataset", Publication.DATASET);
         typeMap.put("book-series", Publication.BOOK_SERIES);
-        parseCrossRef();
-
-    }
-
-    private void parseCrossRef() {
-
-        articles = new ArrayList<>();
-        for (String doi : info.getDois()) {
-            try {
-                Item item = crossrefService.get(doi);
-                article = new Publication();
-                article.setArticleType(typeMap.get(item.getType())); 
-                article.setJournalMeta(parseJournalMeta(item));
-                article.setArticleMeta(parseArticleMeta(item));
-
-                articles.add(article);
-            } catch (RequestFailedException | IOException e) {
-                logger.error("Couuld not retrieve work for doi: "+ doi, e);
-                // for now we just log the exceptions
-                // we might want to devise a way to decide if the 
-                // service might be down and we should stop sending requests.
-            }
-        }
     }
 
     private ContainerMeta parseJournalMeta(Item item) {
@@ -150,8 +125,6 @@ public class CrossRefIterator implements BibEntryIterator {
             chair.setIds(Arrays.asList(contributorID));
             contributors.add(chair);
         }
-        // added Editors & translators to article meta. 
-
         return meta;
     }
 
@@ -193,11 +166,19 @@ public class CrossRefIterator implements BibEntryIterator {
             review.setFullDescription(item.getReview().getCompetingInterestStatement());  
         }
         meta.setReviewInfo(review);       
-        meta.setDocumentType(item.getType());        
-
-        List<Reference> references = new ArrayList<>();
+        meta.setDocumentType(item.getType());
         if(item.getReference() != null) {
-            for(edu.asu.diging.crossref.model.Reference itemRef: item.getReference()) { 
+            meta.setReferences(mapReferences(item.getReference()));
+        }
+        meta.setReferenceCount(item.getReferenceCount().toString());
+
+        return meta;
+    }
+    
+    private List<Reference> mapReferences(List<edu.asu.diging.crossref.model.Reference> itemReferences) {
+        List<Reference> references = new ArrayList<>();
+        if(itemReferences != null) {
+            for(edu.asu.diging.crossref.model.Reference itemRef: itemReferences) { 
                 Reference ref = new Reference();
                 ref.setAuthorString(itemRef.getAuthor());
                 ref.setContributors(null);
@@ -222,13 +203,10 @@ public class CrossRefIterator implements BibEntryIterator {
                 references.add(ref);
             }
         }
-        meta.setReferences(references);
-        meta.setReferenceCount(item.getReferenceCount().toString());
-
-        return meta;
+        return references;
     }
 
-    public List<Contributor> mapPersonToContributor(List<Person> personList) {
+    private List<Contributor> mapPersonToContributor(List<Person> personList) {
         List<Contributor> contributors = new ArrayList<Contributor>();
         for(Person person: personList) {
             Contributor contributor = new Contributor();
@@ -257,7 +235,20 @@ public class CrossRefIterator implements BibEntryIterator {
         if (iteratorDone) {
             return null;
         }
-        BibEntry nextEntry = articles.get(currentIndex);
+        BibEntry nextEntry = new Publication();;
+        
+        try {
+            Item item = crossrefService.get(info.getDois().get(currentIndex));
+            nextEntry.setArticleType(typeMap.get(item.getType())); 
+            nextEntry.setJournalMeta(parseJournalMeta(item));
+            nextEntry.setArticleMeta(parseArticleMeta(item));
+        } catch (RequestFailedException | IOException e) {
+            logger.error("Could not retrieve work for doi: "+ info.getDois().get(currentIndex), e);
+            // for now we just log the exceptions
+            // we might want to devise a way to decide if the 
+            // service might be down and we should stop sending requests.
+        }
+        
         currentIndex++;
         return nextEntry;
     }
@@ -265,7 +256,7 @@ public class CrossRefIterator implements BibEntryIterator {
 
     @Override
     public boolean hasNext() {
-        if (currentIndex >= articles.size()) {
+        if (currentIndex >= info.getDois().size()) {
             iteratorDone = true;
         }
         return !iteratorDone;

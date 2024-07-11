@@ -16,7 +16,7 @@
         <thymeleaf.version>3.0.11.RELEASE</thymeleaf.version>
         <spring.kafka.version>2.2.6.RELEASE</spring.kafka.version>
         <citesphere.messages.version>0.5</citesphere.messages.version>
-        <crossref-connect-version>0.3-SNAPSHOT</crossref-connect-version>
+        <crossref-connect-version>0.2</crossref-connect-version>
 
         <admin.password>$2a$04$oQo44vqcDIFRoYKiAXoNheurzkwX9dcNmowvTX/hsWuBMwijqn44i</admin.password>
 
