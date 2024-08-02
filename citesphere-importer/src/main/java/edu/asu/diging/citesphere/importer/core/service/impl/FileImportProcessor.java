@@ -38,7 +38,7 @@ public class FileImportProcessor extends AbstractImportProcessor {
     }
 
     @Override
-    protected BibEntryIterator getbibIterator(KafkaJobMessage message, JobInfo info) {
+    protected BibEntryIterator getBibEntryIterator(KafkaJobMessage message, JobInfo info) {
         String filePath = downloadFile(message);
         if (filePath == null) {
             sendMessage(null, message.getId(), Status.FAILED, ResponseCode.X20);

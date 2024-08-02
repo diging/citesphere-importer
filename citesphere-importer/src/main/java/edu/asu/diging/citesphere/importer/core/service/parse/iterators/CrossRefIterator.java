@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -38,18 +39,16 @@ public class CrossRefIterator implements BibEntryIterator {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private JobInfo info;
-    private int currentIndex;
 
-    private boolean iteratorDone = false;
     private Map<String, String> typeMap;
 
     private CrossrefWorksService crossrefService;
 
-
+    private Iterator<String> doisIterator;
 
     public CrossRefIterator(JobInfo info) {
         this.info = info;
-        currentIndex = 0;
+        doisIterator = info.getDois().iterator();
         init();
     }
 
@@ -59,15 +58,15 @@ public class CrossRefIterator implements BibEntryIterator {
         typeMap.put("journal-article", Publication.ARTICLE);
         typeMap.put("book", Publication.BOOK);
         typeMap.put("book-chapter", Publication.BOOK_CHAPTER); 
-        typeMap.put("monograph", Publication.MONOGRAPH);
+        typeMap.put("monograph", Publication.BOOK);
         typeMap.put("journal-issue", Publication.JOURNAL_ISSUE);
         typeMap.put("reference-entry", Publication.REFERNCE_ENTRY);
         typeMap.put("posted-content", Publication.POSTED_CONTENT);
         typeMap.put("component", Publication.COMPONENT);
         typeMap.put("edited-book", Publication.EDITED_BOOK);
-        typeMap.put("proceedings-article", Publication.PROCEEDINGS_ARTICLE);
+        typeMap.put("proceedings-article", Publication.PROCEEDINGS_PAPER);
         typeMap.put("dissertation", Publication.DISSERTATION);
-        typeMap.put("book-section", Publication.BOOK_SECTION);
+        typeMap.put("book-section", Publication.BOOK_CHAPTER);
         typeMap.put("report-component", Publication.REPORT_COMPONENT);
         typeMap.put("report", Publication.REPORT);
         typeMap.put("peer-review", Publication.PEER_REVIEW);
@@ -103,28 +102,6 @@ public class CrossRefIterator implements BibEntryIterator {
             }
         }
         meta.setIssns(issnList);
-
-        List<Contributor> contributors = new ArrayList<>();
-        if(item.getChair() != null) {
-            Person itemChair = item.getChair();
-            Contributor chair = new Contributor();
-            chair.setContributionType(ContributionType.CHAIR);
-            chair.setGivenName(itemChair.getGiven());
-            chair.setSurname(itemChair.getFamily());
-            chair.setFullName(itemChair.getName());
-            List<Affiliation> affiliations = new ArrayList<>();
-            for(Institution institute: itemChair.getAffiliation()) {
-                Affiliation affiliation = new Affiliation();
-                affiliation.setName(institute.getName());
-                affiliations.add(affiliation);
-            }
-            chair.setAffiliations(affiliations);
-            ContributorId contributorID = new ContributorId();
-            contributorID.setId(itemChair.getOrcid());
-            contributorID.setIdSystem("ORCID");
-            chair.setIds(Arrays.asList(contributorID));
-            contributors.add(chair);
-        }
         return meta;
     }
 
@@ -134,17 +111,22 @@ public class CrossRefIterator implements BibEntryIterator {
         List<Contributor> contributors = new ArrayList<>();
         // List of authors
         if(item.getAuthor() != null) {
-            contributors.addAll(mapPersonToContributor(item.getAuthor()));
+            contributors.addAll(mapPersonToContributor(item.getAuthor(), ContributionType.AUTHOR));
         }
         // List of editors
         if(item.getEditor() != null) {
-            contributors.addAll(mapPersonToContributor(item.getEditor()));
+            contributors.addAll(mapPersonToContributor(item.getEditor(), ContributionType.EDITOR));
         }
         // List of translators
         if(item.getTranslator() != null) {
-            contributors.addAll(mapPersonToContributor(item.getTranslator()));
+            contributors.addAll(mapPersonToContributor(item.getTranslator(), ContributionType.TRANSLATOR));
+        }
+        // List of chair
+        if(item.getChair() != null) {
+            contributors.addAll(mapPersonToContributor(Arrays.asList(item.getChair()), ContributionType.CHAIR));
         }
         meta.setContributors(contributors);
+        
         meta.setAuthorNotesCorrespondence(null);
         ArticlePublicationDate publicationDate = new ArticlePublicationDate();
         List<Integer> dateParts = item.getPublished().getIndexedDateParts();
@@ -206,11 +188,11 @@ public class CrossRefIterator implements BibEntryIterator {
         return references;
     }
 
-    private List<Contributor> mapPersonToContributor(List<Person> personList) {
+    private List<Contributor> mapPersonToContributor(List<Person> personList, String contributionType) {
         List<Contributor> contributors = new ArrayList<Contributor>();
         for(Person person: personList) {
             Contributor contributor = new Contributor();
-            contributor.setContributionType(ContributionType.EDITOR);
+            contributor.setContributionType(contributionType);
             contributor.setGivenName(person.getGiven());
             contributor.setSurname(person.getFamily());
             contributor.setFullName(person.getName());
@@ -232,34 +214,30 @@ public class CrossRefIterator implements BibEntryIterator {
 
     @Override
     public BibEntry next() {
-        if (iteratorDone) {
+        if (!doisIterator.hasNext()) {
             return null;
         }
         BibEntry nextEntry = new Publication();;
         
         try {
-            Item item = crossrefService.get(info.getDois().get(currentIndex));
+            Item item = crossrefService.get(doisIterator.next());
             nextEntry.setArticleType(typeMap.get(item.getType())); 
             nextEntry.setJournalMeta(parseJournalMeta(item));
             nextEntry.setArticleMeta(parseArticleMeta(item));
         } catch (RequestFailedException | IOException e) {
-            logger.error("Could not retrieve work for doi: "+ info.getDois().get(currentIndex), e);
+            logger.error("Could not retrieve work for doi: "+ doisIterator.next(), e);
             // for now we just log the exceptions
             // we might want to devise a way to decide if the 
             // service might be down and we should stop sending requests.
         }
         
-        currentIndex++;
         return nextEntry;
     }
 
 
     @Override
     public boolean hasNext() {
-        if (currentIndex >= info.getDois().size()) {
-            iteratorDone = true;
-        }
-        return !iteratorDone;
+        return doisIterator.hasNext();
     }
 
     @Override

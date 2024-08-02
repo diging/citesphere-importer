@@ -11,7 +11,7 @@ import edu.asu.diging.citesphere.messages.model.KafkaJobMessage;
 public class CrossrefReferenceImportProcessor extends AbstractImportProcessor {
          
     @Override
-    protected BibEntryIterator getbibIterator(KafkaJobMessage message, JobInfo info) {
+    protected BibEntryIterator getBibEntryIterator(KafkaJobMessage message, JobInfo info) {
         return new CrossRefIterator(info);
     }
 }

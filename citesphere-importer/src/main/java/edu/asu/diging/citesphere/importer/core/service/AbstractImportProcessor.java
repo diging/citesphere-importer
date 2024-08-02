@@ -65,33 +65,27 @@ public abstract class AbstractImportProcessor implements IImportProcessor {
         itemTypeMapping.put(Publication.NEWS_ITEM, ItemType.NEWSPAPER_ARTICLE);
         itemTypeMapping.put(Publication.PROCEEDINGS_PAPER, ItemType.CONFERENCE_PAPER);
         itemTypeMapping.put(Publication.DOCUMENT, ItemType.DOCUMENT);
-        itemTypeMapping.put(Publication.MONOGRAPH, ItemType.BOOK);
-        itemTypeMapping.put(Publication.JOURNAL_ISSUE, ItemType.JOURNAL_ARTICLE);
+        itemTypeMapping.put(Publication.BOOK, ItemType.BOOK);
         itemTypeMapping.put(Publication.REFERNCE_ENTRY, ItemType.DICTIONARY_ENTRY);
         itemTypeMapping.put(Publication.POSTED_CONTENT, ItemType.WEBPAGE);
         itemTypeMapping.put(Publication.COMPONENT, ItemType.ATTACHMENT);
         itemTypeMapping.put(Publication.EDITED_BOOK, ItemType.BOOK);
-        itemTypeMapping.put(Publication.PROCEEDINGS_ARTICLE, ItemType.CONFERENCE_PAPER);
+        itemTypeMapping.put(Publication.PROCEEDINGS_PAPER, ItemType.CONFERENCE_PAPER);
         itemTypeMapping.put(Publication.DISSERTATION, ItemType.THESIS);
-        itemTypeMapping.put(Publication.BOOK_SECTION, ItemType.BOOK_SECTION);
+        itemTypeMapping.put(Publication.BOOK_CHAPTER, ItemType.BOOK_SECTION);
         itemTypeMapping.put(Publication.REPORT_COMPONENT, ItemType.REPORT);
         itemTypeMapping.put(Publication.REPORT, ItemType.REPORT);
         itemTypeMapping.put(Publication.PEER_REVIEW, ItemType.JOURNAL_ARTICLE);
         itemTypeMapping.put(Publication.BOOK_TRACK, ItemType.BOOK);
         itemTypeMapping.put(Publication.BOOK_PART, ItemType.BOOK_SECTION);
         itemTypeMapping.put(Publication.OTHER, ItemType.DOCUMENT);
-        itemTypeMapping.put(Publication.JORUNAL_VOLUME, ItemType.JOURNAL_ARTICLE);
         itemTypeMapping.put(Publication.BOOK_SET, ItemType.BOOK);
-        itemTypeMapping.put(Publication.JOURNAL, ItemType.JOURNAL_ARTICLE);
-        itemTypeMapping.put(Publication.PROCEEDINGS_SERIES, ItemType.CONFERENCE_PAPER);
-        itemTypeMapping.put(Publication.REPORT_SERIES, ItemType.REPORT);
         itemTypeMapping.put(Publication.PROCEEDINGS, ItemType.CONFERENCE_PAPER);
         itemTypeMapping.put(Publication.DATABASE, ItemType.DATABASE);
         itemTypeMapping.put(Publication.STANDARD, ItemType.STATUTE);
-        itemTypeMapping.put(Publication.REFERENCE_BOOK, ItemType.DICTIONARY_ENTRY);
+        itemTypeMapping.put(Publication.REFERENCE_BOOK, ItemType.BOOK);
         itemTypeMapping.put(Publication.GRANT, ItemType.DOCUMENT);
         itemTypeMapping.put(Publication.DATASET, ItemType.DATABASE);
-        itemTypeMapping.put(Publication.BOOK_SERIES, ItemType.BOOK);
     }
    
     @Override
@@ -158,7 +152,7 @@ public abstract class AbstractImportProcessor implements IImportProcessor {
         
         sendMessage(null, message.getId(), Status.PROCESSING, ResponseCode.P00);
         
-        BibEntryIterator bibIterator = getbibIterator(message, info);
+        BibEntryIterator bibIterator = getBibEntryIterator(message, info);
         if (bibIterator == null) {
             sendMessage(null, message.getId(), Status.FAILED, ResponseCode.X30);
             return;
@@ -197,5 +191,5 @@ public abstract class AbstractImportProcessor implements IImportProcessor {
         sendMessage(response, message.getId(), Status.DONE, ResponseCode.S00);
     }
     
-    protected abstract BibEntryIterator getbibIterator(KafkaJobMessage message, JobInfo info);
+    protected abstract BibEntryIterator getBibEntryIterator(KafkaJobMessage message, JobInfo info);
 }
