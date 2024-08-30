@@ -94,51 +94,51 @@ public class CollectionImportProcessor implements IImportProcessor {
         
         sendMessage(null, message.getId(), Status.PROCESSING, ResponseCode.P00);
         BibEntryIterator bibIterator = null;
-//        try {
-//            bibIterator = handlerRegistry.handleFile(info, filePath);
-//        } catch (IteratorCreationException e1) {
-//            logger.error("Could not create iterator.", e1);
-//        }
-//        
-//        if (bibIterator == null) {
-//            sendMessage(null, message.getId(), Status.FAILED, ResponseCode.X30);
-//            return;
-//        }
+        try {
+            bibIterator = handlerRegistry.handleFile(info, filePath);
+        } catch (IteratorCreationException e1) {
+            logger.error("Could not create iterator.", e1);
+        }
         
-//        ObjectMapper mapper = new ObjectMapper();
-//        ArrayNode root = mapper.createArrayNode();
-//        int entryCounter = 0;
-//        while (bibIterator.hasNext()) {
-//            BibEntry entry = bibIterator.next();
-//            if (entry.getArticleType() == null) {
-//                // something is wrong with this entry, let's ignore it
-//                continue;
-//            }
-//            ItemType type = itemTypeMapping.get(entry.getArticleType());
-//            JsonNode template = zoteroConnector.getTemplate(type);
-//            ObjectNode bibNode = generationService.generateJson(template, entry);
-//
-//            root.add(bibNode);
-//            entryCounter++;
-//
-//            // we can submit max 50 entries to Zotoro
-//            if (entryCounter >= 50) {
-//                submitEntries(root, info);
-//                entryCounter = 0;
-//                root = mapper.createArrayNode();
-//            }
-//
-//        }
-//        
-//        bibIterator.close();
-//        
-//        ItemCreationResponse response = null;
-//        if (entryCounter > 0) {
-//            response = submitEntries(root, info);
-//        }
-//
-//        response = response != null ? response : new ItemCreationResponse();
-//        sendMessage(response, message.getId(), Status.DONE, ResponseCode.S00);
+        if (bibIterator == null) {
+            sendMessage(null, message.getId(), Status.FAILED, ResponseCode.X30);
+            return;
+        }
+        
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayNode root = mapper.createArrayNode();
+        int entryCounter = 0;
+        while (bibIterator.hasNext()) {
+            BibEntry entry = bibIterator.next();
+            if (entry.getArticleType() == null) {
+                // something is wrong with this entry, let's ignore it
+                continue;
+            }
+            ItemType type = itemTypeMapping.get(entry.getArticleType());
+            JsonNode template = zoteroConnector.getTemplate(type);
+            ObjectNode bibNode = generationService.generateJson(template, entry);
+
+            root.add(bibNode);
+            entryCounter++;
+
+            // we can submit max 50 entries to Zotoro
+            if (entryCounter >= 50) {
+                submitEntries(root, info);
+                entryCounter = 0;
+                root = mapper.createArrayNode();
+            }
+
+        }
+        
+        bibIterator.close();
+        
+        ItemCreationResponse response = null;
+        if (entryCounter > 0) {
+            response = submitEntries(root, info);
+        }
+
+        response = response != null ? response : new ItemCreationResponse();
+        sendMessage(response, message.getId(), Status.DONE, ResponseCode.S00);
 
     }
     
