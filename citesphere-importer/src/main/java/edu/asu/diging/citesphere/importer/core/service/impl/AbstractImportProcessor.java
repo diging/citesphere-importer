@@ -1,4 +1,4 @@
-package edu.asu.diging.citesphere.importer.core.service;
+package edu.asu.diging.citesphere.importer.core.service.impl;
 
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -22,7 +22,8 @@ import edu.asu.diging.citesphere.importer.core.kafka.impl.KafkaRequestProducer;
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.ItemType;
 import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
-import edu.asu.diging.citesphere.importer.core.service.impl.JobInfo;
+import edu.asu.diging.citesphere.importer.core.service.ICitesphereConnector;
+import edu.asu.diging.citesphere.importer.core.service.IImportProcessor;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
 import edu.asu.diging.citesphere.importer.core.zotero.IZoteroConnector;
 import edu.asu.diging.citesphere.importer.core.zotero.template.IJsonGenerationService;

@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 
 import edu.asu.diging.citesphere.importer.core.exception.CitesphereCommunicationException;
 import edu.asu.diging.citesphere.importer.core.exception.IteratorCreationException;
-import edu.asu.diging.citesphere.importer.core.service.AbstractImportProcessor;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
 import edu.asu.diging.citesphere.importer.core.service.parse.IHandlerRegistry;
 import edu.asu.diging.citesphere.messages.model.KafkaJobMessage;

@@ -89,7 +89,7 @@ public class CrossRefIterator implements BibEntryIterator {
 
     private ContainerMeta parseJournalMeta(Item item) {
         ContainerMeta meta = new ContainerMeta();
-        meta.setContainerTitle(String.join(", ", item.getContainerTitle()));
+        meta.setContainerTitle(item.getContainerTitle().get(0));
         meta.setPublisherName(item.getPublisher());
         meta.setPublisherLocation(item.getPublisherLocation());
         List<Issn> issnList = new ArrayList<Issn>();
