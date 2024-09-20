@@ -15,7 +15,8 @@
         <spring-data.version>Lovelace-RELEASE</spring-data.version>
         <thymeleaf.version>3.0.11.RELEASE</thymeleaf.version>
         <spring.kafka.version>2.2.6.RELEASE</spring.kafka.version>
-        <citesphere.messages.version>0.2</citesphere.messages.version>
+        <citesphere.messages.version>0.5</citesphere.messages.version>
+        <crossref-connect-version>0.2</crossref-connect-version>
 
         <admin.password>$2a$04$oQo44vqcDIFRoYKiAXoNheurzkwX9dcNmowvTX/hsWuBMwijqn44i</admin.password>
 
@@ -68,6 +69,11 @@
             <groupId>edu.asu.diging</groupId>
             <artifactId>citesphere-messages</artifactId>
             <version>${citesphere.messages.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>edu.asu.diging</groupId>
+          <artifactId>crossref-connect</artifactId>
+          <version>${crossref-connect-version}</version>
         </dependency>
 
         <!-- Spring -->
@@ -328,7 +334,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>2.6</version>
+                <version>3.3.1</version>
                 <configuration>
                     <webResources>
                         <resource>

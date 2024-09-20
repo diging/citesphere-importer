@@ -162,7 +162,7 @@ public abstract class ItemJsonGenerator {
             creators.add(contributorNode);
         }
 
-        if (article.getArticleMeta().getReviewInfo() != null) {
+        if (article.getArticleMeta().getReviewInfo() != null && article.getArticleMeta().getReviewInfo().getContributors() != null) {
             for (Contributor reviewedAuthor : article.getArticleMeta().getReviewInfo().getContributors()) {
                 ObjectNode contributorNode = getObjectMapper().createObjectNode();
                 contributorNode.put("creatorType", ZoteroCreatorTypes.REVIEWED_AUTHOR);
