@@ -107,7 +107,8 @@ public class CrossRefIterator implements BibEntryIterator {
 
     private ArticleMeta parseArticleMeta(Item item) {
         ArticleMeta meta = new ArticleMeta();
-        meta.setArticleTitle(String.join(", ", item.getTitle()));
+        meta.setArticleTitle(item.getTitle().get(0));
+        meta.setShortTitle(String.join(", ", item.getTitle().subList(1, item.getTitle().size())));
         List<Contributor> contributors = new ArrayList<>();
         // List of authors
         if(item.getAuthor() != null) {
@@ -126,7 +127,7 @@ public class CrossRefIterator implements BibEntryIterator {
             contributors.addAll(mapPersonToContributor(Arrays.asList(item.getChair()), ContributionType.CHAIR));
         }
         meta.setContributors(contributors);
-        
+
         meta.setAuthorNotesCorrespondence(null);
         ArticlePublicationDate publicationDate = new ArticlePublicationDate();
         List<Integer> dateParts = item.getPublished().getIndexedDateParts();
@@ -156,36 +157,41 @@ public class CrossRefIterator implements BibEntryIterator {
 
         return meta;
     }
-    
+
     private List<Reference> mapReferences(List<edu.asu.diging.crossref.model.Reference> itemReferences) {
         List<Reference> references = new ArrayList<>();
         if(itemReferences != null) {
             for(edu.asu.diging.crossref.model.Reference itemRef: itemReferences) { 
-                Reference ref = new Reference();
-                ref.setAuthorString(itemRef.getAuthor());
-                ref.setContributors(null);
-                ref.setTitle(itemRef.getArticleTitle());
-                ref.setYear(itemRef.getYear());
-                if(itemRef.getDoi()!=null && !itemRef.getDoi().isBlank()) {
-                    ref.setIdentifier(itemRef.getDoi());
-                    ref.setIdentifierType("DOI");
-                    ref.setSource(itemRef.getDoiAssertedBy());
-                } else if (itemRef.getIssn()!=null && !itemRef.getIssn().isBlank()) {
-                    ref.setIdentifier(itemRef.getIssn());
-                    ref.setIdentifierType("ISSN");
-                } else if (itemRef.getIsbn()!=null && !itemRef.getIsbn().isBlank()) {
-                    ref.setIdentifier(itemRef.getIsbn());
-                    ref.setIdentifierType("ISBN");
-                }
-                ref.setFirstPage(itemRef.getFirstPage());
-                ref.setVolume(itemRef.getVolume());
-                ref.setReferenceId(itemRef.getKey());
-                ref.setReferenceString(itemRef.getUnstructured());
-                ref.setReferenceStringRaw(itemRef.getUnstructured());
-                references.add(ref);
+                references.add(mapSingleReference(itemRef));
             }
         }
         return references;
+    }
+
+    private Reference mapSingleReference(edu.asu.diging.crossref.model.Reference itemRef) {
+        Reference ref = new Reference();
+        ref.setAuthorString(itemRef.getAuthor());
+        ref.setContributors(null);
+        ref.setTitle(itemRef.getArticleTitle());
+        ref.setYear(itemRef.getYear());
+        if(itemRef.getDoi()!=null && !itemRef.getDoi().isBlank()) {
+            ref.setIdentifier(itemRef.getDoi());
+            ref.setIdentifierType("DOI");
+            ref.setSource(itemRef.getDoiAssertedBy());
+        } else if (itemRef.getIssn()!=null && !itemRef.getIssn().isBlank()) {
+            ref.setIdentifier(itemRef.getIssn());
+            ref.setIdentifierType("ISSN");
+        } else if (itemRef.getIsbn()!=null && !itemRef.getIsbn().isBlank()) {
+            ref.setIdentifier(itemRef.getIsbn());
+            ref.setIdentifierType("ISBN");
+        }
+        ref.setFirstPage(itemRef.getFirstPage());
+        ref.setVolume(itemRef.getVolume());
+        ref.setReferenceId(itemRef.getKey());
+        ref.setReferenceString(itemRef.getUnstructured());
+        ref.setReferenceStringRaw(itemRef.getUnstructured());
+
+        return ref;
     }
 
     private List<Contributor> mapPersonToContributor(List<Person> personList, String contributionType) {
@@ -218,7 +224,7 @@ public class CrossRefIterator implements BibEntryIterator {
             return null;
         }
         BibEntry nextEntry = new Publication();;
-        
+
         try {
             Item item = crossrefService.get(doisIterator.next());
             nextEntry.setArticleType(typeMap.get(item.getType())); 
@@ -230,7 +236,7 @@ public class CrossRefIterator implements BibEntryIterator {
             // we might want to devise a way to decide if the 
             // service might be down and we should stop sending requests.
         }
-        
+
         return nextEntry;
     }
 
