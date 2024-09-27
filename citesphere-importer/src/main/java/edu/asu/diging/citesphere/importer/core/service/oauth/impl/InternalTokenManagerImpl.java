@@ -43,24 +43,24 @@ import edu.asu.diging.citesphere.user.IUser;
 @Transactional
 public class InternalTokenManagerImpl implements InternalTokenManager {
     
-    @Value("${_oauth_token_validity}")
-    private int tokenValidity;
+//    @Value("${_oauth_token_validity}")
+//    private Integer tokenValidity;
+//    
+//    @Value("${_citephere_oauth2_app_clientid}")
+//    private String citesphereClientId;
+//    
+//    @Autowired
+//    private TokenStore tokenStore;
+//    
+//    @Autowired
+//    private ClientDetailsService clientDetailsService;
+//    
+//    private OAuth2RequestFactory requestFactory;
     
-    @Value("${_citephere_oauth2_app_clientid}")
-    private String citesphereClientId;
-    
-    @Autowired
-    private TokenStore tokenStore;
-    
-    @Autowired
-    private ClientDetailsService clientDetailsService;
-    
-    private OAuth2RequestFactory requestFactory;
-    
-    @PostConstruct
-    public void init() {
-        this.requestFactory = new DefaultOAuth2RequestFactory(clientDetailsService);
-    }
+//    @PostConstruct
+//    public void init() {
+//        this.requestFactory = new DefaultOAuth2RequestFactory(clientDetailsService);
+//    }
     
     /* (non-Javadoc)
      * @see edu.asu.diging.citesphere.core.service.oauth.impl.InternalTokenManager#getAccessToken()
@@ -68,53 +68,54 @@ public class InternalTokenManagerImpl implements InternalTokenManager {
     @Override
     @Transactional(TxType.REQUIRES_NEW)
     public OAuth2AccessToken getAccessToken(IUser user) {
-        Collection<OAuth2AccessToken> tokens = tokenStore.findTokensByClientIdAndUserName(citesphereClientId, user.getUsername());
-        Optional<OAuth2AccessToken> validToken = tokens.stream().filter(t -> !t.isExpired()).findFirst();
-        if (validToken.isPresent()) {
-            return validToken.get();
-        }
-        return createAccessToken(user);
+//        Collection<OAuth2AccessToken> tokens = tokenStore.findTokensByClientIdAndUserName(citesphereClientId, user.getUsername());
+//        Optional<OAuth2AccessToken> validToken = tokens.stream().filter(t -> !t.isExpired()).findFirst();
+//        if (validToken.isPresent()) {
+//            return validToken.get();
+//        }
+//        return createAccessToken(user);
+        return null;
     }
     
-    private OAuth2AccessToken createAccessToken(IUser user) {
-        DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken(UUID.randomUUID().toString());
-        if (tokenValidity > 0) {
-            token.setExpiration(new Date(System.currentTimeMillis() + (tokenValidity * 1000L)));
-        }
-        token.setScope(Sets.asSet(OAuthScope.READ.getScope()));
-        
-        AuthorizationRequest request = new AuthorizationRequest(citesphereClientId, token.getScope());
-        TokenRequest implicitRequest = new ImplicitTokenRequest(requestFactory.createTokenRequest(request, "implicit"), requestFactory.createOAuth2Request(request));
-        
-        OAuth2Authentication authentication = getOAuth2Authentication(clientDetailsService.loadClientByClientId(citesphereClientId), implicitRequest, user);
-        tokenStore.storeAccessToken(token, authentication);
-        System.out.println(extractTokenKey(token.getValue()));
-        return token;
-    }
+//    private OAuth2AccessToken createAccessToken(IUser user) {
+//        DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken(UUID.randomUUID().toString());
+//        if (tokenValidity > 0) {
+//            token.setExpiration(new Date(System.currentTimeMillis() + (tokenValidity * 1000L)));
+//        }
+//        token.setScope(Sets.asSet(OAuthScope.READ.getScope()));
+//        
+//        AuthorizationRequest request = new AuthorizationRequest(citesphereClientId, token.getScope());
+//        TokenRequest implicitRequest = new ImplicitTokenRequest(requestFactory.createTokenRequest(request, "implicit"), requestFactory.createOAuth2Request(request));
+//        
+//        OAuth2Authentication authentication = getOAuth2Authentication(clientDetailsService.loadClientByClientId(citesphereClientId), implicitRequest, user);
+//        tokenStore.storeAccessToken(token, authentication);
+//        System.out.println(extractTokenKey(token.getValue()));
+//        return token;
+//    }
     
-    private OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest, IUser user) {
-        OAuth2Request storedOAuth2Request = requestFactory.createOAuth2Request(client, tokenRequest);
-        Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getRoles());
-        return new OAuth2Authentication(storedOAuth2Request, authentication);
-    }
-    
-    private String extractTokenKey(String value) {
-        if(value == null) {
-            return null;
-        } else {
-            MessageDigest digest;
-            try {
-                digest = MessageDigest.getInstance("MD5");
-            } catch (NoSuchAlgorithmException var5) {
-                throw new IllegalStateException("MD5 algorithm not available.  Fatal (should be in the JDK).");
-            }
-
-            try {
-                byte[] e = digest.digest(value.getBytes("UTF-8"));
-                return String.format("%032x", new Object[]{new BigInteger(1, e)});
-            } catch (UnsupportedEncodingException var4) {
-                throw new IllegalStateException("UTF-8 encoding not available.  Fatal (should be in the JDK).");
-            }
-        }
-    }
+//    private OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest, IUser user) {
+//        OAuth2Request storedOAuth2Request = requestFactory.createOAuth2Request(client, tokenRequest);
+//        Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getRoles());
+//        return new OAuth2Authentication(storedOAuth2Request, authentication);
+//    }
+//    
+//    private String extractTokenKey(String value) {
+//        if(value == null) {
+//            return null;
+//        } else {
+//            MessageDigest digest;
+//            try {
+//                digest = MessageDigest.getInstance("MD5");
+//            } catch (NoSuchAlgorithmException var5) {
+//                throw new IllegalStateException("MD5 algorithm not available.  Fatal (should be in the JDK).");
+//            }
+//
+//            try {
+//                byte[] e = digest.digest(value.getBytes("UTF-8"));
+//                return String.format("%032x", new Object[]{new BigInteger(1, e)});
+//            } catch (UnsupportedEncodingException var4) {
+//                throw new IllegalStateException("UTF-8 encoding not available.  Fatal (should be in the JDK).");
+//            }
+//        }
+//    }
 }
