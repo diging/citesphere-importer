@@ -9,11 +9,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.javers.common.collections.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
+import edu.asu.diging.citesphere.importer.core.model.impl.ArticlePublicationDate;
 import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
 import edu.asu.diging.citesphere.importer.core.model.impl.ContributionType;
 import edu.asu.diging.citesphere.importer.core.model.impl.Contributor;
@@ -92,7 +94,7 @@ public class BibFileIterator implements BibEntryIterator {
                 String[] parts = line.split("=", 2);
                 if (parts.length == 2) {
                     String key = parts[0].trim();
-                    String value = parts[1].trim().replaceAll("\\{([^}]*)\\}", "$1"); // Remove curly braces and commas
+                    String value = parts[1].trim().replaceAll("[{},]", ""); // Remove curly braces and commas
                     fields.put(key, value);
                 }
             }
@@ -102,9 +104,14 @@ public class BibFileIterator implements BibEntryIterator {
 
     private ContainerMeta parseJournalMeta(Map<String, String> fields) {
         ContainerMeta meta = new ContainerMeta();
+//        journalIds
         //        meta.setContainerTitle(fields.get("title"));
+        List<String> journalAbbrev = new ArrayList<>();
+        journalAbbrev.add(fields.get("journal"));
+        meta.setJournalAbbreviations(journalAbbrev);
         meta.setPublisherName(fields.get("publisher"));
         meta.setPublisherLocation(fields.get("place"));
+//        publisherAddress
         List<Issn> issnList = new ArrayList<Issn>();
         if(fields.get("issn") != null) {
             String issnListString = fields.get("issn");
@@ -115,6 +122,8 @@ public class BibFileIterator implements BibEntryIterator {
             }
         }
         meta.setIssns(issnList);
+        meta.setSeriesTitle(fields.get("series"));
+//        private String seriesSubTitle;
         return meta;
     }
 
@@ -129,27 +138,24 @@ public class BibFileIterator implements BibEntryIterator {
             //            System.out.println(fields.get("author")+ "========================== authors");
         }
         // List of editors
-        //        if(item.getEditor() != null) {
-        //            contributors.addAll(mapPersonToContributor(item.getEditor(), ContributionType.EDITOR));
-        //        }
-        //        // List of translators
-        //        if(item.getTranslator() != null) {
-        //            contributors.addAll(mapPersonToContributor(item.getTranslator(), ContributionType.TRANSLATOR));
-        //        }
-
+                if(fields.get("editor") != null) {
+                    contributors.addAll(mapPersonToContributor(fields.get("editor"), ContributionType.EDITOR));
+                }
+                meta.setContributors(contributors);
         //        meta.setAuthorNotesCorrespondence(null);
-        //        ArticlePublicationDate publicationDate = new ArticlePublicationDate();
-        //        List<Integer> dateParts = item.getPublished().getIndexedDateParts();
+                ArticlePublicationDate publicationDate = new ArticlePublicationDate();
         //        if(dateParts != null) {
         //            publicationDate.setPublicationDate(dateParts.get(2).toString());
         //            publicationDate.setPublicationMonth(dateParts.get(1).toString());
-        //            publicationDate.setPublicationYear(dateParts.get(0).toString());
+                    publicationDate.setPublicationYear(fields.get("year").trim());
         //        }
-        //        meta.setPublicationDate(publicationDate);
+                meta.setPublicationDate(publicationDate);
         meta.setVolume(fields.get("volume"));
-        meta.setIssue(fields.get("issue"));
-        meta.setPartNumber(fields.get("partNumber"));
-        meta.setFirstPage(fields.get("firstPage"));
+        meta.setIssue(fields.get("issue"));   // no eg
+        meta.setIssueId(fields.get("issueId"));  //no eg
+        meta.setPartNumber(fields.get("partNumber"));  // no eg
+        meta.setFirstPage(fields.get("pages").split("--")[0].trim());
+        meta.setLastPage(fields.get("pages").split("--")[1].trim());
         meta.setSelfUri(fields.get("uri"));
         meta.setArticleAbstract(fields.get("abstract"));
         meta.setLanguage(fields.get("language"));
@@ -167,16 +173,16 @@ public class BibFileIterator implements BibEntryIterator {
         return meta;
     }
     
-    private List<Contributor> mapPersonToContributor(String authorsString, String contributionType) {
-        String[] authorStringList = authorsString.split("and");
+    private List<Contributor> mapPersonToContributor(String contributorsString, String contributionType) {
+        String[] contributorStringList = contributorsString.split("and");
         List<Contributor> contributors = new ArrayList<Contributor>();
-        for(String person: authorStringList) {
+        for(String personStr: contributorStringList) {
             Contributor contributor = new Contributor();
-            String[] parts = person.split(",");
+            String[] parts = personStr.split(" ");
             contributor.setContributionType(contributionType);
-            contributor.setGivenName(parts[0].trim());
-            contributor.setSurname(parts[1].trim());
-//            contributor.setFullName(person.getName());
+            contributor.setGivenName(parts[1].trim());
+            contributor.setSurname(parts[0].trim());
+            contributor.setFullName(parts[1].trim()+" "+parts[0].trim());
 //            List<Affiliation> affiliations = new ArrayList<>();
 //            for(Institution institute: person.getAffiliation()) {
 //                Affiliation affiliation = new Affiliation();
