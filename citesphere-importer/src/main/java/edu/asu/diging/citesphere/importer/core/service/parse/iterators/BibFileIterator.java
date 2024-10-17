@@ -9,9 +9,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.javers.common.collections.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.social.zotero.api.Data;
+import org.springframework.social.zotero.api.Item;
+import org.springframework.social.zotero.api.Library;
 
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
@@ -28,12 +30,14 @@ public class BibFileIterator implements BibEntryIterator {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private String filePath;
+    private String groupId;
     private Iterator<String> lineIterator;
     private String currentLine = null;
     private Map<String, String> typeMap;
 
-    public BibFileIterator(String filePath) {
+    public BibFileIterator(String filePath, String groupId) {
         this.filePath = filePath;
+        this.groupId = groupId;
         init();
     }
 
@@ -80,14 +84,21 @@ public class BibFileIterator implements BibEntryIterator {
     public BibEntry next() {
         BibEntry entry = new Publication();
         Map<String, String> fields = new HashMap<>();
+        Item item = new Item();
+        Library lib = new Library();
+        lib.setId(new Long(groupId));
+        item.setLibrary(lib);
+        Data itemData = new Data();
         while (lineIterator.hasNext()) {
             String line = lineIterator.next().trim();
             if(line.contains("@")) {
-                entry.setArticleType(typeMap.get(line.substring(line.indexOf('@')+1, line.indexOf('{'))));
+//                entry.setArticleType(typeMap.get(line.substring(line.indexOf('@')+1, line.indexOf('{'))));
+                itemData.setItemType(typeMap.get(line.substring(line.indexOf('@')+1, line.indexOf('{'))));
             } else if (line.equals("}")) {
-                entry.setJournalMeta(parseJournalMeta(fields));
-                entry.setArticleMeta(parseArticleMeta(fields));
-                System.out.println("====================== entry - " + entry.toString());
+//                entry.setJournalMeta(parseJournalMeta(fields));
+//                entry.setArticleMeta(parseArticleMeta(fields));
+                itemData = parseItemData(itemData, fields);
+//                System.out.println("====================== entry - " + entry.toString());
                 fields.clear();
                 break;
             } else if (line.contains("=")) {
@@ -99,7 +110,28 @@ public class BibFileIterator implements BibEntryIterator {
                 }
             }
         }
+        item.setData(itemData);
         return entry;
+    }
+    
+    private Data parseItemData(Data data, Map<String, String> fields) {
+//        linkMode;  accessDate contentType charset filename md5 mtime dateAdded dateModified
+//        creators  publicationTitle issue date seriesTitle  seriesText archive
+//        archiveLocation libraryCatalog  callNumber  rights extra tags collections
+        data.setTitle(fields.get("title"));
+        data.setUrl(fields.get("url"));
+        data.setNote(fields.get("note"));
+        data.setAbstractNote(fields.get("abstract"));
+        data.setVolume(fields.get("volume"));
+        data.setPages(fields.get("pages"));
+        data.setSeries(fields.get("series"));
+        data.setJournalAbbreviation(fields.get("journal"));
+        data.setLanguage(fields.get("language"));
+        data.setDoi(fields.get("doi"));
+        data.setIssn(fields.get("issn"));
+        data.setShortTitle(fields.get("shorttitle"));
+        
+        return data;
     }
 
     private ContainerMeta parseJournalMeta(Map<String, String> fields) {
@@ -151,9 +183,6 @@ public class BibFileIterator implements BibEntryIterator {
         //        }
                 meta.setPublicationDate(publicationDate);
         meta.setVolume(fields.get("volume"));
-        meta.setIssue(fields.get("issue"));   // no eg
-        meta.setIssueId(fields.get("issueId"));  //no eg
-        meta.setPartNumber(fields.get("partNumber"));  // no eg
         meta.setFirstPage(fields.get("pages").split("--")[0].trim());
         meta.setLastPage(fields.get("pages").split("--")[1].trim());
         meta.setSelfUri(fields.get("uri"));
