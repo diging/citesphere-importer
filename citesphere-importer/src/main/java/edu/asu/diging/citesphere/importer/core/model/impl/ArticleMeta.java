@@ -7,6 +7,7 @@ public class ArticleMeta {
 
     private List<ArticleId> articleIds;
     private String articleTitle;
+    private String articleShortTitle;
     private List<ArticleCategoryGroup> categoryGroups = new ArrayList<ArticleCategoryGroup>();
     private List<Contributor> contributors;
     private String authorNotesCorrespondence;
@@ -55,6 +56,12 @@ public class ArticleMeta {
     }
     public void setArticleTitle(String articleTitle) {
         this.articleTitle = articleTitle;
+    }
+    public String getArticleShortTitle() {
+        return articleShortTitle;
+    }
+    public void setArticleShortTitle(String articleShortTitle) {
+        this.articleShortTitle = articleShortTitle;
     }
     public List<ArticleCategoryGroup> getCategories() {
         return categoryGroups;
