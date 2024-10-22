@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ import org.springframework.social.zotero.api.Library;
 
 import edu.asu.diging.citesphere.factory.impl.CitationFactory;
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
+import edu.asu.diging.citesphere.importer.core.model.impl.Affiliation;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticlePublicationDate;
 import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
@@ -25,13 +27,17 @@ import edu.asu.diging.citesphere.importer.core.model.impl.ContributionType;
 import edu.asu.diging.citesphere.importer.core.model.impl.Contributor;
 import edu.asu.diging.citesphere.importer.core.model.impl.Issn;
 import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
+import edu.asu.diging.citesphere.importer.core.model.impl.Reference;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
+import edu.asu.diging.citesphere.model.bib.IAffiliation;
 import edu.asu.diging.citesphere.model.bib.ICitation;
+import edu.asu.diging.citesphere.model.bib.IPerson;
+import edu.asu.diging.citesphere.model.bib.IReference;
 
 public class BibFileIterator implements BibEntryIterator {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
-    
+
     @Autowired
     private CitationFactory citationFactory;
 
@@ -101,15 +107,15 @@ public class BibFileIterator implements BibEntryIterator {
                 entry.setArticleType(typeMap.get(line.substring(line.indexOf('@')+1, line.indexOf('{'))));
                 itemData.setItemType(typeMap.get(line.substring(line.indexOf('@')+1, line.indexOf('{'))));
             } else if (line.equals("}")) {
-//                entry.setJournalMeta(parseJournalMeta(fields));
-//                entry.setArticleMeta(parseArticleMeta(fields));
+                //                entry.setJournalMeta(parseJournalMeta(fields));
+                //                entry.setArticleMeta(parseArticleMeta(fields));
                 itemData = parseItemData(itemData, fields);
                 item.setData(itemData);
                 ICitation citation = citationFactory.createCitation(item);
                 // convert citation to bibentry
                 entry.setJournalMeta(parseJournalMeta(citation, fields));
-              entry.setArticleMeta(parseArticleMeta(citation, fields));
-//                System.out.println("====================== entry - " + entry.toString());
+                entry.setArticleMeta(parseArticleMeta(citation, fields));
+                //                System.out.println("====================== entry - " + entry.toString());
                 fields.clear();
                 break;
             } else if (line.contains("=")) {
@@ -124,11 +130,11 @@ public class BibFileIterator implements BibEntryIterator {
 
         return entry;
     }
-    
+
     private Data parseItemData(Data data, Map<String, String> fields) {
-//        linkMode;  accessDate contentType charset filename md5 mtime dateAdded dateModified
-//        creators  publicationTitle  seriesTitle  seriesText archive
-//        archiveLocation libraryCatalog  callNumber  rights extra tags collections
+        //        linkMode;  accessDate contentType charset filename md5 mtime dateAdded dateModified
+        //        creators  publicationTitle  seriesTitle  seriesText archive
+        //        archiveLocation libraryCatalog  callNumber  rights extra tags collections
         data.setTitle(fields.get("title"));
         data.setPublicationTitle(fields.get("publisher"));
         data.setUrl(fields.get("url"));
@@ -144,20 +150,20 @@ public class BibFileIterator implements BibEntryIterator {
         data.setShortTitle(fields.get("shorttitle"));
         data.setDate(fields.get("year")+"-01-01T00:00Z");
         data.setIssue(fields.get("number"));
-        
+
         return data;
     }
 
     private ContainerMeta parseJournalMeta(ICitation citation, Map<String, String> fields) {
         ContainerMeta meta = new ContainerMeta();
-//        journalIds
+        //        journalIds
         //        meta.setContainerTitle(fields.get("title"));
         List<String> journalAbbrev = new ArrayList<>();
         journalAbbrev.add(citation.getJournalAbbreviation());
         meta.setJournalAbbreviations(journalAbbrev);
         meta.setPublisherName(citation.getPublicationTitle());
         meta.setPublisherLocation(fields.get("place"));
-//        publisherAddress
+        //        publisherAddress
         List<Issn> issnList = new ArrayList<Issn>();
         if(fields.get("issn") != null) {
             for(String issnString : fields.get("issn").split("and")) {
@@ -168,7 +174,7 @@ public class BibFileIterator implements BibEntryIterator {
         }
         meta.setIssns(issnList);
         meta.setSeriesTitle(citation.getSeriesTitle());
-//        private String seriesSubTitle;
+        //        private String seriesSubTitle;
         return meta;
     }
 
@@ -176,26 +182,26 @@ public class BibFileIterator implements BibEntryIterator {
         ArticleMeta meta = new ArticleMeta();
         meta.setArticleTitle(citation.getTitle());
         meta.setArticleShortTitle(citation.getShortTitle());
-//        categoryGroups
+        //        categoryGroups
         List<Contributor> contributors = new ArrayList<>();
         // List of authors
-//        if(fields.get("author") != null) {
-//            contributors.addAll(mapPersonToContributor(fields.get("author"), ContributionType.AUTHOR));
-//            //            System.out.println(fields.get("author")+ "========================== authors");
-//        }
+        if(citation.getAuthors() != null) {
+            contributors.addAll(mapPersonToContributor(citation.getAuthors(), ContributionType.AUTHOR));
+            //            System.out.println(fields.get("author")+ "========================== authors");
+        }
         // List of editors
-//                if(fields.get("editor") != null) {
-//                    contributors.addAll(mapPersonToContributor(fields.get("editor"), ContributionType.EDITOR));
-//                }
-//                meta.setContributors(contributors);
+        //                if(fields.get("editor") != null) {
+        //                    contributors.addAll(mapPersonToContributor(fields.get("editor"), ContributionType.EDITOR));
+        //                }
+        //                meta.setContributors(contributors);
         //        meta.setAuthorNotesCorrespondence(null);
-                ArticlePublicationDate publicationDate = new ArticlePublicationDate();
-//                if(citation != null) {
-//                    publicationDate.setPublicationDate(dateParts.get(2).toString());
-//                    publicationDate.setPublicationMonth(dateParts.get(1).toString());
-                    publicationDate.setPublicationYear(citation.getDateFreetext());
+        ArticlePublicationDate publicationDate = new ArticlePublicationDate();
+        //                if(citation != null) {
+        //                    publicationDate.setPublicationDate(dateParts.get(2).toString());
+        //                    publicationDate.setPublicationMonth(dateParts.get(1).toString());
+        publicationDate.setPublicationYear(citation.getDateFreetext());
         //        }
-                meta.setPublicationDate(publicationDate);
+        meta.setPublicationDate(publicationDate);
         meta.setVolume(citation.getVolume());
         meta.setIssue(citation.getIssue());
         meta.setFirstPage(citation.getPages().split("--")[0].trim());
@@ -208,39 +214,79 @@ public class BibFileIterator implements BibEntryIterator {
         //            review.setFullDescription(item.getReview().getCompetingInterestStatement());  
         //        }
         //        meta.setReviewInfo(review);       
-        meta.setDocumentType(fields.get("type"));
-        //        if(item.getReference() != null) {
-        //            meta.setReferences(mapReferences(item.getReference()));
-        //        }
-        //        meta.setReferenceCount(item.getReferenceCount().toString());
+        //        meta.setDocumentType(fields.get("type"));   // document type in note
+        //        conferenceInfo in note - map to conferenceTitle, conferenceDate, conferenceLocation, conferenceSponsor, conferenceHost
+        //        keywords in note
+        //        reprintAddress in note
+        // additionalData in note
+        //         funding in note - map to fundingInfo, fundingText
 
+
+        if(citation.getReferences() != null) {
+            meta.setReferences(mapReferences(citation.getReferences()));
+        }
+        meta.setReferenceCount(meta.getReferences().size()+"");
+
+        //        retrievalDate in note
         return meta;
     }
-    
-    private List<Contributor> mapPersonToContributor(String contributorsString, String contributionType) {
-        String[] contributorStringList = contributorsString.split("and");
+
+    private List<Contributor> mapPersonToContributor(Set<IPerson> citationContributors, String contributionType) {
+        //        String[] contributorStringList = contributorsString.split("and");
         List<Contributor> contributors = new ArrayList<Contributor>();
-        for(String personStr: contributorStringList) {
+        for(IPerson person: citationContributors) {
             Contributor contributor = new Contributor();
-            String[] parts = personStr.split(" ");
             contributor.setContributionType(contributionType);
-            contributor.setGivenName(parts[1].trim());
-            contributor.setSurname(parts[0].trim());
-            contributor.setFullName(parts[1].trim()+" "+parts[0].trim());
-//            List<Affiliation> affiliations = new ArrayList<>();
-//            for(Institution institute: person.getAffiliation()) {
-//                Affiliation affiliation = new Affiliation();
-//                affiliation.setName(institute.getName());
-//                affiliations.add(affiliation);
-//            }
-//            contributor.setAffiliations(affiliations);
-//            ContributorId contributorID = new ContributorId();
-//            contributorID.setId(person.getOrcid());
-//            contributorID.setIdSystem("ORCID");
-//            contributor.setIds(Arrays.asList(contributorID));
+            contributor.setGivenName(person.getFirstName());
+            contributor.setSurname(person.getLastName());
+            contributor.setFullName(person.getName());
+
+            List<Affiliation> affiliations = new ArrayList<>();
+            for(IAffiliation institute: person.getAffiliations()) {                
+                Affiliation affiliation = new Affiliation();
+                affiliation.setName(institute.getName());
+                affiliation.setUri(institute.getUri());
+                affiliation.setLocalAuthorityId(institute.getLocalAuthorityId());
+                affiliations.add(affiliation);
+            }
+            contributor.setAffiliations(affiliations);
+            //            ContributorId contributorID = new ContributorId();
+            //            contributorID.setId(person.getOrcid());
+            //            contributorID.setIdSystem("ORCID");
+            //            contributor.setIds(Arrays.asList(contributorID));
             contributors.add(contributor); 
         }
         return contributors;
+    }
+
+    private List<Reference> mapReferences(Set<IReference> citationReferences) {
+        List<Reference> references = new ArrayList<Reference>();
+        for(IReference citationRef: citationReferences) {
+            references.add(mapSingleReference(citationRef));
+        }
+
+        return references;
+    }
+
+    private Reference mapSingleReference(IReference citationRef) {
+        Reference ref = new Reference();
+        ref.setAuthorString(citationRef.getAuthorString());
+        ref.setTitle(citationRef.getTitle());
+        ref.setYear(citationRef.getYear());
+        ref.setIdentifier(citationRef.getIdentifier());
+        ref.setIdentifierType(citationRef.getIdentifierType());
+        ref.setFirstPage(citationRef.getFirstPage());
+        ref.setEndPage(citationRef.getEndPage());
+        ref.setVolume(citationRef.getVolume());
+        ref.setSource(citationRef.getSource());
+        ref.setReferenceId(citationRef.getReferenceId());
+        ref.setReferenceLabel(citationRef.getReferenceLabel());
+        ref.setPublicationType(citationRef.getPublicationType());
+        ref.setCitationId(citationRef.getCitationId());
+        ref.setReferenceString(citationRef.getReferenceString());
+        ref.setReferenceStringRaw(citationRef.getReferenceStringRaw());
+
+        return ref;
     }
 
     @Override
