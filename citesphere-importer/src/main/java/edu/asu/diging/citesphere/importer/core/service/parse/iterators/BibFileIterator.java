@@ -17,7 +17,7 @@ import org.springframework.social.zotero.api.Data;
 import org.springframework.social.zotero.api.Item;
 import org.springframework.social.zotero.api.Library;
 
-import edu.asu.diging.citesphere.factory.impl.CitationFactory;
+import edu.asu.diging.citesphere.factory.ICitationFactory;
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.impl.Affiliation;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
@@ -39,7 +39,7 @@ public class BibFileIterator implements BibEntryIterator {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private CitationFactory citationFactory;
+    private ICitationFactory citationFactory;
 
     private String filePath;
     private String groupId;
@@ -60,7 +60,7 @@ public class BibFileIterator implements BibEntryIterator {
             logger.error("Could not create line iterator.", e);
         }
         typeMap = new HashMap<String, String>();
-        typeMap.put("journal-article", Publication.ARTICLE);
+        typeMap.put("article", Publication.ARTICLE);
         typeMap.put("book", Publication.BOOK);
         typeMap.put("book-chapter", Publication.BOOK_CHAPTER); 
         typeMap.put("monograph", Publication.BOOK);
@@ -103,19 +103,23 @@ public class BibFileIterator implements BibEntryIterator {
         Data itemData = new Data();
         while (lineIterator.hasNext()) {
             String line = lineIterator.next().trim();
-            if(line.contains("@")) {
-                entry.setArticleType(typeMap.get(line.substring(line.indexOf('@')+1, line.indexOf('{'))));
-                itemData.setItemType(typeMap.get(line.substring(line.indexOf('@')+1, line.indexOf('{'))));
+//            System.out.println("============ line - "+ line);
+            if(!line.isBlank() && line.charAt(0)=='@') {
+                System.out.println("===================" + line.substring(1, line.indexOf('{')));
+                entry.setArticleType(typeMap.get(line.substring(1, line.indexOf('{'))));
+//                itemData.setItemType(typeMap.get(line.substring(line.indexOf('@')+1, line.indexOf('{'))));
             } else if (line.equals("}")) {
                 //                entry.setJournalMeta(parseJournalMeta(fields));
                 //                entry.setArticleMeta(parseArticleMeta(fields));
                 itemData = parseItemData(itemData, fields);
                 item.setData(itemData);
-                ICitation citation = citationFactory.createCitation(item);
+                System.out.println("item ================= " +item);
+//                System.out.println("citation factory ===================== "+ citationFactory);
+                ICitation citation = citationFactory.createCitation(item, null);
                 // convert citation to bibentry
                 entry.setJournalMeta(parseJournalMeta(citation, fields));
                 entry.setArticleMeta(parseArticleMeta(citation, fields));
-                //                System.out.println("====================== entry - " + entry.toString());
+                                System.out.println("====================== entry - " + entry.toString());
                 fields.clear();
                 break;
             } else if (line.contains("=")) {
@@ -190,10 +194,10 @@ public class BibFileIterator implements BibEntryIterator {
             //            System.out.println(fields.get("author")+ "========================== authors");
         }
         // List of editors
-        //                if(fields.get("editor") != null) {
-        //                    contributors.addAll(mapPersonToContributor(fields.get("editor"), ContributionType.EDITOR));
-        //                }
-        //                meta.setContributors(contributors);
+        if(citation.getEditors() != null) {
+            contributors.addAll(mapPersonToContributor(citation.getEditors(), ContributionType.EDITOR));
+        }
+        meta.setContributors(contributors);
         //        meta.setAuthorNotesCorrespondence(null);
         ArticlePublicationDate publicationDate = new ArticlePublicationDate();
         //                if(citation != null) {
@@ -240,6 +244,7 @@ public class BibFileIterator implements BibEntryIterator {
             contributor.setGivenName(person.getFirstName());
             contributor.setSurname(person.getLastName());
             contributor.setFullName(person.getName());
+            contributor.setUri(person.getUri());
 
             List<Affiliation> affiliations = new ArrayList<>();
             for(IAffiliation institute: person.getAffiliations()) {                
@@ -250,11 +255,6 @@ public class BibFileIterator implements BibEntryIterator {
                 affiliations.add(affiliation);
             }
             contributor.setAffiliations(affiliations);
-            //            ContributorId contributorID = new ContributorId();
-            //            contributorID.setId(person.getOrcid());
-            //            contributorID.setIdSystem("ORCID");
-            //            contributor.setIds(Arrays.asList(contributorID));
-            contributors.add(contributor); 
         }
         return contributors;
     }
