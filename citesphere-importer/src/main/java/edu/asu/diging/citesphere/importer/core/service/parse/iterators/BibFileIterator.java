@@ -12,18 +12,15 @@ import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.zotero.api.Data;
 import org.springframework.social.zotero.api.Item;
 import org.springframework.social.zotero.api.Library;
 
-import edu.asu.diging.citesphere.factory.ICitationFactory;
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.impl.Affiliation;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticlePublicationDate;
 import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
-import edu.asu.diging.citesphere.importer.core.model.impl.ContributionType;
 import edu.asu.diging.citesphere.importer.core.model.impl.Contributor;
 import edu.asu.diging.citesphere.importer.core.model.impl.Issn;
 import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
@@ -33,13 +30,13 @@ import edu.asu.diging.citesphere.model.bib.IAffiliation;
 import edu.asu.diging.citesphere.model.bib.ICitation;
 import edu.asu.diging.citesphere.model.bib.IPerson;
 import edu.asu.diging.citesphere.model.bib.IReference;
+import edu.asu.diging.citesphere.model.bib.impl.Citation;
 
 public class BibFileIterator implements BibEntryIterator {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Autowired
-    private ICitationFactory citationFactory;
+    private ParseExtra parseExtra;
 
     private String filePath;
     private String groupId;
@@ -50,6 +47,7 @@ public class BibFileIterator implements BibEntryIterator {
     public BibFileIterator(String filePath, String groupId) {
         this.filePath = filePath;
         this.groupId = groupId;
+        parseExtra = new ParseExtra();
         init();
     }
 
@@ -111,14 +109,14 @@ public class BibFileIterator implements BibEntryIterator {
             } else if (line.equals("}")) {
                 //                entry.setJournalMeta(parseJournalMeta(fields));
                 //                entry.setArticleMeta(parseArticleMeta(fields));
-                itemData = parseItemData(itemData, fields);
+//                itemData = parseItemData(itemData, fields);
                 item.setData(itemData);
                 System.out.println("item ================= " +item);
 //                System.out.println("citation factory ===================== "+ citationFactory);
-                ICitation citation = citationFactory.createCitation(item, null);
+//                ICitation citation = citationFactory.createCitation(item, null);
                 // convert citation to bibentry
-                entry.setJournalMeta(parseJournalMeta(citation, fields));
-                entry.setArticleMeta(parseArticleMeta(citation, fields));
+                entry.setJournalMeta(parseJournalMeta(fields));
+                entry.setArticleMeta(parseArticleMeta(fields));
                                 System.out.println("====================== entry - " + entry.toString());
                 fields.clear();
                 break;
@@ -135,37 +133,14 @@ public class BibFileIterator implements BibEntryIterator {
         return entry;
     }
 
-    private Data parseItemData(Data data, Map<String, String> fields) {
-        //        linkMode;  accessDate contentType charset filename md5 mtime dateAdded dateModified
-        //        creators  publicationTitle  seriesTitle  seriesText archive
-        //        archiveLocation libraryCatalog  callNumber  rights extra tags collections
-        data.setTitle(fields.get("title"));
-        data.setPublicationTitle(fields.get("publisher"));
-        data.setUrl(fields.get("url"));
-        data.setNote(fields.get("note"));
-        data.setAbstractNote(fields.get("abstract"));
-        data.setVolume(fields.get("volume"));
-        data.setPages(fields.get("pages"));
-        data.setSeries(fields.get("series"));
-        data.setJournalAbbreviation(fields.get("journal"));
-        data.setLanguage(fields.get("language"));
-        data.setDoi(fields.get("doi"));
-        data.setIssn(fields.get("issn"));
-        data.setShortTitle(fields.get("shorttitle"));
-        data.setDate(fields.get("year")+"-01-01T00:00Z");
-        data.setIssue(fields.get("number"));
-
-        return data;
-    }
-
-    private ContainerMeta parseJournalMeta(ICitation citation, Map<String, String> fields) {
+    private ContainerMeta parseJournalMeta(Map<String, String> fields) {
         ContainerMeta meta = new ContainerMeta();
         //        journalIds
         //        meta.setContainerTitle(fields.get("title"));
         List<String> journalAbbrev = new ArrayList<>();
-        journalAbbrev.add(citation.getJournalAbbreviation());
+        journalAbbrev.add(fields.get("journal"));
         meta.setJournalAbbreviations(journalAbbrev);
-        meta.setPublisherName(citation.getPublicationTitle());
+        meta.setPublisherName(fields.get("publisher"));
         meta.setPublisherLocation(fields.get("place"));
         //        publisherAddress
         List<Issn> issnList = new ArrayList<Issn>();
@@ -177,25 +152,32 @@ public class BibFileIterator implements BibEntryIterator {
             }
         }
         meta.setIssns(issnList);
-        meta.setSeriesTitle(citation.getSeriesTitle());
+        meta.setSeriesTitle(fields.get("series"));
         //        private String seriesSubTitle;
         return meta;
     }
 
-    private ArticleMeta parseArticleMeta(ICitation citation, Map<String, String> fields) {
+    private ArticleMeta parseArticleMeta(Map<String, String> fields) {
         ArticleMeta meta = new ArticleMeta();
-        meta.setArticleTitle(citation.getTitle());
-        meta.setArticleShortTitle(citation.getShortTitle());
+        ICitation citation = new Citation();
+        Item item = new Item();
+        Data data = new Data();
+        data.setNote(fields.get("note"));
+        item.setData(data);
+        parseExtra.parseMetaDataNote(citation, item);
+        
+        meta.setArticleTitle(fields.get("title"));
+        meta.setArticleShortTitle(fields.get("shorttitle"));
         //        categoryGroups
         List<Contributor> contributors = new ArrayList<>();
         // List of authors
         if(citation.getAuthors() != null) {
-            contributors.addAll(mapPersonToContributor(citation.getAuthors(), ContributionType.AUTHOR));
+//            contributors.addAll(mapPersonToContributor(citation.getAuthors(), ContributionType.AUTHOR));
             //            System.out.println(fields.get("author")+ "========================== authors");
         }
         // List of editors
         if(citation.getEditors() != null) {
-            contributors.addAll(mapPersonToContributor(citation.getEditors(), ContributionType.EDITOR));
+//            contributors.addAll(mapPersonToContributor(citation.getEditors(), ContributionType.EDITOR));
         }
         meta.setContributors(contributors);
         //        meta.setAuthorNotesCorrespondence(null);
@@ -203,16 +185,17 @@ public class BibFileIterator implements BibEntryIterator {
         //                if(citation != null) {
         //                    publicationDate.setPublicationDate(dateParts.get(2).toString());
         //                    publicationDate.setPublicationMonth(dateParts.get(1).toString());
-        publicationDate.setPublicationYear(citation.getDateFreetext());
+        publicationDate.setPublicationYear(fields.get("year"));
         //        }
         meta.setPublicationDate(publicationDate);
-        meta.setVolume(citation.getVolume());
-        meta.setIssue(citation.getIssue());
-        meta.setFirstPage(citation.getPages().split("--")[0].trim());
-        meta.setLastPage(citation.getPages().split("--")[1].trim());
-        meta.setSelfUri(citation.getUrl());
-        meta.setArticleAbstract(citation.getAbstractNote());
-        meta.setLanguage(citation.getLanguage());
+        meta.setVolume(fields.get("volume"));
+        meta.setIssue(fields.get("number"));
+        meta.setFirstPage(fields.get("pages").split("--")[0].trim());
+        meta.setLastPage(fields.get("pages").split("--")[1].trim());
+        meta.setSelfUri(fields.get("url"));
+        meta.setDoi(fields.get("doi"));
+        meta.setArticleAbstract(fields.get("abstract"));
+        meta.setLanguage(fields.get("language"));
         //        ReviewInfo review = new ReviewInfo();
         //        if (item.getReview() != null) {
         //            review.setFullDescription(item.getReview().getCompetingInterestStatement());  

@@ -26,6 +26,7 @@ public class ArticleMeta {
     private String copyrightYear;
     private String copyrightHolder;
     private String selfUri;
+    private String doi;
     private String articleAbstract;
     private String language;
     private ReviewInfo reviewInfo;
@@ -170,6 +171,12 @@ public class ArticleMeta {
     }
     public void setSelfUri(String selfUri) {
         this.selfUri = selfUri;
+    }
+    public String getDoi() {
+        return doi;
+    }
+    public void setDoi(String doi) {
+        this.doi = doi;
     }
     public String getArticleAbstract() {
         return articleAbstract;
