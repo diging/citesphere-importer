@@ -16,6 +16,7 @@ import org.springframework.social.zotero.api.Data;
 import org.springframework.social.zotero.api.Item;
 import org.springframework.social.zotero.api.Library;
 
+import edu.asu.diging.citesphere.factory.impl.ParseExtra;
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.impl.Affiliation;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
@@ -147,6 +148,7 @@ public class BibFileIterator implements BibEntryIterator {
         if(fields.get("issn") != null) {
             for(String issnString : fields.get("issn").split("and")) {
                 Issn issn = new Issn();
+                issn.setPubType("issn");
                 issn.setIssn(issnString.trim());
                 issnList.add(issn);
             }
@@ -165,6 +167,9 @@ public class BibFileIterator implements BibEntryIterator {
         data.setNote(fields.get("note"));
         item.setData(data);
         parseExtra.parseMetaDataNote(citation, item);
+        parseExtra.parseExtra(data, citation);
+        
+        System.out.println("citation ================================" + citation.toString());
         
         meta.setArticleTitle(fields.get("title"));
         meta.setArticleShortTitle(fields.get("shorttitle"));
@@ -211,8 +216,9 @@ public class BibFileIterator implements BibEntryIterator {
 
         if(citation.getReferences() != null) {
             meta.setReferences(mapReferences(citation.getReferences()));
+            meta.setReferenceCount(meta.getReferences().size()+"");
         }
-        meta.setReferenceCount(meta.getReferences().size()+"");
+        
 
         //        retrievalDate in note
         return meta;
