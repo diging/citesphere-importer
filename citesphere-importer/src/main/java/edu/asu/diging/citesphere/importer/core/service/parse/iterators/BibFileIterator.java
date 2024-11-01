@@ -49,6 +49,7 @@ public class BibFileIterator implements BibEntryIterator {
         this.filePath = filePath;
         this.groupId = groupId;
         parseExtra = new ParseExtra();
+        parseExtra.init();
         init();
     }
 
@@ -111,8 +112,8 @@ public class BibFileIterator implements BibEntryIterator {
                 //                entry.setJournalMeta(parseJournalMeta(fields));
                 //                entry.setArticleMeta(parseArticleMeta(fields));
 //                itemData = parseItemData(itemData, fields);
-                item.setData(itemData);
-                System.out.println("item ================= " +item);
+//                item.setData(itemData);
+//                System.out.println("item ================= " +item);
 //                System.out.println("citation factory ===================== "+ citationFactory);
 //                ICitation citation = citationFactory.createCitation(item, null);
                 // convert citation to bibentry
