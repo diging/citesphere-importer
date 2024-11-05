@@ -126,7 +126,7 @@ public class BibFileIterator implements BibEntryIterator {
                 String[] parts = line.split("=", 2);
                 if (parts.length == 2) {
                     String key = parts[0].trim();
-                    String value = parts[1].trim().replaceAll("[{},]", ""); // Remove curly braces and commas
+                    String value = key.equals("annote") || key.equals("note")? parts[1].trim() : parts[1].trim().replaceAll("[{},]", ""); // Remove curly braces and commas
                     fields.put(key, value);
                 }
             }
@@ -165,7 +165,13 @@ public class BibFileIterator implements BibEntryIterator {
         ICitation citation = new Citation();
         Item item = new Item();
         Data data = new Data();
-        data.setNote(fields.get("note"));
+        if(fields.containsKey("annote") && fields.get("annote").endsWith(",")) {
+            data.setNote(fields.get("annote").substring(0, fields.get("annote").length()-1));
+        }
+        if(fields.containsKey("note") && fields.get("note").endsWith(",")) {
+            data.setExtra(fields.get("note").substring(0, fields.get("note").length()-1));
+        }
+             
         item.setData(data);
         parseExtra.parseMetaDataNote(citation, item);
         parseExtra.parseExtra(data, citation);
