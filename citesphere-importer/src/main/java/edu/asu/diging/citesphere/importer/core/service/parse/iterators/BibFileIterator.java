@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import edu.asu.diging.citesphere.importer.core.model.impl.Affiliation;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticlePublicationDate;
 import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
+import edu.asu.diging.citesphere.importer.core.model.impl.ContributionType;
 import edu.asu.diging.citesphere.importer.core.model.impl.Contributor;
 import edu.asu.diging.citesphere.importer.core.model.impl.Issn;
 import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
@@ -29,9 +31,11 @@ import edu.asu.diging.citesphere.importer.core.model.impl.Reference;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
 import edu.asu.diging.citesphere.model.bib.IAffiliation;
 import edu.asu.diging.citesphere.model.bib.ICitation;
+import edu.asu.diging.citesphere.model.bib.ICreator;
 import edu.asu.diging.citesphere.model.bib.IPerson;
 import edu.asu.diging.citesphere.model.bib.IReference;
 import edu.asu.diging.citesphere.model.bib.impl.Citation;
+import edu.asu.diging.citesphere.model.bib.impl.Person;
 
 public class BibFileIterator implements BibEntryIterator {
 
@@ -126,7 +130,10 @@ public class BibFileIterator implements BibEntryIterator {
                 String[] parts = line.split("=", 2);
                 if (parts.length == 2) {
                     String key = parts[0].trim();
-                    String value = key.equals("annote") || key.equals("note")? parts[1].trim() : parts[1].trim().replaceAll("[{},]", ""); // Remove curly braces and commas
+                    String value = parts[1].trim();
+                    if (value.endsWith(",")) {
+                        value = value.substring(0, value.length()-1).replaceAll("^\\{|\\}$", "");
+                    }
                     fields.put(key, value);
                 }
             }
@@ -165,14 +172,48 @@ public class BibFileIterator implements BibEntryIterator {
         ICitation citation = new Citation();
         Item item = new Item();
         Data data = new Data();
-        if(fields.containsKey("annote") && fields.get("annote").endsWith(",")) {
-            data.setNote(fields.get("annote").substring(0, fields.get("annote").length()-1));
+        if(fields.containsKey("annote")) {
+            data.setNote(fields.get("annote").replaceAll("\\\\", "").replaceAll("\\{textbackslash\\}n", ""));
         }
-        if(fields.containsKey("note") && fields.get("note").endsWith(",")) {
-            data.setExtra(fields.get("note").substring(0, fields.get("note").length()-1));
+        if(fields.containsKey("note")) {
+            data.setExtra(fields.get("note").replace("\\\\", "").replaceAll("\\{textbackslash\\}n", ""));
         }
              
         item.setData(data);
+        
+        Set<IPerson> authors = new HashSet<>();
+        String[] authorStringList = fields.get("author").split("and");
+        for(String authorString: authorStringList) {
+            IPerson author = new Person();
+            String[] authorParts = authorString.split(",");
+            author.setLastName(authorParts[0].trim());
+            author.setFirstName(authorParts[1].trim());
+            authors.add(author);
+        }
+        citation.setAuthors(authors);
+        
+        Set<IPerson> editors = new HashSet<>();
+        String[] editorStringList = fields.get("author").split("and");
+        for(String editorString: editorStringList) {
+            IPerson editor = new Person();
+            String[] editorParts = editorString.split(",");
+            editor.setLastName(editorParts[0].trim());
+            editor.setFirstName(editorParts[1].trim());
+            editors.add(editor);
+        }
+        citation.setEditors(editors);
+        
+//        Add other creators
+        Set<ICreator> creators = new HashSet<>();
+//        String[] creatorsStringList = fields.get("author").split("and");
+//        for(String authorString: authorStringList) {
+//            IPerson author = new Person();
+//            String[] authorParts = authorString.split(",");
+//            author.setLastName(authorParts[0].trim());
+//            author.setFirstName(authorParts[1].trim());
+//        }
+        citation.setOtherCreators(creators);
+        
         parseExtra.parseMetaDataNote(citation, item);
         parseExtra.parseExtra(data, citation);
         
@@ -184,13 +225,13 @@ public class BibFileIterator implements BibEntryIterator {
         List<Contributor> contributors = new ArrayList<>();
         // List of authors
         if(citation.getAuthors() != null) {
-//            contributors.addAll(mapPersonToContributor(citation.getAuthors(), ContributionType.AUTHOR));
-            //            System.out.println(fields.get("author")+ "========================== authors");
+            contributors.addAll(mapPersonToContributor(citation.getAuthors(), ContributionType.AUTHOR));
         }
         // List of editors
         if(citation.getEditors() != null) {
-//            contributors.addAll(mapPersonToContributor(citation.getEditors(), ContributionType.EDITOR));
+            contributors.addAll(mapPersonToContributor(citation.getEditors(), ContributionType.EDITOR));
         }
+//        if(citation.getOtherCreators())
         meta.setContributors(contributors);
         //        meta.setAuthorNotesCorrespondence(null);
         ArticlePublicationDate publicationDate = new ArticlePublicationDate();
@@ -243,12 +284,14 @@ public class BibFileIterator implements BibEntryIterator {
             contributor.setUri(person.getUri());
 
             List<Affiliation> affiliations = new ArrayList<>();
-            for(IAffiliation institute: person.getAffiliations()) {                
-                Affiliation affiliation = new Affiliation();
-                affiliation.setName(institute.getName());
-                affiliation.setUri(institute.getUri());
-                affiliation.setLocalAuthorityId(institute.getLocalAuthorityId());
-                affiliations.add(affiliation);
+            if(person.getAffiliations()!= null) {
+                for(IAffiliation institute: person.getAffiliations()) {                
+                    Affiliation affiliation = new Affiliation();
+                    affiliation.setName(institute.getName());
+                    affiliation.setUri(institute.getUri());
+                    affiliation.setLocalAuthorityId(institute.getLocalAuthorityId());
+                    affiliations.add(affiliation);
+                }
             }
             contributor.setAffiliations(affiliations);
         }
