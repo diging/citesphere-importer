@@ -11,15 +11,16 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.javers.common.collections.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.social.zotero.api.Data;
 import org.springframework.social.zotero.api.Item;
-import org.springframework.social.zotero.api.Library;
 
 import edu.asu.diging.citesphere.factory.impl.ParseExtra;
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.impl.Affiliation;
+import edu.asu.diging.citesphere.importer.core.model.impl.ArticleId;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleMeta;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticlePublicationDate;
 import edu.asu.diging.citesphere.importer.core.model.impl.ContainerMeta;
@@ -46,7 +47,6 @@ public class BibFileIterator implements BibEntryIterator {
     private String filePath;
     private String groupId;
     private Iterator<String> lineIterator;
-    private String currentLine = null;
     private Map<String, String> typeMap;
 
     public BibFileIterator(String filePath, String groupId) {
@@ -100,11 +100,6 @@ public class BibFileIterator implements BibEntryIterator {
     public BibEntry next() {
         BibEntry entry = new Publication();
         Map<String, String> fields = new HashMap<>();
-        Item item = new Item();
-        Library lib = new Library();
-        lib.setId(Long.parseLong(groupId));
-        item.setLibrary(lib);
-        Data itemData = new Data();
         while (lineIterator.hasNext()) {
             String line = lineIterator.next().trim();
             if(!line.isBlank() && line.charAt(0)=='@') {
@@ -112,7 +107,6 @@ public class BibFileIterator implements BibEntryIterator {
             } else if (line.equals("}")) {
                 entry.setJournalMeta(parseJournalMeta(fields));
                 entry.setArticleMeta(parseArticleMeta(fields));
-//                System.out.println("====================== entry - " + entry.toString());
                 fields.clear();
                 break;
             } else if (line.contains("=")) {
@@ -227,14 +221,23 @@ public class BibFileIterator implements BibEntryIterator {
         //        meta.setAuthorNotesCorrespondence(null);
         ArticlePublicationDate publicationDate = new ArticlePublicationDate();
         publicationDate.setPublicationYear(fields.get("year"));
-        //        }
         meta.setPublicationDate(publicationDate);
         meta.setVolume(fields.get("volume"));
         meta.setIssue(fields.get("number"));
         meta.setFirstPage(fields.get("pages").split("--")[0].trim());
         meta.setLastPage(fields.get("pages").split("--")[1].trim());
         meta.setSelfUri(fields.get("url"));
-        meta.setDoi(fields.get("doi"));
+        meta.setDoi(fields.get("doi"));        
+        ArticleId doiId = new ArticleId();
+        doiId.setPubIdType("doi");
+        doiId.setId(fields.get("doi"));
+        ArticleId isbnId = new ArticleId();
+        isbnId.setPubIdType("isbn");
+        isbnId.setId(fields.get("isbn"));
+        List<ArticleId> articleIds = new ArrayList<>();
+        articleIds.add(doiId);
+        articleIds.add(isbnId);
+        meta.setArticleIds(articleIds);
         meta.setArticleAbstract(fields.get("abstract"));
         meta.setLanguage(fields.get("language"));
         //        ReviewInfo review = new ReviewInfo();
@@ -257,7 +260,6 @@ public class BibFileIterator implements BibEntryIterator {
 
 
         //        retrievalDate in note
-        System.out.println("===================== meta - " + meta.toString());
         return meta;
     }
 
