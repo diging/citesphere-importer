@@ -3,8 +3,11 @@ package edu.asu.diging.citesphere.importer.core.model.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class ArticleMeta {
 
+    private List<String> collectionIds;
     private List<ArticleId> articleIds;
     private String articleTitle;
     private String articleShortTitle;
@@ -26,6 +29,7 @@ public class ArticleMeta {
     private String copyrightYear;
     private String copyrightHolder;
     private String selfUri;
+    @JsonProperty("DOI")
     private String doi;
     private String articleAbstract;
     private String language;
@@ -46,6 +50,12 @@ public class ArticleMeta {
     private String referenceCount;
     private String retrievalDate;
     
+    public List<String> getCollectionIds() {
+        return collectionIds;
+    }
+    public void setCollectionIds(List<String> collectionIds) {
+        this.collectionIds = collectionIds;
+    }
     public List<ArticleId> getArticleIds() {
         return articleIds;
     }

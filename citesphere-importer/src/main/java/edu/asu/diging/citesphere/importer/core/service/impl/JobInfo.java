@@ -8,6 +8,7 @@ public class JobInfo {
     private String zotero;
     private String zoteroId;
     private String groupId;
+    private String collectionId;
     
     public String getZotero() {
         return zotero;
@@ -26,6 +27,12 @@ public class JobInfo {
     }
     public void setGroupId(String groupId) {
         this.groupId = groupId;
+    }
+    public String getCollectionId() {
+        return collectionId;
+    }
+    public void setCollectionId(String collectionId) {
+        this.collectionId = collectionId;
     }
     
 }

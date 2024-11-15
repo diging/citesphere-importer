@@ -36,6 +36,7 @@ import edu.asu.diging.citesphere.model.bib.ICreator;
 import edu.asu.diging.citesphere.model.bib.IPerson;
 import edu.asu.diging.citesphere.model.bib.IReference;
 import edu.asu.diging.citesphere.model.bib.impl.Citation;
+import edu.asu.diging.citesphere.model.bib.impl.Creator;
 import edu.asu.diging.citesphere.model.bib.impl.Person;
 
 public class BibFileIterator implements BibEntryIterator {
@@ -46,12 +47,14 @@ public class BibFileIterator implements BibEntryIterator {
 
     private String filePath;
     private String groupId;
+    private String collectionId;
     private Iterator<String> lineIterator;
     private Map<String, String> typeMap;
 
-    public BibFileIterator(String filePath, String groupId) {
+    public BibFileIterator(String filePath, String groupId, String collectionId) {
         this.filePath = filePath;
         this.groupId = groupId;
+        this.collectionId = collectionId;
         parseExtra = new ParseExtra();
         parseExtra.init();
         init();
@@ -161,7 +164,6 @@ public class BibFileIterator implements BibEntryIterator {
         if(fields.containsKey("note")) {
             data.setExtra(fields.get("note").replace("\\\\", "").replaceAll("\\{textbackslash\\}n", ""));
         }
-
         item.setData(data);
 
         Set<IPerson> authors = new HashSet<>();
@@ -192,18 +194,28 @@ public class BibFileIterator implements BibEntryIterator {
 
         //        Add other creators
         Set<ICreator> creators = new HashSet<>();
-        //        String[] creatorsStringList = fields.get("author").split("and");
-        //        for(String authorString: authorStringList) {
-        //            IPerson author = new Person();
-        //            String[] authorParts = authorString.split(",");
-        //            author.setLastName(authorParts[0].trim());
-        //            author.setFirstName(authorParts[1].trim());
-        //        }
+//        if(fields.containsKey("editor"))
+//        String[] artistStringList = fields.get("artist").split("and");
+//        for(String artistString: artistStringList) {
+//            ICreator artist = new Creator();
+//            IPerson person = new Person();
+//            String[] authorParts = artistString.split(",");
+//            person.setLastName(authorParts[0].trim());
+//            person.setFirstName(authorParts[1].trim());
+//            artist.setPerson(person);
+//            artist.setRole("Artist");
+//            creators.add(artist);
+//        }
         citation.setOtherCreators(creators);
 
         parseExtra.parseMetaDataNote(citation, item);
         parseExtra.parseExtra(data, citation);
 
+        List<String> collectionIds = new ArrayList<>();
+        if (collectionId != null && !collectionId.trim().isEmpty()) {
+            collectionIds.add(collectionId);
+        }
+        meta.setCollectionIds(collectionIds);
         meta.setArticleTitle(fields.get("title"));
         meta.setArticleShortTitle(fields.get("shorttitle"));
         //        categoryGroups
@@ -257,9 +269,6 @@ public class BibFileIterator implements BibEntryIterator {
             meta.setReferences(mapReferences(citation.getReferences()));
             meta.setReferenceCount(meta.getReferences().size()+"");
         }
-
-
-        //        retrievalDate in note
         return meta;
     }
 

@@ -24,8 +24,7 @@ public class BibFileHandler implements FileHandler {
     @Override
     public BibEntryIterator getIterator(String path, IHandlerRegistry callback, JobInfo info)
             throws IteratorCreationException {
-        System.out.println("inside bib file handler .................");
-        return new BibFileIterator(path, info.getGroupId());
+        return new BibFileIterator(path, info.getGroupId(), info.getCollectionId());
     }
 
 }
