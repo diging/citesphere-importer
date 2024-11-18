@@ -3,6 +3,7 @@ package edu.asu.diging.citesphere.importer.core.service.parse.iterators;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -11,7 +12,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import org.javers.common.collections.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.social.zotero.api.Data;
@@ -36,7 +36,6 @@ import edu.asu.diging.citesphere.model.bib.ICreator;
 import edu.asu.diging.citesphere.model.bib.IPerson;
 import edu.asu.diging.citesphere.model.bib.IReference;
 import edu.asu.diging.citesphere.model.bib.impl.Citation;
-import edu.asu.diging.citesphere.model.bib.impl.Creator;
 import edu.asu.diging.citesphere.model.bib.impl.Person;
 
 public class BibFileIterator implements BibEntryIterator {
@@ -71,33 +70,12 @@ public class BibFileIterator implements BibEntryIterator {
         typeMap.put("book", Publication.BOOK);
         typeMap.put("book-chapter", Publication.BOOK_CHAPTER); 
         typeMap.put("monograph", Publication.BOOK);
-        //        typeMap.put("journal-issue", Publication.JOURNAL_ISSUE);
-        //        typeMap.put("reference-entry", Publication.REFERNCE_ENTRY);
-        //        typeMap.put("posted-content", Publication.POSTED_CONTENT);
-        //        typeMap.put("component", Publication.COMPONENT);
-        //        typeMap.put("edited-book", Publication.EDITED_BOOK);
         typeMap.put("proceedings-article", Publication.PROCEEDINGS_PAPER);
-        //        typeMap.put("dissertation", Publication.DISSERTATION);
         typeMap.put("book-section", Publication.BOOK_CHAPTER);
-        //        typeMap.put("report-component", Publication.REPORT_COMPONENT);
-        //        typeMap.put("report", Publication.REPORT);
-        //        typeMap.put("peer-review", Publication.PEER_REVIEW);
-        //        typeMap.put("book-track", Publication.BOOK_TRACK);
-        //        typeMap.put("book-part", Publication.BOOK_PART);
-        //        typeMap.put("other", Publication.OTHER);
-        //        typeMap.put("journal-volume", Publication.JORUNAL_VOLUME);
-        //        typeMap.put("book-set", Publication.BOOK_SET);
-        //        typeMap.put("journal", Publication.JOURNAL);
-        //        typeMap.put("proceedings-series", Publication.PROCEEDINGS_SERIES);
-        //        typeMap.put("report-series", Publication.REPORT_SERIES);
-        //        typeMap.put("proceedings", Publication.PROCEEDINGS);
-        //        typeMap.put("database", Publication.DATABASE);
-        //        typeMap.put("standard", Publication.STANDARD);
-        //        typeMap.put("reference-book", Publication.REFERENCE_BOOK);
-        //        typeMap.put("grant", Publication.GRANT);
-        //        typeMap.put("dataset", Publication.DATASET);
-        //        typeMap.put("book-series", Publication.BOOK_SERIES);
-    }
+        typeMap.put("research-article", Publication.ARTICLE);
+        typeMap.put("book-review", Publication.REVIEW);
+        typeMap.put("patent", Publication.PROCEEDINGS_PAPER);
+        }
 
     @Override
     public BibEntry next() {
@@ -130,14 +108,12 @@ public class BibFileIterator implements BibEntryIterator {
 
     private ContainerMeta parseJournalMeta(Map<String, String> fields) {
         ContainerMeta meta = new ContainerMeta();
-        //        journalIds
-        //        meta.setContainerTitle(fields.get("title"));
+
         List<String> journalAbbrev = new ArrayList<>();
         journalAbbrev.add(fields.get("journal"));
         meta.setJournalAbbreviations(journalAbbrev);
         meta.setPublisherName(fields.get("publisher"));
         meta.setPublisherLocation(fields.get("place"));
-        //        publisherAddress
         List<Issn> issnList = new ArrayList<Issn>();
         if(fields.get("issn") != null) {
             for(String issnString : fields.get("issn").split("and")) {
@@ -149,7 +125,6 @@ public class BibFileIterator implements BibEntryIterator {
         }
         meta.setIssns(issnList);
         meta.setSeriesTitle(fields.get("series"));
-        //        private String seriesSubTitle;
         return meta;
     }
 
@@ -192,20 +167,8 @@ public class BibFileIterator implements BibEntryIterator {
         }
         citation.setEditors(editors);
 
-        //        Add other creators
+
         Set<ICreator> creators = new HashSet<>();
-//        if(fields.containsKey("editor"))
-//        String[] artistStringList = fields.get("artist").split("and");
-//        for(String artistString: artistStringList) {
-//            ICreator artist = new Creator();
-//            IPerson person = new Person();
-//            String[] authorParts = artistString.split(",");
-//            person.setLastName(authorParts[0].trim());
-//            person.setFirstName(authorParts[1].trim());
-//            artist.setPerson(person);
-//            artist.setRole("Artist");
-//            creators.add(artist);
-//        }
         citation.setOtherCreators(creators);
 
         parseExtra.parseMetaDataNote(citation, item);
@@ -218,7 +181,7 @@ public class BibFileIterator implements BibEntryIterator {
         meta.setCollectionIds(collectionIds);
         meta.setArticleTitle(fields.get("title"));
         meta.setArticleShortTitle(fields.get("shorttitle"));
-        //        categoryGroups
+
         List<Contributor> contributors = new ArrayList<>();
         // List of authors
         if(citation.getAuthors() != null) {
@@ -228,9 +191,12 @@ public class BibFileIterator implements BibEntryIterator {
         if(citation.getEditors() != null) {
             contributors.addAll(mapPersonToContributor(citation.getEditors(), ContributionType.EDITOR));
         }
-        //        if(citation.getOtherCreators())
+        // List of other creators
+        if(citation.getOtherCreators() != null) {
+            contributors.addAll(mapCreatorToContributor(citation.getOtherCreators()));
+            
+        }
         meta.setContributors(contributors);
-        //        meta.setAuthorNotesCorrespondence(null);
         ArticlePublicationDate publicationDate = new ArticlePublicationDate();
         publicationDate.setPublicationYear(fields.get("year"));
         meta.setPublicationDate(publicationDate);
@@ -252,18 +218,6 @@ public class BibFileIterator implements BibEntryIterator {
         meta.setArticleIds(articleIds);
         meta.setArticleAbstract(fields.get("abstract"));
         meta.setLanguage(fields.get("language"));
-        //        ReviewInfo review = new ReviewInfo();
-        //        if (item.getReview() != null) {
-        //            review.setFullDescription(item.getReview().getCompetingInterestStatement());  
-        //        }
-        //        meta.setReviewInfo(review);       
-        //        meta.setDocumentType(fields.get("type"));   // document type in note
-        //        conferenceInfo in note - map to conferenceTitle, conferenceDate, conferenceLocation, conferenceSponsor, conferenceHost
-        //        keywords in note
-        //        reprintAddress in note
-        // additionalData in note
-        //         funding in note - map to fundingInfo, fundingText
-
 
         if(citation.getReferences() != null) {
             meta.setReferences(mapReferences(citation.getReferences()));
@@ -275,25 +229,38 @@ public class BibFileIterator implements BibEntryIterator {
     private List<Contributor> mapPersonToContributor(Set<IPerson> citationContributors, String contributionType) {
         List<Contributor> contributors = new ArrayList<Contributor>();
         for(IPerson person: citationContributors) {
-            Contributor contributor = new Contributor();
-            contributor.setContributionType(contributionType);
-            contributor.setGivenName(person.getFirstName());
-            contributor.setSurname(person.getLastName());
-            contributor.setFullName(person.getName());
-            contributor.setUri(person.getUri());
-
-            List<Affiliation> affiliations = new ArrayList<>();
-            if(person.getAffiliations()!= null) {
-                for(IAffiliation institute: person.getAffiliations()) {                
-                    Affiliation affiliation = new Affiliation();
-                    affiliation.setName(institute.getName());
-                    affiliation.setUri(institute.getUri());
-                    affiliation.setLocalAuthorityId(institute.getLocalAuthorityId());
-                    affiliations.add(affiliation);
-                }
-            }
-            contributor.setAffiliations(affiliations);
+            Contributor contributor = mapSinglePerson(person, contributionType);
             contributors.add(contributor);
+        }
+        return contributors;
+    }
+    
+    private Contributor mapSinglePerson(IPerson person, String contributionType) {
+        Contributor contributor = new Contributor();
+        contributor.setContributionType(contributionType);
+        contributor.setGivenName(person.getFirstName());
+        contributor.setSurname(person.getLastName());
+        contributor.setFullName(person.getName());
+        contributor.setUri(person.getUri());
+
+        List<Affiliation> affiliations = new ArrayList<>();
+        if(person.getAffiliations()!= null) {
+            for(IAffiliation institute: person.getAffiliations()) {                
+                Affiliation affiliation = new Affiliation();
+                affiliation.setName(institute.getName());
+                affiliation.setUri(institute.getUri());
+                affiliation.setLocalAuthorityId(institute.getLocalAuthorityId());
+                affiliations.add(affiliation);
+            }
+        }
+        contributor.setAffiliations(affiliations);
+        return contributor;
+    }
+    
+    private List<Contributor> mapCreatorToContributor(Set<ICreator> creators) {
+        List<Contributor> contributors = new ArrayList<Contributor>();
+        for(ICreator creator: creators) {
+            contributors.add(mapSinglePerson(creator.getPerson(), creator.getRole()));
         }
         return contributors;
     }
