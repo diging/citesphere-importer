@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ArticleMeta {
 
-    private List<String> collectionIds;
+    private List<String> collections;
     private List<ArticleId> articleIds;
     private String articleTitle;
     private String articleShortTitle;
@@ -50,11 +50,11 @@ public class ArticleMeta {
     private String referenceCount;
     private String retrievalDate;
     
-    public List<String> getCollectionIds() {
-        return collectionIds;
+    public List<String> getCollections() {
+        return collections;
     }
-    public void setCollectionIds(List<String> collectionIds) {
-        this.collectionIds = collectionIds;
+    public void setCollections(List<String> collections) {
+        this.collections = collections;
     }
     public List<ArticleId> getArticleIds() {
         return articleIds;

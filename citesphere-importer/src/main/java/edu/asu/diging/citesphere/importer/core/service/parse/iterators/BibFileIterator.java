@@ -109,9 +109,11 @@ public class BibFileIterator implements BibEntryIterator {
     private ContainerMeta parseJournalMeta(Map<String, String> fields) {
         ContainerMeta meta = new ContainerMeta();
 
-        List<String> journalAbbrev = new ArrayList<>();
-        journalAbbrev.add(fields.get("journal"));
-        meta.setJournalAbbreviations(journalAbbrev);
+        if(fields.containsKey("journal")) {
+            List<String> journalAbbrev = new ArrayList<>();
+            journalAbbrev.add(fields.get("journal"));
+            meta.setJournalAbbreviations(journalAbbrev);
+        }
         meta.setPublisherName(fields.get("publisher"));
         meta.setPublisherLocation(fields.get("place"));
         List<Issn> issnList = new ArrayList<Issn>();
@@ -178,7 +180,7 @@ public class BibFileIterator implements BibEntryIterator {
         if (collectionId != null && !collectionId.trim().isEmpty()) {
             collectionIds.add(collectionId);
         }
-        meta.setCollectionIds(collectionIds);
+        meta.setCollections(collectionIds);
         meta.setArticleTitle(fields.get("title"));
         meta.setArticleShortTitle(fields.get("shorttitle"));
 
@@ -202,8 +204,10 @@ public class BibFileIterator implements BibEntryIterator {
         meta.setPublicationDate(publicationDate);
         meta.setVolume(fields.get("volume"));
         meta.setIssue(fields.get("number"));
-        meta.setFirstPage(fields.get("pages").split("--")[0].trim());
-        meta.setLastPage(fields.get("pages").split("--")[1].trim());
+        if(fields.containsKey("pages")) {
+            meta.setFirstPage(fields.get("pages").split("--")[0].trim());
+            meta.setLastPage(fields.get("pages").split("--")[1].trim());
+        }
         meta.setSelfUri(fields.get("url"));
         meta.setDoi(fields.get("doi"));        
         ArticleId doiId = new ArticleId();
