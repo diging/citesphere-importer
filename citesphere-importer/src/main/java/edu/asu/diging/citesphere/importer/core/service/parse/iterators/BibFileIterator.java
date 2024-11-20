@@ -75,7 +75,7 @@ public class BibFileIterator implements BibEntryIterator {
         typeMap.put("research-article", Publication.ARTICLE);
         typeMap.put("book-review", Publication.REVIEW);
         typeMap.put("patent", Publication.PROCEEDINGS_PAPER);
-        }
+    }
 
     @Override
     public BibEntry next() {

@@ -106,7 +106,7 @@ public abstract class ItemJsonGenerator {
     }
     
     public JsonNode processCollections(JsonNode node, BibEntry bibEntry) {
-        return mapper.createArrayNode();
+        return mapper.valueToTree(bibEntry.getArticleMeta().getCollections());
     }
     
     protected ObjectMapper getObjectMapper() {
