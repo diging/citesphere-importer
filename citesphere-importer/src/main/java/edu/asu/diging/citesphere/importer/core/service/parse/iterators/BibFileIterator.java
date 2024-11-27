@@ -227,6 +227,12 @@ public class BibFileIterator implements BibEntryIterator {
             meta.setReferences(mapReferences(citation.getReferences()));
             meta.setReferenceCount(meta.getReferences().size()+"");
         }
+        
+        if(fields.containsKey("file")) {
+            String[] fileParts = fields.get("file").split(":");
+            meta.setDocumentType(fileParts[2]);
+            meta.setFilePath(fileParts[1]);
+        }
         return meta;
     }
 

@@ -35,6 +35,7 @@ public class ArticleMeta {
     private String language;
     private ReviewInfo reviewInfo;
     private String documentType;
+    private String filePath;
     private String conferenceTitle;
     private String conferenceDate;
     private String conferenceLocation;
@@ -211,6 +212,12 @@ public class ArticleMeta {
     }
     public void setDocumentType(String documentType) {
         this.documentType = documentType;
+    }
+    public String getFilePath() {
+        return filePath;
+    }
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
     }
     public String getConferenceTitle() {
         return conferenceTitle;
