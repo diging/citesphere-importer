@@ -72,6 +72,9 @@ public class CitesphereConnector implements ICitesphereConnector {
     @Value("${_citesphere_job_info_path}")
     private String jobInfoPath;
     
+    @Value("${_citesphere_get_item_path}")
+    private String getItemPath;
+    
     private RestTemplate restTemplate;
     
     private String accessToken;
@@ -190,6 +193,31 @@ public class CitesphereConnector implements ICitesphereConnector {
             throw new CitesphereCommunicationException("Could not communicate with Citesphere properly. Got " + response.keySet());
         }
         return filepath;
+    }
+    
+    @Override
+    public String getItem(String apiToken, String groupId, String itemKey) throws CitesphereCommunicationException {
+        String path = getItemPath.replace("{groupId}", groupId).replace("{item}", itemKey);
+        System.out.println("path ====================================" + path);
+        @SuppressWarnings("unchecked")
+        ResponseEntity<String> response = (ResponseEntity<String>) makeApiCall(path, apiToken, String.class);
+        HttpStatus status = response.getStatusCode();
+        
+//        JobInfo info = null;
+        if (status == HttpStatus.OK) {
+            String responseBody = response.getBody();
+            System.out.println("ITem ============================" + responseBody);
+            ObjectMapper mapper = new ObjectMapper();
+//            try {
+//                info = mapper.readValue(responseBody, JobInfo.class);
+//            } catch (IOException e) {
+//                throw new CitesphereCommunicationException("Could not understand returned message: " + responseBody, e);
+//            }
+        } else {
+            throw new CitesphereCommunicationException("Could not communicate with Citesphere properly. Got " + status);
+        }
+        
+        return response.getBody();
     }
     
     private ResponseEntity<?> makeApiCall(String url, String apiToken, Class<?> responseType) throws CitesphereCommunicationException {

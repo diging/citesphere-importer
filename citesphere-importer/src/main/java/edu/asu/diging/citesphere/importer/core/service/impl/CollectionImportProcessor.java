@@ -3,6 +3,7 @@ package edu.asu.diging.citesphere.importer.core.service.impl;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.annotation.PostConstruct;
 
@@ -135,6 +136,18 @@ public class CollectionImportProcessor implements IImportProcessor {
         ItemCreationResponse response = null;
         if (entryCounter > 0) {
             response = submitEntries(root, info);
+            response.getSuccessful().forEach((key, value) -> {
+                System.out.println("==========================================================");
+                System.out.println("Key -" + key.toString());
+                System.out.println("value - "+ value.toString());
+                
+                try {
+                    String item = connector.getItem(message.getId(), info.getGroupId(), value.toString());
+                } catch (CitesphereCommunicationException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            });
         }
 
         response = response != null ? response : new ItemCreationResponse();
