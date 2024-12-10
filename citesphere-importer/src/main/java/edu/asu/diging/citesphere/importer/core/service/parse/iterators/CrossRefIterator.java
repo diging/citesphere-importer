@@ -80,7 +80,7 @@ public class CrossRefIterator implements BibEntryIterator {
         if (!doisIterator.hasNext()) {
             return null;
         }
-        BibEntry nextEntry = new Publication();;
+        BibEntry nextEntry = new Publication();
 
         try {
             Item item = crossrefService.get(doisIterator.next());
