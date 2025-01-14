@@ -1,4 +1,4 @@
-package edu.asu.diging.citesphere.importer.core.service.parse.crossref;
+package edu.asu.diging.citesphere.importer.core.service.parse.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,6 +16,7 @@ import edu.asu.diging.citesphere.importer.core.model.impl.ContributorId;
 import edu.asu.diging.citesphere.importer.core.model.impl.Issn;
 import edu.asu.diging.citesphere.importer.core.model.impl.Reference;
 import edu.asu.diging.citesphere.importer.core.model.impl.ReviewInfo;
+import edu.asu.diging.citesphere.importer.core.service.parse.crossref.ICrossRefParser;
 import edu.asu.diging.crossref.model.Institution;
 import edu.asu.diging.crossref.model.IssnType;
 import edu.asu.diging.crossref.model.Item;
@@ -23,7 +24,15 @@ import edu.asu.diging.crossref.model.Person;
 
 @Component
 public class CrossRefParser implements ICrossRefParser {
-
+    
+    /**
+     * Parses journal metadata from the given {@link Item} object and returns a {@link ContainerMeta} object
+     * containing the extracted journal metadata.
+     *
+     * @param item the {@link Item} object containing journal metadata to be parsed.
+     * 
+     * @return a {@link ContainerMeta} object containing the parsed journal metadata.
+     */
     @Override
     public ContainerMeta parseJournalMeta(Item item) {
         ContainerMeta meta = new ContainerMeta();
@@ -42,7 +51,15 @@ public class CrossRefParser implements ICrossRefParser {
         meta.setIssns(issnList);
         return meta;
     }
-
+    
+    /**
+     * Parses article metadata from the given {@link Item} object and returns an {@link ArticleMeta} object
+     * containing the extracted article metadata.
+     *
+     * @param item the {@link Item} object containing article metadata to be parsed. 
+     * 
+     * @return an {@link ArticleMeta} object containing the parsed article metadata.
+     */
     @Override
     public ArticleMeta parseArticleMeta(Item item) {
         ArticleMeta meta = new ArticleMeta();
