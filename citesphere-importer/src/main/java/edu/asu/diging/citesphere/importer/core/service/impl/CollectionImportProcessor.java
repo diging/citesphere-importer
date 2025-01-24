@@ -1,7 +1,12 @@
 package edu.asu.diging.citesphere.importer.core.service.impl;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -11,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -136,23 +142,60 @@ public class CollectionImportProcessor implements IImportProcessor {
         ItemCreationResponse response = null;
         if (entryCounter > 0) {
             response = submitEntries(root, info);
-            response.getSuccessful().forEach((key, value) -> {
+            for(int i=0; i<response.getSuccessful().size(); i++) {
+                Map.Entry<String, String> entry = (Entry<String, String>) response.getSuccessful().get(i);
                 System.out.println("==========================================================");
-                System.out.println("Key -" + key.toString());
-                System.out.println("value - "+ value.toString());
-                
+                System.out.println("Key -" + entry.getKey());
+                System.out.println("value - "+ entry.getValue());
                 try {
-                    String item = connector.getItem(message.getId(), info.getGroupId(), value.toString());
-                } catch (CitesphereCommunicationException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            });
+//                  Item item = connector.getItem(message.getId(), info.getGroupId(), value.toString().trim());
+//                  System.out.println(item.toString()+ " ============================= item");
+                    String res = connector.uploadFile(message.getId(), info.getGroupId(), entry.getValue().trim(), new File(root.get(i).get("filePath").asText()));
+              } catch (CitesphereCommunicationException e) {
+                  // TODO Auto-generated catch block
+                  e.printStackTrace();
+              }
+            }
+            
+//            response.getSuccessful().forEach((key, value) -> {
+//                System.out.println("==========================================================");
+//                System.out.println("Key -" + key.toString());
+//                System.out.println("value - "+ value.toString());
+//                
+//                try {
+////                    Item item = connector.getItem(message.getId(), info.getGroupId(), value.toString().trim());
+////                    System.out.println(item.toString()+ " ============================= item");
+//                      String res = connector.uploadFile(message.getId(), info.getGroupId(), value.toString().trim(), root.get(i).get("filePath"));
+//                } catch (CitesphereCommunicationException e) {
+//                    // TODO Auto-generated catch block
+//                    e.printStackTrace();
+//                }
+//            });
         }
 
         response = response != null ? response : new ItemCreationResponse();
         sendMessage(response, message.getId(), Status.DONE, ResponseCode.S00);
 
+    }
+    
+    public static MultipartFile[] getMultipartFilesFromPaths(List<String> filePaths) throws IOException {
+        List<MultipartFile> multipartFiles = new ArrayList<>();
+        
+        for (String filePath : filePaths) {
+            File file = new File(filePath);
+            
+            try (FileInputStream inputStream = new FileInputStream(file)) {
+                MultipartFile multipartFile = new MockMultipartFile(
+                    file.getName(),               // Original file name
+                    file.getName(),               // File name for upload
+                    "application/octet-stream",   // Content type (default to binary)
+                    inputStream                   // Input stream of the file
+                );
+                multipartFiles.add(multipartFile);
+            }
+        }
+        
+        return multipartFiles.toArray(new MultipartFile[0]);
     }
     
     private void sendMessage(ItemCreationResponse message, String jobId, Status status, ResponseCode code) {
