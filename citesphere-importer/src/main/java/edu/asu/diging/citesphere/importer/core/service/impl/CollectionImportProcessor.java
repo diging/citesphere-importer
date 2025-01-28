@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
@@ -32,6 +33,7 @@ import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.ItemType;
 import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
 import edu.asu.diging.citesphere.importer.core.service.ICitesphereConnector;
+import edu.asu.diging.citesphere.importer.core.service.IGilesConnector;
 import edu.asu.diging.citesphere.importer.core.service.IImportProcessor;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
 import edu.asu.diging.citesphere.importer.core.service.parse.IHandlerRegistry;
@@ -43,6 +45,9 @@ import edu.asu.diging.citesphere.messages.model.KafkaImportReturnMessage;
 import edu.asu.diging.citesphere.messages.model.KafkaJobMessage;
 import edu.asu.diging.citesphere.messages.model.ResponseCode;
 import edu.asu.diging.citesphere.messages.model.Status;
+import edu.asu.diging.citesphere.user.IUser;
+import edu.asu.diging.simpleusers.core.data.UserRepository;
+import edu.asu.diging.simpleusers.core.model.impl.User;
 
 @Service
 public class CollectionImportProcessor implements IImportProcessor {
@@ -63,6 +68,12 @@ public class CollectionImportProcessor implements IImportProcessor {
     
     @Autowired
     private KafkaRequestProducer requestProducer;
+    
+    @Autowired
+    private IGilesConnector gilesConnector;
+    
+    @Autowired
+    private UserRepository userRepository;
     
     private Map<String, ItemType> itemTypeMapping = new HashMap<>();
 
@@ -147,14 +158,14 @@ public class CollectionImportProcessor implements IImportProcessor {
                 System.out.println("==========================================================");
                 System.out.println("Key -" + entry.getKey());
                 System.out.println("value - "+ entry.getValue());
-                try {
-//                  Item item = connector.getItem(message.getId(), info.getGroupId(), value.toString().trim());
-//                  System.out.println(item.toString()+ " ============================= item");
-                    String res = connector.uploadFile(message.getId(), info.getGroupId(), entry.getValue().trim(), new File(root.get(i).get("filePath").asText()));
-              } catch (CitesphereCommunicationException e) {
-                  // TODO Auto-generated catch block
-                  e.printStackTrace();
-              }
+                IUser user = null;
+                
+                Optional<User> foundUser = userRepository.findById(info.getUsername());
+                if (foundUser.isPresent()) {
+                     user = (IUser) foundUser.get();
+                }
+                
+                
             }
             
 //            response.getSuccessful().forEach((key, value) -> {

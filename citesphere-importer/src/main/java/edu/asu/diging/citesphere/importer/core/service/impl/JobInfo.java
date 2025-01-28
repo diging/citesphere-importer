@@ -9,6 +9,7 @@ public class JobInfo {
     private String zoteroId;
     private String groupId;
     private String collectionId;
+    private String username;
     
     public String getZotero() {
         return zotero;
@@ -33,6 +34,12 @@ public class JobInfo {
     }
     public void setCollectionId(String collectionId) {
         this.collectionId = collectionId;
+    }
+    public String getUsername() {
+        return username;
+    }
+    public void setUsername(String username) {
+        this.username = username;
     }
     
 }
