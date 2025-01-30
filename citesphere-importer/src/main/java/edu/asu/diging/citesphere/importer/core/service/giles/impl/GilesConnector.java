@@ -44,16 +44,14 @@ public class GilesConnector implements IGilesConnector {
     }
     
     @Override
-    public IGilesUpload uploadFile(IUser user, MultipartFile file, byte[] fileBytes) {
-
-        String token = getToken(user);
+    public IGilesUpload uploadFile(IUser user, String token, String filename, byte[] fileBytes) {
         
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         headers.setBearerAuth(token);
         
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("files", new MultipartFileResource(fileBytes, file.getOriginalFilename()));
+        body.add("files", new MultipartFileResource(fileBytes, filename));
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 

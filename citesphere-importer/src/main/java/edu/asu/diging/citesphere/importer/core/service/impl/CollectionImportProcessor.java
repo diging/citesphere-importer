@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +47,7 @@ import edu.asu.diging.citesphere.messages.model.KafkaImportReturnMessage;
 import edu.asu.diging.citesphere.messages.model.KafkaJobMessage;
 import edu.asu.diging.citesphere.messages.model.ResponseCode;
 import edu.asu.diging.citesphere.messages.model.Status;
+import edu.asu.diging.citesphere.model.bib.IGilesUpload;
 import edu.asu.diging.citesphere.user.IUser;
 import edu.asu.diging.simpleusers.core.data.UserRepository;
 import edu.asu.diging.simpleusers.core.model.impl.User;
@@ -165,6 +168,16 @@ public class CollectionImportProcessor implements IImportProcessor {
                      user = (IUser) foundUser.get();
                 }
                 
+                File file = new File(root.get(i).get("filePath").asText());
+                byte[] fileBytes = null;
+                try {
+                    fileBytes = Files.readAllBytes(Path.of(root.get(i).get("filePath").asText()));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+               
+                IGilesUpload upload = gilesConnector.uploadFile(user, info.getGiles(), file.getName() , fileBytes);
+                
                 
             }
             
@@ -187,26 +200,6 @@ public class CollectionImportProcessor implements IImportProcessor {
         response = response != null ? response : new ItemCreationResponse();
         sendMessage(response, message.getId(), Status.DONE, ResponseCode.S00);
 
-    }
-    
-    public static MultipartFile[] getMultipartFilesFromPaths(List<String> filePaths) throws IOException {
-        List<MultipartFile> multipartFiles = new ArrayList<>();
-        
-        for (String filePath : filePaths) {
-            File file = new File(filePath);
-            
-            try (FileInputStream inputStream = new FileInputStream(file)) {
-                MultipartFile multipartFile = new MockMultipartFile(
-                    file.getName(),               // Original file name
-                    file.getName(),               // File name for upload
-                    "application/octet-stream",   // Content type (default to binary)
-                    inputStream                   // Input stream of the file
-                );
-                multipartFiles.add(multipartFile);
-            }
-        }
-        
-        return multipartFiles.toArray(new MultipartFile[0]);
     }
     
     private void sendMessage(ItemCreationResponse message, String jobId, Status status, ResponseCode code) {

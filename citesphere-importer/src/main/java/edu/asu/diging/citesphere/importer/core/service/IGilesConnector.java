@@ -7,5 +7,5 @@ import edu.asu.diging.citesphere.user.IUser;
 
 public interface IGilesConnector {
 
-    IGilesUpload uploadFile(IUser user, MultipartFile file, byte[] fileBytes);
+    IGilesUpload uploadFile(IUser user, String token, String filename, byte[] fileBytes);
 }
