@@ -1,17 +1,19 @@
 package edu.asu.diging.citesphere.importer.core.service.impl;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
 
@@ -19,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -156,45 +157,37 @@ public class CollectionImportProcessor implements IImportProcessor {
         ItemCreationResponse response = null;
         if (entryCounter > 0) {
             response = submitEntries(root, info);
-            for(int i=0; i<response.getSuccessful().size(); i++) {
-                Map.Entry<String, String> entry = (Entry<String, String>) response.getSuccessful().get(i);
+            
+            Set<Entry<String, Object>> entrySet = response.getSuccessful().entrySet();
+            List<Entry<String, String>> entries = new ArrayList();
+            entries.addAll((Collection<? extends Entry<String, String>>) entrySet);
+
+            
+            for (int i = 0; i < entries.size(); i++) {
+                Map.Entry<String, String> entry = entries.get(i);
+                
                 System.out.println("==========================================================");
                 System.out.println("Key -" + entry.getKey());
-                System.out.println("value - "+ entry.getValue());
+                System.out.println("Value - " + entry.getValue());
+
+                String gilesFilePath = root.get(i).get("filePath").asText();
+
                 IUser user = null;
-                
                 Optional<User> foundUser = userRepository.findById(info.getUsername());
                 if (foundUser.isPresent()) {
-                     user = (IUser) foundUser.get();
+                    user = (IUser) foundUser.get();
                 }
-                
-                File file = new File(root.get(i).get("filePath").asText());
+
+                File file = new File(gilesFilePath);
                 byte[] fileBytes = null;
                 try {
-                    fileBytes = Files.readAllBytes(Path.of(root.get(i).get("filePath").asText()));
+                    fileBytes = Files.readAllBytes(Path.of(gilesFilePath));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-               
-                IGilesUpload upload = gilesConnector.uploadFile(user, info.getGiles(), file.getName() , fileBytes);
-                
-                
+
+                IGilesUpload upload = gilesConnector.uploadFile(user, info.getGiles(), file.getName(), fileBytes);
             }
-            
-//            response.getSuccessful().forEach((key, value) -> {
-//                System.out.println("==========================================================");
-//                System.out.println("Key -" + key.toString());
-//                System.out.println("value - "+ value.toString());
-//                
-//                try {
-////                    Item item = connector.getItem(message.getId(), info.getGroupId(), value.toString().trim());
-////                    System.out.println(item.toString()+ " ============================= item");
-//                      String res = connector.uploadFile(message.getId(), info.getGroupId(), value.toString().trim(), root.get(i).get("filePath"));
-//                } catch (CitesphereCommunicationException e) {
-//                    // TODO Auto-generated catch block
-//                    e.printStackTrace();
-//                }
-//            });
         }
 
         response = response != null ? response : new ItemCreationResponse();

@@ -4,34 +4,29 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartFile;
 
 import edu.asu.diging.citesphere.importer.core.service.IGilesConnector;
-import edu.asu.diging.citesphere.importer.core.service.oauth.InternalTokenManager;
 import edu.asu.diging.citesphere.model.bib.IGilesUpload;
 import edu.asu.diging.citesphere.model.bib.impl.GilesUpload;
 import edu.asu.diging.citesphere.user.IUser;
 
+@Service
 public class GilesConnector implements IGilesConnector {
     
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private RestTemplate restTemplate;
-    
-    @Autowired
-    private InternalTokenManager internalTokenManager;
-    
+       
     @Value("${giles_baseurl}")
     private String gilesBaseurl;
 
@@ -63,10 +58,10 @@ public class GilesConnector implements IGilesConnector {
         return upload;
     }
     
-    private String getToken(IUser user) {
-        OAuth2AccessToken token = internalTokenManager.getAccessToken(user);
-        return token.getValue();
-    }
+//    private String getToken(IUser user) {
+//        OAuth2AccessToken token = internalTokenManager.getAccessToken(user);
+//        return token.getValue();
+//    }
     
     public class MultipartFileResource extends ByteArrayResource {
 
