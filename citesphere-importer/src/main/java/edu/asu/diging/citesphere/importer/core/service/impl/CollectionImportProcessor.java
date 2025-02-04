@@ -20,6 +20,7 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.social.zotero.api.Item;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -55,7 +56,7 @@ import edu.asu.diging.simpleusers.core.model.impl.User;
 
 @Service
 public class CollectionImportProcessor implements IImportProcessor {
-    
+
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
@@ -69,16 +70,16 @@ public class CollectionImportProcessor implements IImportProcessor {
 
     @Autowired
     private IJsonGenerationService generationService;
-    
+
     @Autowired
     private KafkaRequestProducer requestProducer;
-    
+
     @Autowired
     private IGilesConnector gilesConnector;
-    
+
     @Autowired
     private UserRepository userRepository;
-    
+
     private Map<String, ItemType> itemTypeMapping = new HashMap<>();
 
     @PostConstruct
@@ -113,7 +114,7 @@ public class CollectionImportProcessor implements IImportProcessor {
             sendMessage(null, message.getId(), Status.FAILED, ResponseCode.X20);
             return;
         }
-        
+
         sendMessage(null, message.getId(), Status.PROCESSING, ResponseCode.P00);
         BibEntryIterator bibIterator = null;
         try {
@@ -121,15 +122,16 @@ public class CollectionImportProcessor implements IImportProcessor {
         } catch (IteratorCreationException e1) {
             logger.error("Could not create iterator.", e1);
         }
-        
+
         if (bibIterator == null) {
             sendMessage(null, message.getId(), Status.FAILED, ResponseCode.X30);
             return;
         }
-        
+
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode root = mapper.createArrayNode();
         int entryCounter = 0;
+        Map<String, String> filesMap = new HashMap<>();
         while (bibIterator.hasNext()) {
             BibEntry entry = bibIterator.next();
             if (entry.getArticleType() == null) {
@@ -139,62 +141,35 @@ public class CollectionImportProcessor implements IImportProcessor {
             ItemType type = itemTypeMapping.get(entry.getArticleType());
             JsonNode template = zoteroConnector.getTemplate(type);
             ObjectNode bibNode = generationService.generateJson(template, entry);
-
+            if(entry.getArticleMeta().getFilePath() != null) {
+                filesMap.put(entry.getArticleMeta().getArticleTitle(), entry.getArticleMeta().getFilePath());
+            }
             root.add(bibNode);
             entryCounter++;
 
             // we can submit max 50 entries to Zotoro
             if (entryCounter >= 50) {
-                submitEntries(root, info);
+                ItemCreationResponse response = submitEntries(root, info);
+                addFiles(response, filesMap, message.getId(), info);
                 entryCounter = 0;
                 root = mapper.createArrayNode();
             }
 
         }
-        
+
         bibIterator.close();
-        
+
         ItemCreationResponse response = null;
         if (entryCounter > 0) {
             response = submitEntries(root, info);
-            
-            Set<Entry<String, Object>> entrySet = response.getSuccessful().entrySet();
-            List<Entry<String, String>> entries = new ArrayList();
-            entries.addAll((Collection<? extends Entry<String, String>>) entrySet);
-
-            
-            for (int i = 0; i < entries.size(); i++) {
-                Map.Entry<String, String> entry = entries.get(i);
-                
-                System.out.println("==========================================================");
-                System.out.println("Key -" + entry.getKey());
-                System.out.println("Value - " + entry.getValue());
-
-                String gilesFilePath = root.get(i).get("filePath").asText();
-
-                IUser user = null;
-                Optional<User> foundUser = userRepository.findById(info.getUsername());
-                if (foundUser.isPresent()) {
-                    user = (IUser) foundUser.get();
-                }
-
-                File file = new File(gilesFilePath);
-                byte[] fileBytes = null;
-                try {
-                    fileBytes = Files.readAllBytes(Path.of(gilesFilePath));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                IGilesUpload upload = gilesConnector.uploadFile(user, info.getGiles(), file.getName(), fileBytes);
-            }
+            addFiles(response, filesMap, message.getId(), info);
         }
 
         response = response != null ? response : new ItemCreationResponse();
         sendMessage(response, message.getId(), Status.DONE, ResponseCode.S00);
 
     }
-    
+
     private void sendMessage(ItemCreationResponse message, String jobId, Status status, ResponseCode code) {
         KafkaImportReturnMessage returnMessage = new KafkaImportReturnMessage(message, jobId);
         returnMessage.setStatus(status);
@@ -206,7 +181,7 @@ public class CollectionImportProcessor implements IImportProcessor {
             logger.error("Exception sending message.", e);
         }
     }
-    
+
     private ItemCreationResponse submitEntries(ArrayNode entries, JobInfo info) {
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -227,7 +202,7 @@ public class CollectionImportProcessor implements IImportProcessor {
         }
         return null;
     }
-    
+
     private JobInfo getJobInfo(KafkaJobMessage message) {
         JobInfo info = null;
         try {
@@ -252,4 +227,51 @@ public class CollectionImportProcessor implements IImportProcessor {
         return file;
     }
 
+    private void addFiles(ItemCreationResponse response, Map<String, String> filesMap, 
+            String token, JobInfo info) {
+
+        response.getSuccessful().forEach((key, value) -> {
+
+            System.out.println("==========================================================");
+            System.out.println("Key -" + key);
+            System.out.println("Value - " + value);
+
+
+            Item item = null;
+            try {
+                item = connector.getItem(token, info.getGroupId(), value.toString());
+
+
+                if(filesMap.containsKey(item.getData().getTitle())) {
+
+                    String gilesFilePath = filesMap.get(item.getData().getTitle());
+
+                    System.out.println(gilesFilePath + "=================================");
+
+                    IUser user = null;
+                    Optional<User> foundUser = userRepository.findById(info.getUsername());
+                    if (foundUser.isPresent()) {
+                        user = (IUser) foundUser.get();
+                    }
+
+                    File file = new File(gilesFilePath);
+                    byte[] fileBytes = null;
+                    try {
+                        fileBytes = Files.readAllBytes(Path.of(gilesFilePath));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    IGilesUpload upload = gilesConnector.uploadFile(user, info.getGiles(), file.getName(), fileBytes);
+
+//                    item.getData().getExtra()
+
+                }
+            } catch (CitesphereCommunicationException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        });
+
+    }
 }
