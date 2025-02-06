@@ -5,22 +5,15 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.social.zotero.api.Item;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -49,6 +42,7 @@ import edu.asu.diging.citesphere.messages.model.KafkaImportReturnMessage;
 import edu.asu.diging.citesphere.messages.model.KafkaJobMessage;
 import edu.asu.diging.citesphere.messages.model.ResponseCode;
 import edu.asu.diging.citesphere.messages.model.Status;
+import edu.asu.diging.citesphere.model.bib.ICitation;
 import edu.asu.diging.citesphere.model.bib.IGilesUpload;
 import edu.asu.diging.citesphere.user.IUser;
 import edu.asu.diging.simpleusers.core.data.UserRepository;
@@ -237,14 +231,14 @@ public class CollectionImportProcessor implements IImportProcessor {
             System.out.println("Value - " + value);
 
 
-            Item item = null;
+            ICitation item = null;
             try {
                 item = connector.getItem(token, info.getGroupId(), value.toString());
 
 
-                if(filesMap.containsKey(item.getData().getTitle())) {
+                if(filesMap.containsKey(item.getTitle())) {
 
-                    String gilesFilePath = filesMap.get(item.getData().getTitle());
+                    String gilesFilePath = filesMap.get(item.getTitle());
 
                     System.out.println(gilesFilePath + "=================================");
 

@@ -27,7 +27,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.social.zotero.api.Item;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RequestCallback;
@@ -44,6 +43,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.asu.diging.citesphere.importer.core.exception.CitesphereCommunicationException;
 import edu.asu.diging.citesphere.importer.core.service.CitesphereHeaders;
 import edu.asu.diging.citesphere.importer.core.service.ICitesphereConnector;
+import edu.asu.diging.citesphere.model.bib.ICitation;
 
 @Service
 @PropertySource("classpath:/config.properties")
@@ -199,18 +199,23 @@ public class CitesphereConnector implements ICitesphereConnector {
     }
     
     @Override
-    public Item getItem(String apiToken, String groupId, String itemKey) throws CitesphereCommunicationException {
+    public ICitation getItem(String apiToken, String groupId, String itemKey) throws CitesphereCommunicationException {
         String path = getItemPath.replace("{groupId}", groupId).replace("{item}", itemKey);
         @SuppressWarnings("unchecked")
         ResponseEntity<String> response = (ResponseEntity<String>) makeApiCall(path, apiToken, String.class);
         HttpStatus status = response.getStatusCode();
         
-        Item item = null;
+        ICitation citation  = null;
         if (status == HttpStatus.OK) {
             String responseBody = response.getBody();
             ObjectMapper mapper = new ObjectMapper();
             try {
-                item = mapper.readValue(responseBody, Item.class);
+                JsonNode rootNode = mapper.readTree(responseBody);
+                JsonNode itemNode = rootNode.get("item"); 
+                
+                System.out.println(mapper.writeValueAsString(itemNode) + "=================================");
+
+                citation = mapper.readValue(mapper.writeValueAsString(itemNode), ICitation.class);
             } catch (IOException e) {
                 throw new CitesphereCommunicationException("Could not understand returned message: " + responseBody, e);
             }
@@ -218,7 +223,7 @@ public class CitesphereConnector implements ICitesphereConnector {
             throw new CitesphereCommunicationException("Could not communicate with Citesphere properly. Got " + status);
         }
         
-        return item;
+        return citation;
     }
     
     private ResponseEntity<?> makeApiCall(String url, String apiToken, Class<?> responseType) throws CitesphereCommunicationException {
