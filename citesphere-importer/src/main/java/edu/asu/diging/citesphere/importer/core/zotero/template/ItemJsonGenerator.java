@@ -283,6 +283,7 @@ public abstract class ItemJsonGenerator {
         fieldHelper.createReferences(article, root);
         fieldHelper.createReferenceCount(article, root);
         fieldHelper.createRetrievalDate(article, root);
+        fieldHelper.createGilesUpload(article, root);
 
         try {
             return prefix + getObjectMapper().writeValueAsString(root);

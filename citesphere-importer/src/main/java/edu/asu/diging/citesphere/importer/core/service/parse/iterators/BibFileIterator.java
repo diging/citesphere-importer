@@ -2,13 +2,15 @@ package edu.asu.diging.citesphere.importer.core.service.parse.iterators;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
@@ -18,6 +20,7 @@ import org.springframework.social.zotero.api.Data;
 import org.springframework.social.zotero.api.Item;
 
 import edu.asu.diging.citesphere.factory.impl.ParseExtra;
+import edu.asu.diging.citesphere.importer.core.exception.CitesphereCommunicationException;
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.impl.Affiliation;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleId;
@@ -29,14 +32,22 @@ import edu.asu.diging.citesphere.importer.core.model.impl.Contributor;
 import edu.asu.diging.citesphere.importer.core.model.impl.Issn;
 import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
 import edu.asu.diging.citesphere.importer.core.model.impl.Reference;
+import edu.asu.diging.citesphere.importer.core.service.IGilesConnector;
+import edu.asu.diging.citesphere.importer.core.service.giles.impl.GilesConnector;
+import edu.asu.diging.citesphere.importer.core.service.impl.JobInfo;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
 import edu.asu.diging.citesphere.model.bib.IAffiliation;
 import edu.asu.diging.citesphere.model.bib.ICitation;
 import edu.asu.diging.citesphere.model.bib.ICreator;
+import edu.asu.diging.citesphere.model.bib.IGilesUpload;
 import edu.asu.diging.citesphere.model.bib.IPerson;
 import edu.asu.diging.citesphere.model.bib.IReference;
 import edu.asu.diging.citesphere.model.bib.impl.Citation;
+import edu.asu.diging.citesphere.model.bib.impl.GilesUpload;
 import edu.asu.diging.citesphere.model.bib.impl.Person;
+import edu.asu.diging.citesphere.user.IUser;
+import edu.asu.diging.simpleusers.core.data.UserRepository;
+import edu.asu.diging.simpleusers.core.model.impl.User;
 
 public class BibFileIterator implements BibEntryIterator {
 
@@ -49,11 +60,15 @@ public class BibFileIterator implements BibEntryIterator {
     private String collectionId;
     private Iterator<String> lineIterator;
     private Map<String, String> typeMap;
+    private IGilesConnector gilesConnector;
+    private UserRepository userRepository;
 
     public BibFileIterator(String filePath, String groupId, String collectionId) {
         this.filePath = filePath;
         this.groupId = groupId;
         this.collectionId = collectionId;
+        gilesConnector = new GilesConnector();
+        userRepository = new UserRepository();
         parseExtra = new ParseExtra();
         parseExtra.init();
         init();
@@ -233,6 +248,8 @@ public class BibFileIterator implements BibEntryIterator {
             meta.setDocumentType(fileParts[2]);
             meta.setFilePath(fileParts[1]);
         }
+        
+        
         return meta;
     }
 
@@ -305,6 +322,27 @@ public class BibFileIterator implements BibEntryIterator {
         return ref;
     }
 
+    private IGilesUpload createGilesUpload(String gilesFilePath, JobInfo info) {
+        System.out.println(gilesFilePath + "=================================");
+
+        IUser user = null;
+        Optional<User> foundUser = userRepository.findById(info.getUsername());
+        if (foundUser.isPresent()) {
+            user = (IUser) foundUser.get();
+        }
+
+        File file = new File(gilesFilePath);
+        byte[] fileBytes = null;
+        try {
+            fileBytes = Files.readAllBytes(Path.of(gilesFilePath));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        IGilesUpload upload = gilesConnector.uploadFile(user, info.getGiles(), file.getName(), fileBytes);
+        return upload;
+    }
+    
     @Override
     public boolean hasNext() {
         return lineIterator.hasNext();

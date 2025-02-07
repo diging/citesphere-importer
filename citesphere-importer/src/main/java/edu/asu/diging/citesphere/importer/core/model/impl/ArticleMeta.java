@@ -5,6 +5,8 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import edu.asu.diging.citesphere.model.bib.IGilesUpload;
+
 public class ArticleMeta {
 
     private List<String> collections;
@@ -50,6 +52,7 @@ public class ArticleMeta {
     private List<Reference> references;
     private String referenceCount;
     private String retrievalDate;
+    private List<IGilesUpload> gilesUpload;
     
     public List<String> getCollections() {
         return collections;
@@ -302,6 +305,12 @@ public class ArticleMeta {
     }
     public void setRetrievalDate(String retrievalDate) {
         this.retrievalDate = retrievalDate;
+    }
+    public List<IGilesUpload> getGilesUpload() {
+        return gilesUpload;
+    }
+    public void setGilesUpload(List<IGilesUpload> gilesUpload) {
+        this.gilesUpload = gilesUpload;
     }
     
 }

@@ -9,6 +9,8 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -422,6 +424,14 @@ public class ExtraFieldHelper {
     public void createRetrievalDate(BibEntry article, ObjectNode root) {
         if (article.getArticleMeta().getRetrievalDate() != null) {
             root.put("retrievalDate", article.getArticleMeta().getRetrievalDate());
+        }
+    }
+    
+    public void createGilesUpload(BibEntry article, ObjectNode root) {
+        if (article.getArticleMeta().getGilesUpload() != null) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode gilesJson = objectMapper.valueToTree(article.getArticleMeta().getGilesUpload());
+            root.put("gilesUploads", gilesJson);
         }
     }
 

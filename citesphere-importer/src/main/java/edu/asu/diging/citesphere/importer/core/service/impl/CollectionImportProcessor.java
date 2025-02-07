@@ -68,12 +68,6 @@ public class CollectionImportProcessor implements IImportProcessor {
     @Autowired
     private KafkaRequestProducer requestProducer;
 
-    @Autowired
-    private IGilesConnector gilesConnector;
-
-    @Autowired
-    private UserRepository userRepository;
-
     private Map<String, ItemType> itemTypeMapping = new HashMap<>();
 
     @PostConstruct
@@ -144,7 +138,7 @@ public class CollectionImportProcessor implements IImportProcessor {
             // we can submit max 50 entries to Zotoro
             if (entryCounter >= 50) {
                 ItemCreationResponse response = submitEntries(root, info);
-                addFiles(response, filesMap, message.getId(), info);
+//                addFiles(response, filesMap, message.getId(), info);
                 entryCounter = 0;
                 root = mapper.createArrayNode();
             }
@@ -156,7 +150,7 @@ public class CollectionImportProcessor implements IImportProcessor {
         ItemCreationResponse response = null;
         if (entryCounter > 0) {
             response = submitEntries(root, info);
-            addFiles(response, filesMap, message.getId(), info);
+//            addFiles(response, filesMap, message.getId(), info);
         }
 
         response = response != null ? response : new ItemCreationResponse();
@@ -221,51 +215,4 @@ public class CollectionImportProcessor implements IImportProcessor {
         return file;
     }
 
-    private void addFiles(ItemCreationResponse response, Map<String, String> filesMap, 
-            String token, JobInfo info) {
-
-        response.getSuccessful().forEach((key, value) -> {
-
-            System.out.println("==========================================================");
-            System.out.println("Key -" + key);
-            System.out.println("Value - " + value);
-
-
-            ICitation item = null;
-            try {
-                item = connector.getItem(token, info.getGroupId(), value.toString());
-
-
-                if(filesMap.containsKey(item.getTitle())) {
-
-                    String gilesFilePath = filesMap.get(item.getTitle());
-
-                    System.out.println(gilesFilePath + "=================================");
-
-                    IUser user = null;
-                    Optional<User> foundUser = userRepository.findById(info.getUsername());
-                    if (foundUser.isPresent()) {
-                        user = (IUser) foundUser.get();
-                    }
-
-                    File file = new File(gilesFilePath);
-                    byte[] fileBytes = null;
-                    try {
-                        fileBytes = Files.readAllBytes(Path.of(gilesFilePath));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                    IGilesUpload upload = gilesConnector.uploadFile(user, info.getGiles(), file.getName(), fileBytes);
-
-//                    item.getData().getExtra()
-
-                }
-            } catch (CitesphereCommunicationException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        });
-
-    }
 }
