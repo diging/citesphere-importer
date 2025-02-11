@@ -58,17 +58,19 @@ public class BibFileIterator implements BibEntryIterator {
     private String filePath;
     private String groupId;
     private String collectionId;
+    private JobInfo info;
     private Iterator<String> lineIterator;
     private Map<String, String> typeMap;
     private IGilesConnector gilesConnector;
     private UserRepository userRepository;
 
-    public BibFileIterator(String filePath, String groupId, String collectionId) {
+    public BibFileIterator(String filePath, JobInfo info, UserRepository userRepository) {
         this.filePath = filePath;
-        this.groupId = groupId;
-        this.collectionId = collectionId;
-        gilesConnector = new GilesConnector();
-        userRepository = new UserRepository();
+        this.groupId = info.getGroupId();
+        this.collectionId = info.getCollectionId();
+        this.info = info;
+        this.gilesConnector = new GilesConnector();
+        this.userRepository = userRepository;
         parseExtra = new ParseExtra();
         parseExtra.init();
         init();
@@ -245,8 +247,13 @@ public class BibFileIterator implements BibEntryIterator {
         
         if(fields.containsKey("file")) {
             String[] fileParts = fields.get("file").split(":");
-            meta.setDocumentType(fileParts[2]);
-            meta.setFilePath(fileParts[1]);
+//            meta.setDocumentType(fileParts[2]);
+//            meta.setFilePath(fileParts[1]);
+            IGilesUpload upload = createGilesUpload(fileParts[1], info);
+            List<IGilesUpload> uploads = new ArrayList<>();
+            uploads.add(upload);
+            meta.setGilesUpload(uploads);
+//            =================
         }
         
         
