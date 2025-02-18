@@ -1,13 +1,8 @@
 package edu.asu.diging.citesphere.importer.core.service.impl;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
@@ -30,7 +25,6 @@ import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.ItemType;
 import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
 import edu.asu.diging.citesphere.importer.core.service.ICitesphereConnector;
-import edu.asu.diging.citesphere.importer.core.service.IGilesConnector;
 import edu.asu.diging.citesphere.importer.core.service.IImportProcessor;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
 import edu.asu.diging.citesphere.importer.core.service.parse.IHandlerRegistry;
@@ -42,11 +36,6 @@ import edu.asu.diging.citesphere.messages.model.KafkaImportReturnMessage;
 import edu.asu.diging.citesphere.messages.model.KafkaJobMessage;
 import edu.asu.diging.citesphere.messages.model.ResponseCode;
 import edu.asu.diging.citesphere.messages.model.Status;
-import edu.asu.diging.citesphere.model.bib.ICitation;
-import edu.asu.diging.citesphere.model.bib.IGilesUpload;
-import edu.asu.diging.citesphere.user.IUser;
-import edu.asu.diging.simpleusers.core.data.UserRepository;
-import edu.asu.diging.simpleusers.core.model.impl.User;
 
 @Service
 public class CollectionImportProcessor implements IImportProcessor {

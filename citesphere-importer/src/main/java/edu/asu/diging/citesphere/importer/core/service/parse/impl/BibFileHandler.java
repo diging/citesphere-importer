@@ -5,12 +5,13 @@ import org.springframework.stereotype.Service;
 
 import edu.asu.diging.citesphere.importer.core.exception.HandlerTestException;
 import edu.asu.diging.citesphere.importer.core.exception.IteratorCreationException;
+import edu.asu.diging.citesphere.importer.core.repository.UserRepository;
 import edu.asu.diging.citesphere.importer.core.service.impl.JobInfo;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
 import edu.asu.diging.citesphere.importer.core.service.parse.FileHandler;
 import edu.asu.diging.citesphere.importer.core.service.parse.IHandlerRegistry;
 import edu.asu.diging.citesphere.importer.core.service.parse.iterators.BibFileIterator;
-import edu.asu.diging.simpleusers.core.data.UserRepository;
+
 
 @Service
 public class BibFileHandler implements FileHandler {

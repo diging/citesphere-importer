@@ -20,7 +20,6 @@ import org.springframework.social.zotero.api.Data;
 import org.springframework.social.zotero.api.Item;
 
 import edu.asu.diging.citesphere.factory.impl.ParseExtra;
-import edu.asu.diging.citesphere.importer.core.exception.CitesphereCommunicationException;
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.impl.Affiliation;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleId;
@@ -32,6 +31,7 @@ import edu.asu.diging.citesphere.importer.core.model.impl.Contributor;
 import edu.asu.diging.citesphere.importer.core.model.impl.Issn;
 import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
 import edu.asu.diging.citesphere.importer.core.model.impl.Reference;
+import edu.asu.diging.citesphere.importer.core.repository.UserRepository;
 import edu.asu.diging.citesphere.importer.core.service.IGilesConnector;
 import edu.asu.diging.citesphere.importer.core.service.giles.impl.GilesConnector;
 import edu.asu.diging.citesphere.importer.core.service.impl.JobInfo;
@@ -43,11 +43,9 @@ import edu.asu.diging.citesphere.model.bib.IGilesUpload;
 import edu.asu.diging.citesphere.model.bib.IPerson;
 import edu.asu.diging.citesphere.model.bib.IReference;
 import edu.asu.diging.citesphere.model.bib.impl.Citation;
-import edu.asu.diging.citesphere.model.bib.impl.GilesUpload;
 import edu.asu.diging.citesphere.model.bib.impl.Person;
 import edu.asu.diging.citesphere.user.IUser;
-import edu.asu.diging.simpleusers.core.data.UserRepository;
-import edu.asu.diging.simpleusers.core.model.impl.User;
+import edu.asu.diging.citesphere.user.impl.User;
 
 public class BibFileIterator implements BibEntryIterator {
 
