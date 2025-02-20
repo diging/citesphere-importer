@@ -4,13 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
@@ -31,7 +31,6 @@ import edu.asu.diging.citesphere.importer.core.model.impl.Contributor;
 import edu.asu.diging.citesphere.importer.core.model.impl.Issn;
 import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
 import edu.asu.diging.citesphere.importer.core.model.impl.Reference;
-import edu.asu.diging.citesphere.importer.core.repository.UserRepository;
 import edu.asu.diging.citesphere.importer.core.service.IGilesConnector;
 import edu.asu.diging.citesphere.importer.core.service.giles.impl.GilesConnector;
 import edu.asu.diging.citesphere.importer.core.service.impl.JobInfo;
@@ -44,8 +43,6 @@ import edu.asu.diging.citesphere.model.bib.IPerson;
 import edu.asu.diging.citesphere.model.bib.IReference;
 import edu.asu.diging.citesphere.model.bib.impl.Citation;
 import edu.asu.diging.citesphere.model.bib.impl.Person;
-import edu.asu.diging.citesphere.user.IUser;
-import edu.asu.diging.citesphere.user.impl.User;
 
 public class BibFileIterator implements BibEntryIterator {
 
@@ -60,15 +57,13 @@ public class BibFileIterator implements BibEntryIterator {
     private Iterator<String> lineIterator;
     private Map<String, String> typeMap;
     private IGilesConnector gilesConnector;
-    private UserRepository userRepository;
 
-    public BibFileIterator(String filePath, JobInfo info, UserRepository userRepository) {
+    public BibFileIterator(String filePath, JobInfo info) {
         this.filePath = filePath;
         this.groupId = info.getGroupId();
         this.collectionId = info.getCollectionId();
         this.info = info;
         this.gilesConnector = new GilesConnector();
-        this.userRepository = userRepository;
         parseExtra = new ParseExtra();
         parseExtra.init();
         init();
@@ -76,6 +71,7 @@ public class BibFileIterator implements BibEntryIterator {
 
     private void init() {
         try {
+            System.out.println("filePath ============================ " + filePath);
             lineIterator = FileUtils.lineIterator(new File(filePath), "UTF-8");
         } catch (IOException e) {
             logger.error("Could not create line iterator.", e);
@@ -244,10 +240,13 @@ public class BibFileIterator implements BibEntryIterator {
         }
         
         if(fields.containsKey("file")) {
+            Path path = Paths.get(filePath);
+            Path folderPath = path.getParent();
             String[] fileParts = fields.get("file").split(":");
 //            meta.setDocumentType(fileParts[2]);
 //            meta.setFilePath(fileParts[1]);
-            IGilesUpload upload = createGilesUpload(fileParts[1], info);
+            System.out.println(folderPath.toString()+"/"+fileParts[1]);
+            IGilesUpload upload = createGilesUpload(folderPath.toString()+"/"+fileParts[1], info);
             List<IGilesUpload> uploads = new ArrayList<>();
             uploads.add(upload);
             meta.setGilesUpload(uploads);
@@ -330,12 +329,6 @@ public class BibFileIterator implements BibEntryIterator {
     private IGilesUpload createGilesUpload(String gilesFilePath, JobInfo info) {
         System.out.println(gilesFilePath + "=================================");
 
-        IUser user = null;
-        Optional<User> foundUser = userRepository.findById(info.getUsername());
-        if (foundUser.isPresent()) {
-            user = (IUser) foundUser.get();
-        }
-
         File file = new File(gilesFilePath);
         byte[] fileBytes = null;
         try {
@@ -344,7 +337,7 @@ public class BibFileIterator implements BibEntryIterator {
             e.printStackTrace();
         }
 
-        IGilesUpload upload = gilesConnector.uploadFile(user, info.getGiles(), file.getName(), fileBytes);
+        IGilesUpload upload = gilesConnector.uploadFile(info.getUsername(), info.getGiles(), file.getName(), fileBytes);
         return upload;
     }
     

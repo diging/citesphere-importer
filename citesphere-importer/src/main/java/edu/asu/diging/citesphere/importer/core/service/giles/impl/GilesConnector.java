@@ -4,10 +4,13 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -18,9 +21,10 @@ import org.springframework.web.client.RestTemplate;
 import edu.asu.diging.citesphere.importer.core.service.IGilesConnector;
 import edu.asu.diging.citesphere.model.bib.IGilesUpload;
 import edu.asu.diging.citesphere.model.bib.impl.GilesUpload;
-import edu.asu.diging.citesphere.user.IUser;
 
 @Service
+@PropertySource({ "classpath:/config.properties",
+    "${appConfigFile:classpath:}/app.properties" })
 public class GilesConnector implements IGilesConnector {
     
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -36,10 +40,18 @@ public class GilesConnector implements IGilesConnector {
     @PostConstruct
     public void init() {
         restTemplate = new RestTemplate();
+        logger.info("GilesConnector initialized with: ================================================");
+        logger.info("Giles Base URL: " + gilesBaseurl);
+        logger.info("Upload Endpoint: " + uploadEndpoint);
+        logger.info("RestTemplate: " + (restTemplate != null ? "Injected" : "NULL"));
     }
     
     @Override
-    public IGilesUpload uploadFile(IUser user, String token, String filename, byte[] fileBytes) {
+    public IGilesUpload uploadFile(String username, String token, String filename, byte[] fileBytes) {
+        
+        if (restTemplate == null) {
+            restTemplate = new RestTemplate();  // Ensure restTemplate is initialized
+        }
         
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -50,11 +62,21 @@ public class GilesConnector implements IGilesConnector {
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-        ResponseEntity<UploadResponse> response = restTemplate.postForEntity(gilesBaseurl + uploadEndpoint, requestEntity, UploadResponse.class);
+        ResponseEntity<UploadResponse> response = null;
+        try {
+        System.out.println(gilesBaseurl + "  " + uploadEndpoint );
+        System.out.println(restTemplate.toString());
+        logger.info("Uploading file to: ================================= " + gilesBaseurl + uploadEndpoint);
+        response = restTemplate.exchange(gilesBaseurl + uploadEndpoint, 
+                                                    HttpMethod.POST, requestEntity, UploadResponse.class);
         
+        } catch (Exception ex) {
+            logger.error("Upload request failed", ex);
+            return null;  // Handle failure gracefully
+        }
         IGilesUpload upload = new GilesUpload();
         upload.setProgressId(response.getBody().getId());
-        upload.setUploadingUser(user.getUsername());
+        upload.setUploadingUser(username);
         return upload;
     }
     
