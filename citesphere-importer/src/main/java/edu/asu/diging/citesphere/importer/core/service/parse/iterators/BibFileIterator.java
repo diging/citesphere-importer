@@ -58,12 +58,12 @@ public class BibFileIterator implements BibEntryIterator {
     private Map<String, String> typeMap;
     private IGilesConnector gilesConnector;
 
-    public BibFileIterator(String filePath, JobInfo info) {
+    public BibFileIterator(String filePath, JobInfo info, IGilesConnector gilesConnector) {
         this.filePath = filePath;
         this.groupId = info.getGroupId();
         this.collectionId = info.getCollectionId();
         this.info = info;
-        this.gilesConnector = new GilesConnector();
+        this.gilesConnector = gilesConnector;
         parseExtra = new ParseExtra();
         parseExtra.init();
         init();
