@@ -9,11 +9,13 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
+import javax.print.attribute.standard.DateTimeAtCompleted;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -262,5 +264,4 @@ public class CitesphereConnector implements ICitesphereConnector {
         
         return false;
     }
-
 }

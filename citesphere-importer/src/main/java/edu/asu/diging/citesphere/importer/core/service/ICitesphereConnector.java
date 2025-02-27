@@ -8,5 +8,5 @@ public interface ICitesphereConnector {
     JobInfo getJobInfo(String apiToken) throws CitesphereCommunicationException;
 
     String getUploadeFile(String apiToken) throws CitesphereCommunicationException;
-    
+
 }
