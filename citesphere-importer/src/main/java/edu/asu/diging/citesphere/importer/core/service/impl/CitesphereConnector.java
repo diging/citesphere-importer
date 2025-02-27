@@ -34,7 +34,6 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -43,7 +42,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.asu.diging.citesphere.importer.core.exception.CitesphereCommunicationException;
 import edu.asu.diging.citesphere.importer.core.service.CitesphereHeaders;
 import edu.asu.diging.citesphere.importer.core.service.ICitesphereConnector;
-import edu.asu.diging.citesphere.model.bib.ICitation;
 
 @Service
 @PropertySource("classpath:/config.properties")
@@ -71,12 +69,6 @@ public class CitesphereConnector implements ICitesphereConnector {
     
     @Value("${_citesphere_job_info_path}")
     private String jobInfoPath;
-    
-    @Value("${_citesphere_get_item_path}")
-    private String getItemPath;
-    
-    @Value("${_citesphere_upload_file_path}")
-    private String uploadFilePath;
     
     private RestTemplate restTemplate;
     
@@ -198,36 +190,8 @@ public class CitesphereConnector implements ICitesphereConnector {
         return filepath;
     }
     
-    @Override
-    public ICitation getItem(String apiToken, String groupId, String itemKey) throws CitesphereCommunicationException {
-        String path = getItemPath.replace("{groupId}", groupId).replace("{item}", itemKey);
-        @SuppressWarnings("unchecked")
-        ResponseEntity<String> response = (ResponseEntity<String>) makeApiCall(path, apiToken, String.class);
-        HttpStatus status = response.getStatusCode();
-        
-        ICitation citation  = null;
-        if (status == HttpStatus.OK) {
-            String responseBody = response.getBody();
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                JsonNode rootNode = mapper.readTree(responseBody);
-                JsonNode itemNode = rootNode.get("item"); 
-                
-                System.out.println(mapper.writeValueAsString(itemNode) + "=================================");
-
-                citation = mapper.readValue(mapper.writeValueAsString(itemNode), ICitation.class);
-            } catch (IOException e) {
-                throw new CitesphereCommunicationException("Could not understand returned message: " + responseBody, e);
-            }
-        } else {
-            throw new CitesphereCommunicationException("Could not communicate with Citesphere properly. Got " + status);
-        }
-        
-        return citation;
-    }
-    
     private ResponseEntity<?> makeApiCall(String url, String apiToken, Class<?> responseType) throws CitesphereCommunicationException {
-        HttpEntity<Object> entity = buildHeaders(apiToken, "body");
+        HttpEntity<String> entity = buildHeaders(apiToken);
         ResponseEntity<?> response;
         try {
             response = restTemplate.exchange(url, HttpMethod.GET, entity, responseType);
@@ -243,36 +207,13 @@ public class CitesphereConnector implements ICitesphereConnector {
             }
             
             // let's try again after getting a new OAuth token
-            entity = buildHeaders(apiToken, "body");
-            response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-        }
-        return response;
-    }
-    
-    private ResponseEntity<?> makePostApiCall(String url, String apiToken, Object requestBody, Class<?> responseType) throws CitesphereCommunicationException {
-        HttpEntity<Object> entity = buildHeaders(apiToken, requestBody);
-        ResponseEntity<?> response;
-        try {
-            response = restTemplate.exchange(url, HttpMethod.POST, entity, responseType);
-        } catch (RestClientException ex) {
-            throw new CitesphereCommunicationException("Could not understand server.", ex);
-        }
-        HttpStatus status = response.getStatusCode();
-        
-        if (status == HttpStatus.UNAUTHORIZED) {
-            String responseBody = response.getBody().toString();
-            if (!refreshToken(responseBody)) {
-                throw new CitesphereCommunicationException("Could not understand returned error message: " + responseBody);
-            }
-            
-            // let's try again after getting a new OAuth token
-            entity = buildHeaders(apiToken, "body");
+            entity = buildHeaders(apiToken);
             response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
         }
         return response;
     }
 
-    private HttpEntity<Object> buildHeaders(String apiToken, Object requestBody) {
+    private HttpEntity<String> buildHeaders(String apiToken) {
         if (accessToken == null) {
             accessToken = getAccessToken();
         }
@@ -280,7 +221,7 @@ public class CitesphereConnector implements ICitesphereConnector {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
         headers.put(CitesphereHeaders.CITESPHERE_API_TOKEN, Arrays.asList(apiToken));
-        HttpEntity<Object> entity = new HttpEntity<>(requestBody, headers);
+        HttpEntity<String> entity = new HttpEntity<>("body", headers);
         return entity;
     }
     
@@ -322,31 +263,4 @@ public class CitesphereConnector implements ICitesphereConnector {
         return false;
     }
 
-    @Override
-    public String uploadFile(String apiToken, String groupId, String itemKey, MultipartFile[] files) throws CitesphereCommunicationException {
-        String path = uploadFilePath.replace("{groupId}", groupId).replace("{item}", itemKey);
-        
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("files", files);
-        
-        @SuppressWarnings("unchecked")
-        ResponseEntity<String> response = (ResponseEntity<String>) makePostApiCall(path, apiToken, requestBody, String.class);
-        HttpStatus status = response.getStatusCode();
-        
-//        Item item = null;
-        if (status == HttpStatus.OK) {
-            String responseBody = response.getBody();
-            System.out.println("=========================== response - " + responseBody);
-            ObjectMapper mapper = new ObjectMapper();
-//            try {
-//                item = mapper.readValue(responseBody, Item.class);
-//            } catch (IOException e) {
-//                throw new CitesphereCommunicationException("Could not understand returned message: " + responseBody, e);
-//            }
-        } else {
-            throw new CitesphereCommunicationException("Could not communicate with Citesphere properly. Got " + status);
-        }
-        
-        return response.getBody();
-    }
 }

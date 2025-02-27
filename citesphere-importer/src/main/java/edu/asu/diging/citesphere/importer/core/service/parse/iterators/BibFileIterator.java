@@ -71,7 +71,6 @@ public class BibFileIterator implements BibEntryIterator {
 
     private void init() {
         try {
-            System.out.println("filePath ============================ " + filePath);
             lineIterator = FileUtils.lineIterator(new File(filePath), "UTF-8");
         } catch (IOException e) {
             logger.error("Could not create line iterator.", e);
@@ -243,14 +242,11 @@ public class BibFileIterator implements BibEntryIterator {
             Path path = Paths.get(filePath);
             Path folderPath = path.getParent();
             String[] fileParts = fields.get("file").split(":");
-//            meta.setDocumentType(fileParts[2]);
-//            meta.setFilePath(fileParts[1]);
             System.out.println(folderPath.toString()+"/"+fileParts[1]);
             IGilesUpload upload = createGilesUpload(folderPath.toString()+"/"+fileParts[1], info);
             List<IGilesUpload> uploads = new ArrayList<>();
             uploads.add(upload);
             meta.setGilesUpload(uploads);
-//            =================
         }
         
         
@@ -327,8 +323,6 @@ public class BibFileIterator implements BibEntryIterator {
     }
 
     private IGilesUpload createGilesUpload(String gilesFilePath, JobInfo info) {
-        System.out.println(gilesFilePath + "=================================");
-
         File file = new File(gilesFilePath);
         byte[] fileBytes = null;
         try {

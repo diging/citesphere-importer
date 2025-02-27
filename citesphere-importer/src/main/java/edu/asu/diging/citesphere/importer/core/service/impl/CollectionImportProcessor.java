@@ -127,7 +127,6 @@ public class CollectionImportProcessor implements IImportProcessor {
             // we can submit max 50 entries to Zotoro
             if (entryCounter >= 50) {
                 ItemCreationResponse response = submitEntries(root, info);
-//                addFiles(response, filesMap, message.getId(), info);
                 entryCounter = 0;
                 root = mapper.createArrayNode();
             }
@@ -139,7 +138,6 @@ public class CollectionImportProcessor implements IImportProcessor {
         ItemCreationResponse response = null;
         if (entryCounter > 0) {
             response = submitEntries(root, info);
-//            addFiles(response, filesMap, message.getId(), info);
         }
 
         response = response != null ? response : new ItemCreationResponse();

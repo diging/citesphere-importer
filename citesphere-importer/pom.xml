@@ -15,8 +15,8 @@
         <spring-data.version>Lovelace-RELEASE</spring-data.version>
         <thymeleaf.version>3.0.11.RELEASE</thymeleaf.version>
         <spring.kafka.version>2.2.6.RELEASE</spring.kafka.version>
-        <citesphere.messages.version>0.5</citesphere.messages.version>
-        <citesphere.model.version>1.22</citesphere.model.version>
+        <citesphere.messages.version>0.6</citesphere.messages.version>
+        <citesphere.model.version>1.24</citesphere.model.version>
         <spring-security-oauth2-version>2.4.0.RELEASE</spring-security-oauth2-version>
 
         <admin.password>$2a$04$oQo44vqcDIFRoYKiAXoNheurzkwX9dcNmowvTX/hsWuBMwijqn44i</admin.password>
@@ -312,6 +312,12 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
             <version>1.10.19</version>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
             <scope>test</scope>
         </dependency>
 
