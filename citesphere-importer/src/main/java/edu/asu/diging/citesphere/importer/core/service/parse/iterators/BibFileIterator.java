@@ -342,7 +342,6 @@ public class BibFileIterator implements BibEntryIterator {
 
     @Override
     public void close() {
-        // TODO Auto-generated method stub
 
     }
 

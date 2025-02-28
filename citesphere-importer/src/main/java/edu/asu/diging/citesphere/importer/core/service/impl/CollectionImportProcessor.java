@@ -152,7 +152,6 @@ public class CollectionImportProcessor implements IImportProcessor {
         try {
             requestProducer.sendRequest(returnMessage, KafkaTopics.REFERENCES_IMPORT_DONE_TOPIC);
         } catch (MessageCreationException e) {
-            // FIXME handle this case
             logger.error("Exception sending message.", e);
         }
     }
@@ -183,7 +182,6 @@ public class CollectionImportProcessor implements IImportProcessor {
         try {
             info = connector.getJobInfo(message.getId());
         } catch (CitesphereCommunicationException e) {
-            // FIXME this needs to be handled better
             logger.error("Could not get Zotero info.", e);
             return null;
         }
@@ -195,7 +193,6 @@ public class CollectionImportProcessor implements IImportProcessor {
         try {
             file = connector.getUploadeFile(message.getId());
         } catch (CitesphereCommunicationException e) {
-            // FIXME this needs to be handled better
             logger.error("Could not get Zotero info.", e);
             return null;
         }

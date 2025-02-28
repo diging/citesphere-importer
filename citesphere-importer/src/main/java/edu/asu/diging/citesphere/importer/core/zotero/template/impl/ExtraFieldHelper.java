@@ -357,61 +357,65 @@ public class ExtraFieldHelper {
             ArrayNode references = root.putArray("references");
             for (Reference ref : article.getArticleMeta().getReferences()) {
                 ObjectNode refNode = references.addObject();
-                if (ref.getAuthorString() != null) {
-                    refNode.put("authorString", ref.getAuthorString());
-                }
-                if (ref.getContributors() != null) {
-                    ArrayNode contributors = refNode.putArray("contributors");
-                    int idx = 0;
-                    for (Contributor contrib : ref.getContributors()) {
-                        ObjectNode contribNode = contributors.addObject();
-                        fillPerson(contrib, contribNode, idx);
-                        idx++;
-                    }
-                }
-                if (ref.getTitle() != null) {
-                    refNode.put("title", ref.getTitle());
-                }
-                if (ref.getEndPage() != null) {
-                    refNode.put("endPage", ref.getEndPage());
-                }
-                if (ref.getFirstPage() != null) {
-                    refNode.put("firstPage", ref.getFirstPage());
-                }
-                if (ref.getIdentifier() != null) {
-                    refNode.put("identifier", ref.getIdentifier());
-                }
-                if (ref.getIdentifierType() != null) {
-                    refNode.put("identifierType", ref.getIdentifierType());
-                }
-                if (ref.getReferenceString() != null) {
-                    refNode.put("referenceString", ref.getReferenceString());
-                }
-                if (ref.getReferenceStringRaw() != null) {
-                    refNode.put("referenceStringRaw", ref.getReferenceStringRaw());
-                }
-                if (ref.getSource() != null) {
-                    refNode.put("source", ref.getSource());
-                }
-                if (ref.getVolume() != null) {
-                    refNode.put("volume", ref.getVolume());
-                }
-                if (ref.getYear() != null) {
-                    refNode.put("year", ref.getYear());
-                }
-                if (ref.getPublicationType() != null) {
-                    refNode.put("publicationType", ref.getPublicationType());
-                }
-                if (ref.getCitationId()!= null) {
-                    refNode.put("citationId", ref.getCitationId());
-                }
-                if (ref.getReferenceId() != null) {
-                    refNode.put("referenceId", ref.getReferenceId());
-                }
-                if (ref.getReferenceLabel() != null) {
-                    refNode.put("referenceLabel", ref.getReferenceLabel());
-                }
+                createSingleReference(ref, refNode);                        
             }
+        }
+    }
+    
+    private void createSingleReference(Reference ref, ObjectNode refNode) {
+        if (ref.getAuthorString() != null) {
+            refNode.put("authorString", ref.getAuthorString());
+        }
+        if (ref.getContributors() != null) {
+            ArrayNode contributors = refNode.putArray("contributors");
+            int idx = 0;
+            for (Contributor contrib : ref.getContributors()) {
+                ObjectNode contribNode = contributors.addObject();
+                fillPerson(contrib, contribNode, idx);
+                idx++;
+            }
+        }
+        if (ref.getTitle() != null) {
+            refNode.put("title", ref.getTitle());
+        }
+        if (ref.getEndPage() != null) {
+            refNode.put("endPage", ref.getEndPage());
+        }
+        if (ref.getFirstPage() != null) {
+            refNode.put("firstPage", ref.getFirstPage());
+        }
+        if (ref.getIdentifier() != null) {
+            refNode.put("identifier", ref.getIdentifier());
+        }
+        if (ref.getIdentifierType() != null) {
+            refNode.put("identifierType", ref.getIdentifierType());
+        }
+        if (ref.getReferenceString() != null) {
+            refNode.put("referenceString", ref.getReferenceString());
+        }
+        if (ref.getReferenceStringRaw() != null) {
+            refNode.put("referenceStringRaw", ref.getReferenceStringRaw());
+        }
+        if (ref.getSource() != null) {
+            refNode.put("source", ref.getSource());
+        }
+        if (ref.getVolume() != null) {
+            refNode.put("volume", ref.getVolume());
+        }
+        if (ref.getYear() != null) {
+            refNode.put("year", ref.getYear());
+        }
+        if (ref.getPublicationType() != null) {
+            refNode.put("publicationType", ref.getPublicationType());
+        }
+        if (ref.getCitationId()!= null) {
+            refNode.put("citationId", ref.getCitationId());
+        }
+        if (ref.getReferenceId() != null) {
+            refNode.put("referenceId", ref.getReferenceId());
+        }
+        if (ref.getReferenceLabel() != null) {
+            refNode.put("referenceLabel", ref.getReferenceLabel());
         }
     }
     
