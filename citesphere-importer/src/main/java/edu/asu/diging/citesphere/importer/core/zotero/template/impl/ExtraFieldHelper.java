@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import javax.annotation.PostConstruct;
 
@@ -357,65 +358,40 @@ public class ExtraFieldHelper {
             ArrayNode references = root.putArray("references");
             for (Reference ref : article.getArticleMeta().getReferences()) {
                 ObjectNode refNode = references.addObject();
-                createSingleReference(ref, refNode);                        
+                
+                if (ref.getContributors() != null) {
+                    ArrayNode contributors = refNode.putArray("contributors");
+                    int idx = 0;
+                    for (Contributor contrib : ref.getContributors()) {
+                        ObjectNode contribNode = contributors.addObject();
+                        fillPerson(contrib, contribNode, idx);
+                        idx++;
+                    }
+                }
+                
+                putIfNotNull(ref, Reference::getAuthorString, "authorString", refNode);
+                putIfNotNull(ref, Reference::getTitle, "title", refNode);
+                putIfNotNull(ref, Reference::getEndPage, "endPage", refNode);
+                putIfNotNull(ref, Reference::getFirstPage, "firstPage", refNode);
+                putIfNotNull(ref, Reference::getIdentifier, "identifier", refNode);
+                putIfNotNull(ref, Reference::getIdentifierType, "identifierType", refNode);
+                putIfNotNull(ref, Reference::getReferenceString, "referenceString", refNode);
+                putIfNotNull(ref, Reference::getReferenceStringRaw, "referenceStringRaw", refNode);
+                putIfNotNull(ref, Reference::getSource, "source", refNode);
+                putIfNotNull(ref, Reference::getVolume, "volume", refNode);
+                putIfNotNull(ref, Reference::getYear, "year", refNode);
+                putIfNotNull(ref, Reference::getPublicationType, "publicationType", refNode);
+                putIfNotNull(ref, Reference::getCitationId, "citationId", refNode);
+                putIfNotNull(ref, Reference::getReferenceId, "referenceId", refNode);
+                putIfNotNull(ref, Reference::getReferenceLabel, "referenceLabel", refNode);                        
             }
         }
     }
     
-    private void createSingleReference(Reference ref, ObjectNode refNode) {
-        if (ref.getAuthorString() != null) {
-            refNode.put("authorString", ref.getAuthorString());
-        }
-        if (ref.getContributors() != null) {
-            ArrayNode contributors = refNode.putArray("contributors");
-            int idx = 0;
-            for (Contributor contrib : ref.getContributors()) {
-                ObjectNode contribNode = contributors.addObject();
-                fillPerson(contrib, contribNode, idx);
-                idx++;
-            }
-        }
-        if (ref.getTitle() != null) {
-            refNode.put("title", ref.getTitle());
-        }
-        if (ref.getEndPage() != null) {
-            refNode.put("endPage", ref.getEndPage());
-        }
-        if (ref.getFirstPage() != null) {
-            refNode.put("firstPage", ref.getFirstPage());
-        }
-        if (ref.getIdentifier() != null) {
-            refNode.put("identifier", ref.getIdentifier());
-        }
-        if (ref.getIdentifierType() != null) {
-            refNode.put("identifierType", ref.getIdentifierType());
-        }
-        if (ref.getReferenceString() != null) {
-            refNode.put("referenceString", ref.getReferenceString());
-        }
-        if (ref.getReferenceStringRaw() != null) {
-            refNode.put("referenceStringRaw", ref.getReferenceStringRaw());
-        }
-        if (ref.getSource() != null) {
-            refNode.put("source", ref.getSource());
-        }
-        if (ref.getVolume() != null) {
-            refNode.put("volume", ref.getVolume());
-        }
-        if (ref.getYear() != null) {
-            refNode.put("year", ref.getYear());
-        }
-        if (ref.getPublicationType() != null) {
-            refNode.put("publicationType", ref.getPublicationType());
-        }
-        if (ref.getCitationId()!= null) {
-            refNode.put("citationId", ref.getCitationId());
-        }
-        if (ref.getReferenceId() != null) {
-            refNode.put("referenceId", ref.getReferenceId());
-        }
-        if (ref.getReferenceLabel() != null) {
-            refNode.put("referenceLabel", ref.getReferenceLabel());
+    private void putIfNotNull(Reference ref, Function<Reference, String> getter, String key, ObjectNode refNode) {
+        String value = getter.apply(ref);
+        if (value != null) {
+            refNode.put(key, value);
         }
     }
     
