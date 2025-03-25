@@ -92,6 +92,7 @@ public class CrossRefIterator implements BibEntryIterator {
             // for now we just log the exceptions
             // we might want to devise a way to decide if the 
             // service might be down and we should stop sending requests.
+            return null;
         }
         return nextEntry;
     }

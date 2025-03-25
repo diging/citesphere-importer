@@ -29,7 +29,7 @@ public class CrossRefParserTest {
     }
 
     @Test
-    public void testParseJournalMeta_WithValidData() {
+    public void test_parseJournalMeta_withValidData() {
         Item item = Mockito.mock(Item.class);
         Mockito.when(item.getContainerTitle()).thenReturn(Collections.singletonList("Journal of Testing"));
         Mockito.when(item.getPublisher()).thenReturn("Test Publisher");
@@ -60,7 +60,7 @@ public class CrossRefParserTest {
     }
 
     @Test
-    public void testParseJournalMeta_WithNoIssns() {
+    public void test_parseJournalMeta_withNoIssns() {
         Item item = Mockito.mock(Item.class);
         Mockito.when(item.getContainerTitle()).thenReturn(Collections.singletonList("Journal of Testing"));
         Mockito.when(item.getPublisher()).thenReturn("Test Publisher");
@@ -78,7 +78,7 @@ public class CrossRefParserTest {
     }
 
     @Test
-    public void testParseJournalMeta_WithNoContainerTitle() {
+    public void test_parseJournalMeta_withNoContainerTitle() {
         Item item = Mockito.mock(Item.class);
         Mockito.when(item.getContainerTitle()).thenReturn(Collections.emptyList());
         Mockito.when(item.getPublisher()).thenReturn("Test Publisher");
@@ -93,7 +93,7 @@ public class CrossRefParserTest {
     }
 
     @Test
-    public void testParseJournalMeta_WithNullItem() {
+    public void test_parseJournalMeta_withNullItem() {
         try {
             crossRefParser.parseJournalMeta(null);
             Assert.fail("Expected NullPointerException to be thrown");
@@ -103,7 +103,7 @@ public class CrossRefParserTest {
     }
 
     @Test
-    public void testParseJournalMeta_WithEmptyFields() {
+    public void test_parseJournalMeta_withEmptyFields() {
         Item item = Mockito.mock(Item.class);
         Mockito.when(item.getContainerTitle()).thenReturn(Collections.singletonList(""));
         Mockito.when(item.getPublisher()).thenReturn("");
@@ -121,7 +121,7 @@ public class CrossRefParserTest {
     }
     
     @Test
-    public void testParseArticleMeta_WithValidData() {
+    public void test_parseArticleMeta_withValidData() {
         // Arrange
         Item item = Mockito.mock(Item.class);
         Mockito.when(item.getTitle()).thenReturn(Collections.singletonList("Test Article Title"));
@@ -177,7 +177,7 @@ public class CrossRefParserTest {
     }
 
     @Test
-    public void testParseArticleMeta_WithNullItem() {
+    public void test_parseArticleMeta_withNullItem() {
         try {
             crossRefParser.parseArticleMeta(null);
             Assert.fail("Expected NullPointerException");
@@ -187,7 +187,7 @@ public class CrossRefParserTest {
     }
 
     @Test
-    public void testParseArticleMeta_WithEmptyTitle() {
+    public void test_parseArticleMeta_withEmptyTitle() {
         Item item = Mockito.mock(Item.class);
         Mockito.when(item.getTitle()).thenReturn(Collections.emptyList());
 
