@@ -1,11 +1,14 @@
 package edu.asu.diging.citesphere.importer.core.service.parse.iterators;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -13,13 +16,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.io.FileUtils;
+import org.jbibtex.BibTeXDatabase;
+import org.jbibtex.BibTeXEntry;
+import org.jbibtex.BibTeXParser;
+import org.jbibtex.DigitStringValue;
+import org.jbibtex.Key;
+import org.jbibtex.ObjectResolutionException;
+import org.jbibtex.ParseException;
+import org.jbibtex.StringValue;
+import org.jbibtex.TokenMgrException;
+import org.jbibtex.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.social.zotero.api.Data;
 import org.springframework.social.zotero.api.Item;
 
-import edu.asu.diging.citesphere.factory.impl.ParseExtra;
+import edu.asu.diging.citesphere.factory.impl.ExtraParser;
 import edu.asu.diging.citesphere.importer.core.model.BibEntry;
 import edu.asu.diging.citesphere.importer.core.model.impl.Affiliation;
 import edu.asu.diging.citesphere.importer.core.model.impl.ArticleId;
@@ -32,7 +44,6 @@ import edu.asu.diging.citesphere.importer.core.model.impl.Issn;
 import edu.asu.diging.citesphere.importer.core.model.impl.Publication;
 import edu.asu.diging.citesphere.importer.core.model.impl.Reference;
 import edu.asu.diging.citesphere.importer.core.service.IGilesConnector;
-import edu.asu.diging.citesphere.importer.core.service.giles.impl.GilesConnector;
 import edu.asu.diging.citesphere.importer.core.service.impl.JobInfo;
 import edu.asu.diging.citesphere.importer.core.service.parse.BibEntryIterator;
 import edu.asu.diging.citesphere.model.bib.IAffiliation;
@@ -48,13 +59,13 @@ public class BibFileIterator implements BibEntryIterator {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private ParseExtra parseExtra;
+    private ExtraParser extraParser;
 
     private String filePath;
     private String groupId;
     private String collectionId;
     private JobInfo info;
-    private Iterator<String> lineIterator;
+    private Iterator<BibTeXEntry> bibIterator;
     private Map<String, String> typeMap;
     private IGilesConnector gilesConnector;
 
@@ -64,17 +75,17 @@ public class BibFileIterator implements BibEntryIterator {
         this.collectionId = info.getCollectionId();
         this.info = info;
         this.gilesConnector = gilesConnector;
-        parseExtra = new ParseExtra();
-        parseExtra.init();
+        extraParser = new ExtraParser();
+        extraParser.init();
         init();
     }
 
     private void init() {
-        try {
-            lineIterator = FileUtils.lineIterator(new File(filePath), "UTF-8");
-        } catch (IOException e) {
-            logger.error("Could not create line iterator.", e);
-        }
+//        try {
+//            lineIterator = FileUtils.lineIterator(new File(filePath), "UTF-8");
+//        } catch (IOException e) {
+//            logger.error("Could not create line iterator.", e);
+//        }
         typeMap = new HashMap<String, String>();
         typeMap.put("article", Publication.ARTICLE);
         typeMap.put("book", Publication.BOOK);
@@ -85,33 +96,66 @@ public class BibFileIterator implements BibEntryIterator {
         typeMap.put("research-article", Publication.ARTICLE);
         typeMap.put("book-review", Publication.REVIEW);
         typeMap.put("patent", Publication.PROCEEDINGS_PAPER);
+        
+        try (FileReader reader = new FileReader(filePath)) {
+            BibTeXParser parser = new BibTeXParser();
+            BibTeXDatabase db = parser.parse(reader);
+            Collection<BibTeXEntry> entries = db.getEntries().values();
+            bibIterator = entries.iterator();
+        } catch (IOException | ObjectResolutionException | TokenMgrException | ParseException e) {
+            logger.error("Could not parse .bib file: " + filePath, e);
+            bibIterator = Collections.emptyIterator();
+        }
     }
 
     @Override
     public BibEntry next() {
-        BibEntry entry = new Publication();
+//        BibEntry entry = new Publication();
+//        Map<String, String> fields = new HashMap<>();
+//        while (lineIterator.hasNext()) {
+//            String line = lineIterator.next().trim();
+//            if(!line.isBlank() && line.charAt(0)=='@') {
+//                entry.setArticleType(typeMap.get(line.substring(1, line.indexOf('{'))));
+//            } else if (line.equals("}")) {
+//                entry.setJournalMeta(parseJournalMeta(fields));
+//                entry.setArticleMeta(parseArticleMeta(fields));
+//                fields.clear();
+//                break;
+//            } else if (line.contains("=")) {
+//                String[] parts = line.split("=", 2);
+//                if (parts.length == 2) {
+//                    String key = parts[0].trim();
+//                    String value = parts[1].trim();
+//                    if (value.endsWith(",")) {
+//                        value = value.substring(0, value.length()-1).replaceAll("^\\{|\\}$", "");
+//                    }
+//                    fields.put(key, value);
+//                }
+//            }
+//        }
+//
+//        return entry;
+        BibTeXEntry bib = bibIterator.next();
+        Publication entry = new Publication();
+
+        String rawType = bib.getType().getValue().toLowerCase();
+        entry.setArticleType(typeMap.getOrDefault(rawType, Publication.ARTICLE));
+
         Map<String, String> fields = new HashMap<>();
-        while (lineIterator.hasNext()) {
-            String line = lineIterator.next().trim();
-            if(!line.isBlank() && line.charAt(0)=='@') {
-                entry.setArticleType(typeMap.get(line.substring(1, line.indexOf('{'))));
-            } else if (line.equals("}")) {
-                entry.setJournalMeta(parseJournalMeta(fields));
-                entry.setArticleMeta(parseArticleMeta(fields));
-                fields.clear();
-                break;
-            } else if (line.contains("=")) {
-                String[] parts = line.split("=", 2);
-                if (parts.length == 2) {
-                    String key = parts[0].trim();
-                    String value = parts[1].trim();
-                    if (value.endsWith(",")) {
-                        value = value.substring(0, value.length()-1).replaceAll("^\\{|\\}$", "");
-                    }
-                    fields.put(key, value);
-                }
+        for (Map.Entry<Key, Value> f : bib.getFields().entrySet()) {
+            String name = f.getKey().getValue().toLowerCase();
+            Value val = f.getValue();
+            String str = "";
+            if (val instanceof StringValue) {
+                str = ((StringValue) val).getString();
+            } else if (val instanceof DigitStringValue) {
+                str = ((DigitStringValue) val).getString();
             }
+            fields.put(name, str);
         }
+
+        entry.setJournalMeta(parseJournalMeta(fields));
+        entry.setArticleMeta(parseArticleMeta(fields));
 
         return entry;
     }
@@ -183,8 +227,8 @@ public class BibFileIterator implements BibEntryIterator {
         Set<ICreator> creators = new HashSet<>();
         citation.setOtherCreators(creators);
 
-        parseExtra.parseMetaDataNote(citation, item);
-        parseExtra.parseExtra(data, citation);
+        extraParser.parseMetaDataNote(citation, item);
+        extraParser.parseExtra(data, citation);
 
         List<String> collectionIds = new ArrayList<>();
         if (collectionId != null && !collectionId.trim().isEmpty()) {
@@ -337,7 +381,7 @@ public class BibFileIterator implements BibEntryIterator {
     
     @Override
     public boolean hasNext() {
-        return lineIterator.hasNext();
+        return bibIterator.hasNext();
     }
 
     @Override
