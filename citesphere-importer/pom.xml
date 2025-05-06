@@ -39,6 +39,8 @@
         <tomcat.deploy.path></tomcat.deploy.path>
         <tomcat.app.name>citesphere-importer</tomcat.app.name>
         <tomcat.server.id>TomcatServer</tomcat.server.id>
+        
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     </properties>
 
@@ -334,7 +336,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.4.0</version>
                 <configuration>
                     <webResources>
                         <resource>
@@ -347,6 +349,8 @@
                                 <exclude>**/*.woff</exclude>
                                 <exclude>**/*.ttf</exclude>
                                 <exclude>**/*.woff2</exclude>
+                                <exclude>**/*.eot</exclude>
+                                <exclude>**/*.otf</exclude>
                             </excludes>
                         </resource>
 
@@ -356,8 +360,9 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>11</source>
+                    <target>11</target>
+                    <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
             <plugin>
