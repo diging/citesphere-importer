@@ -81,11 +81,6 @@ public class BibFileIterator implements BibEntryIterator {
     }
 
     private void init() {
-//        try {
-//            lineIterator = FileUtils.lineIterator(new File(filePath), "UTF-8");
-//        } catch (IOException e) {
-//            logger.error("Could not create line iterator.", e);
-//        }
         typeMap = new HashMap<String, String>();
         typeMap.put("article", Publication.ARTICLE);
         typeMap.put("book", Publication.BOOK);
@@ -110,31 +105,6 @@ public class BibFileIterator implements BibEntryIterator {
 
     @Override
     public BibEntry next() {
-//        BibEntry entry = new Publication();
-//        Map<String, String> fields = new HashMap<>();
-//        while (lineIterator.hasNext()) {
-//            String line = lineIterator.next().trim();
-//            if(!line.isBlank() && line.charAt(0)=='@') {
-//                entry.setArticleType(typeMap.get(line.substring(1, line.indexOf('{'))));
-//            } else if (line.equals("}")) {
-//                entry.setJournalMeta(parseJournalMeta(fields));
-//                entry.setArticleMeta(parseArticleMeta(fields));
-//                fields.clear();
-//                break;
-//            } else if (line.contains("=")) {
-//                String[] parts = line.split("=", 2);
-//                if (parts.length == 2) {
-//                    String key = parts[0].trim();
-//                    String value = parts[1].trim();
-//                    if (value.endsWith(",")) {
-//                        value = value.substring(0, value.length()-1).replaceAll("^\\{|\\}$", "");
-//                    }
-//                    fields.put(key, value);
-//                }
-//            }
-//        }
-//
-//        return entry;
         BibTeXEntry bib = bibIterator.next();
         Publication entry = new Publication();
 

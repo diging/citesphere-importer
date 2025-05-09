@@ -21,10 +21,6 @@ public class ReferenceImportListener {
     @Autowired
     @Qualifier("importProcessor")
     private IImportProcessor fileProcessor;
-    
-    @Autowired
-    @Qualifier("collectionImportProcessor")
-    private IImportProcessor collectionProcessor;
 
     @KafkaListener(topics = KafkaTopics.REFERENCES_IMPORT_TOPIC)
     public void receiveMessage(String message) {
@@ -52,7 +48,7 @@ public class ReferenceImportListener {
             return;
         }
         
-        collectionProcessor.process(msg);
+        fileProcessor.process(msg);
     }
     
 }

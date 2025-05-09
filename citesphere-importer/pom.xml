@@ -17,7 +17,6 @@
         <spring.kafka.version>2.2.6.RELEASE</spring.kafka.version>
         <citesphere.messages.version>0.6</citesphere.messages.version>
         <citesphere.model.version>1.24</citesphere.model.version>
-        <spring-security-oauth2-version>2.4.0.RELEASE</spring-security-oauth2-version>
 
         <admin.password>$2a$04$oQo44vqcDIFRoYKiAXoNheurzkwX9dcNmowvTX/hsWuBMwijqn44i</admin.password>
 
@@ -126,12 +125,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.security.oauth</groupId>
-            <artifactId>spring-security-oauth2</artifactId>
-            <version>${spring-security-oauth2-version}</version>
         </dependency>
 
         <dependency>
@@ -261,8 +254,12 @@
             <version>2.2.11</version>
         </dependency>
 
-
-
+		<!-- Dependency for parsing bib file -->
+		<dependency>
+			<groupId>org.jbibtex</groupId>
+			<artifactId>jbibtex</artifactId>
+			<version>1.0.20</version>
+		</dependency>
 
         <!-- Apache Kafka -->
         <dependency>
@@ -315,12 +312,6 @@
             <scope>test</scope>
         </dependency>
         
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
