@@ -3,10 +3,16 @@ package edu.asu.diging.citesphere.importer.core.model.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import edu.asu.diging.citesphere.model.bib.IGilesUpload;
+
 public class ArticleMeta {
 
+    private List<String> collections;
     private List<ArticleId> articleIds;
     private String articleTitle;
+    private String articleShortTitle;
     private List<ArticleCategoryGroup> categoryGroups = new ArrayList<ArticleCategoryGroup>();
     private List<Contributor> contributors;
     private String authorNotesCorrespondence;
@@ -25,10 +31,13 @@ public class ArticleMeta {
     private String copyrightYear;
     private String copyrightHolder;
     private String selfUri;
+    @JsonProperty("DOI")
+    private String doi;
     private String articleAbstract;
     private String language;
     private ReviewInfo reviewInfo;
     private String documentType;
+    private String filePath;
     private String conferenceTitle;
     private String conferenceDate;
     private String conferenceLocation;
@@ -43,7 +52,14 @@ public class ArticleMeta {
     private List<Reference> references;
     private String referenceCount;
     private String retrievalDate;
+    private List<IGilesUpload> gilesUpload;
     
+    public List<String> getCollections() {
+        return collections;
+    }
+    public void setCollections(List<String> collections) {
+        this.collections = collections;
+    }
     public List<ArticleId> getArticleIds() {
         return articleIds;
     }
@@ -55,6 +71,12 @@ public class ArticleMeta {
     }
     public void setArticleTitle(String articleTitle) {
         this.articleTitle = articleTitle;
+    }
+    public String getArticleShortTitle() {
+        return articleShortTitle;
+    }
+    public void setArticleShortTitle(String articleShortTitle) {
+        this.articleShortTitle = articleShortTitle;
     }
     public List<ArticleCategoryGroup> getCategories() {
         return categoryGroups;
@@ -164,6 +186,12 @@ public class ArticleMeta {
     public void setSelfUri(String selfUri) {
         this.selfUri = selfUri;
     }
+    public String getDoi() {
+        return doi;
+    }
+    public void setDoi(String doi) {
+        this.doi = doi;
+    }
     public String getArticleAbstract() {
         return articleAbstract;
     }
@@ -187,6 +215,12 @@ public class ArticleMeta {
     }
     public void setDocumentType(String documentType) {
         this.documentType = documentType;
+    }
+    public String getFilePath() {
+        return filePath;
+    }
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
     }
     public String getConferenceTitle() {
         return conferenceTitle;
@@ -271,6 +305,12 @@ public class ArticleMeta {
     }
     public void setRetrievalDate(String retrievalDate) {
         this.retrievalDate = retrievalDate;
+    }
+    public List<IGilesUpload> getGilesUpload() {
+        return gilesUpload;
+    }
+    public void setGilesUpload(List<IGilesUpload> gilesUpload) {
+        this.gilesUpload = gilesUpload;
     }
     
 }

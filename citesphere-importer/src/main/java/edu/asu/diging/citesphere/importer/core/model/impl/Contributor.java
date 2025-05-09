@@ -13,6 +13,7 @@ public class Contributor {
     private String fullSurname;
     private String fullName;
     private String emailAddress;
+    private String uri;
     private List<Affiliation> affiliations = new ArrayList<Affiliation>();
     private List<ContributorId> ids;
     
@@ -63,6 +64,15 @@ public class Contributor {
     }
     public void setEmailAddress(String emailAddress) {
         this.emailAddress = emailAddress;
+    }
+    public String getUri() {
+        return uri;
+    }
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
+    public void setFullStandardizeName(String fullStandardizeName) {
+        this.fullStandardizeName = fullStandardizeName;
     }
     public List<Affiliation> getAffiliations() {
         return affiliations;

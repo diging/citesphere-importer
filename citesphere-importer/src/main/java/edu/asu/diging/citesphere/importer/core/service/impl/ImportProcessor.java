@@ -120,6 +120,8 @@ public class ImportProcessor implements IImportProcessor {
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode root = mapper.createArrayNode();
         int entryCounter = 0;
+        Map<String, String> filesMap = new HashMap<>();
+        ItemCreationResponse response = null;
         while (bibIterator.hasNext()) {
             BibEntry entry = bibIterator.next();
             if (entry.getArticleType() == null) {
@@ -129,13 +131,15 @@ public class ImportProcessor implements IImportProcessor {
             ItemType type = itemTypeMapping.get(entry.getArticleType());
             JsonNode template = zoteroConnector.getTemplate(type);
             ObjectNode bibNode = generationService.generateJson(template, entry);
-
+            if(entry.getArticleMeta().getFilePath() != null) {
+                filesMap.put(entry.getArticleMeta().getArticleTitle(), entry.getArticleMeta().getFilePath());
+            }
             root.add(bibNode);
             entryCounter++;
 
             // we can submit max 50 entries to Zotoro
             if (entryCounter >= 50) {
-                submitEntries(root, info);
+                response = submitEntries(root, info);
                 entryCounter = 0;
                 root = mapper.createArrayNode();
             }
@@ -144,7 +148,6 @@ public class ImportProcessor implements IImportProcessor {
         
         bibIterator.close();
         
-        ItemCreationResponse response = null;
         if (entryCounter > 0) {
             response = submitEntries(root, info);
         }
